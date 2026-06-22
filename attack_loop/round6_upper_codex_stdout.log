@@ -1,0 +1,409 @@
+Reading additional input from stdin...
+OpenAI Codex v0.141.0
+--------
+workdir: E:\Project-git\emst-oracle-lower-bound\attack_loop\codex_scratch_upper6
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019eeb56-763e-7310-a52c-aa5f691adcbf
+--------
+user
+You are an external algorithms researcher completing a theorem + proof. Claim: a randomized algorithm (1±ε)-estimates Euclidean MST weight of n points in [Delta]^2 in O~(n^{1/3}) orthogonal range-COUNTING queries. Your OWN Round-5 counterexample (uniform grid, c(lambda)=n at weight-relevant lambda) correctly killed the 'c(lambda)=O(n/lambda)' cost bound. The brief (<stdin>) adds the missing DENSE branch: point-sampling per-scale costs ~n/c(lambda) (cheap exactly when c(lambda) is large, e.g. your uniform grid), so per-scale cost = min(n/c(lambda), sqrt(c(lambda))) which peaks at c=n^{2/3} = n^{1/3}, covering ALL regimes. Solve section 5: assemble the full algorithm (small-component point-sampling + sparse 2-axis + DENSE point-sampling + dense-gadget) with adaptive branch selection, and PROVE the theorem (query bound, (1±ε) variance/error-budget for BOTH branches incl. the dense-branch low-variance argument, range-counting implementability). Confirm your uniform-grid counterexample is now O~(1) per scale. Report per section 6. Respect the Omega(n^{1/3}) floor; do NOT smuggle a sqrt(n) cost into any branch or the adaptive selection. If your sandbox allows Python, re-confirm end-to-end on islands/filament/uniform-grid/dense-gadget/random; else say so. A precise residual beats an over-claim. Return your COMPLETE theorem + proof as the final message.
+
+<stdin>
+# Round 6 (UPPER-bound line) — Brief to attacker (add the DENSE-regime branch; complete the proof)
+
+**To:** external solver (codex GPT-5.5-xhigh, FRESH session). **From:** orchestrator. **Date:** 2026-06-21.
+**Type:** method-free brief (FACTS frozen, METHODS free). Solve §5; report per §6.
+
+> Your Round-5 counterexample was correct and valuable: it killed the cost bound "c(λ)=O(n/λ)". This
+> brief adds the missing branch that handles exactly your counterexample, and asks you to complete the
+> proof. Read §2–§3; the fix re-parameterizes the per-scale cost by c(λ), not by λ.
+
+---
+
+## 1. Setting + target (frozen)
+
+P ⊂ [Δ]² integer grid, |P|=n, Δ=O(n). Orthogonal range-COUNTING oracle: query R → exact integer |P∩R|.
+Uniform point-sample p∈P: O(log Δ) queries. A point's "isolation scale" (largest λ with |P ∩
+(λ-box around p)| = 1, or more generally the death scale of p's single-linkage component) and a point's
+nearest-neighbour distance are computable by binary search on box size: O(log Δ) counts. Want a
+randomized **(1±ε)** estimate of w(MST(P)), success ≥2/3, in **Õ(n^{1/3})** queries (closes the Driemel
+et al. gap from above; any proven o(√n) is also a result). Floor: Ω(n^{1/3}).
+
+---
+
+## 2. The frame (frozen, VERIFIED) + YOUR Round-5 counterexample (the gap to fix)
+
+**w(MST) = (n − Δ) + ∫₀^∞ (c(t) − 1) dt**, c(t) = #single-linkage components at threshold t (verified
+ratio 1.0001). c(λ)−1 = #(MST edges ≥ λ) — a SCALAR per scale. Estimate the Õ(1) scalars {c(λ_i)}.
+
+**Your Round-5 counterexample (accepted as `U-N3`):** uniform q×q grid (n=q²) spacing d=2λ, λ=q/4=Θ(√n):
+nearest-neighbour = 2λ ⇒ **c(λ)=n** (all isolated) at a weight-relevant scale (band [0,λ] contributes
+λ(n−1)=Θ(n^{3/2}) = const. fraction). So **c(λ) = n ≫ n/λ = Θ(√n)**, and the large-λ 2-axis estimator
+costs √(#nonempty cells) = √n, NOT √(n/λ). The Round-4/5 cost bound is dead in this **DENSE regime**.
+
+---
+
+## 3. The fix — re-parameterize per-scale cost by c(λ), add a DENSE branch (frozen direction; verify+prove)
+
+There are TWO complementary estimators for the scalar c(λ) (equivalently the scale-λ persistence
+contribution), and the right one depends on c(λ):
+
+- **(DENSE branch — point-sampling, NEW) cost ~ Õ(n / c(λ)).** When c(λ) is LARGE, a large fraction
+  (≈ c(λ)/n for singletons; in general the points in small components at scale λ) are "isolated/small
+  at scale λ", so uniform point-sampling hits them with probability ≈ c(λ)/n and estimates their
+  contribution (via each sampled point's isolation/death scale, by range-counting binary search) in
+  **Õ(n/c(λ))** samples. 🔑 This is CHEAP exactly in your counterexample: uniform grid has c(λ)=n ⇒ cost
+  Õ(1) (every point isolated, NN distance d trivially measured ⇒ w ≈ n·d). This is the branch Round 5
+  lacked.
+- **(SPARSE branch — 2-axis λ-cells) cost ~ Õ(√(c(λ))).** When c(λ) is SMALL, the live components are
+  spread over ≈ c(λ) nonempty λ-cells; random 2-axis cell probing estimates c(λ) in Õ(√(c(λ))) queries
+  (verified ratio→1 in this regime). (When components are singletons #nonempty cells ≈ c(λ).)
+- **⇒ per-scale cost ≤ min( Õ(n/c(λ)) , Õ(√(c(λ))) ).** This min over c(λ)∈[1,n] is **MAXIMIZED at
+  c(λ)=n^{2/3}, where both equal n^{1/3}** (n/c = √c ⇔ c=n^{2/3}). For c(λ) larger (dense) the point-
+  sampling branch is cheaper; for c(λ) smaller (sparse) the 2-axis branch is cheaper. So **every scale,
+  every regime, costs ≤ Õ(n^{1/3})** — including your dense counterexample. Over Õ(1) scales ⇒ Õ(n^{1/3}).
+  (The algorithm picks the branch adaptively, e.g. by a cheap O(1)-relative pre-estimate of c(λ) at a
+  coarse resolution, or by running both at a budget and taking the valid one.)
+- **(dense-gadget stratum, unchanged) Õ(n^{1/3}).** A single dense block is ONE component (Õ(1)
+  persistence); weight-relevant dense anomalies tile into a Θ(n^{1/3}) family (the vise); a 1-D coarse
+  scan finds them.
+
+---
+
+## 4. Barriers (B*) the proof must respect
+- **Ω(n^{1/3}) floor** — any query count < n^{1/3} is WRONG.
+- **No N_i to relative error** as a black box (= cell sampling = Ω(√n)). NOTE: the DENSE branch does NOT
+  estimate N_i to relative error — it point-samples and aggregates per-point isolation scales (a sum,
+  not a relative-error cell count). The SPARSE branch uses √(c(λ)) hitting, valid only when c(λ) small;
+  show the adaptive choice never invokes a √n-cost estimate.
+- **No √n wall** (VERIFIED, the spread-vs-concentrate vise): a constant-fraction weight gap is coarsely
+  visible at all λ; do not produce a √n hard instance (it would contradict U-P1 and the vise).
+
+---
+
+## 5. The task — assemble + PROVE the complete theorem
+
+> **Theorem (state + prove): a randomized algorithm (1±ε)-estimates w(MST(P)) for P⊂[Δ]² (|P|=n,
+> Δ=O(n)) with prob ≥2/3 using Õ(n^{1/3}) orthogonal range-counting queries.**
+
+Establish rigorously:
+- **(P1) Query bound Õ(n^{1/3}):** the per-scale cost = min(Õ(n/c(λ)), Õ(√(c(λ)))) ≤ Õ(n^{1/3}); the
+  adaptive branch-selection (and its own cost); the Õ(1) scales; the dense-gadget scan; sampling +
+  edge-test costs. CONFIRM your Round-5 counterexample (uniform grid) is now Õ(1) per scale via the
+  DENSE branch.
+- **(P2) (1±ε)-correctness:** for BOTH branches give the estimator, its unbiasedness/debiasing, and a
+  variance bound ⇒ each c(λ) (or its persistence contribution) to additive ≤ its ε·OPT/(Õ(1)) share;
+  median-of-means for success prob; truncation of low-weight strata; the error budget summing to ε·OPT;
+  the (n−Δ) term and the spanner (1+ε) distortion. **Crucially: prove the DENSE point-sampling branch's
+  variance is bounded — the isolation-scale value per sampled point is ≤ λ_max and the fraction is
+  c(λ)/n, so the estimator does NOT revert to √n (contrast the Round-2 uniform-point-estimator U-N2,
+  whose Θ(√n) variance came from rare HIGH-value points; here the dense regime has COMMON LOW-value
+  points — the opposite).** Handle components of all sizes, not just singletons.
+- **(P3) Range-counting implementability** of every primitive (uniform sampling; isolation/death-scale &
+  NN-distance by binary search; the 2-axis λ-cell test; the coarse scan; the adaptive c(λ) pre-estimate).
+
+If a step still cannot close, identify it precisely (it must not re-introduce a √n cost given §3/§4) —
+a precise residual is valuable. Otherwise give the clean theorem + full proof.
+
+---
+
+## 6. What we need back
+1. **Theorem statement** (exact Õ(n^{1/3}) bound, hypotheses, success prob).
+2. **Full proof**: (P1) query bound incl. the c(λ)-parameterized min and the dense-branch handling of
+   the uniform-grid counterexample; (P2) (1±ε) correctness with both branches' variance/debiasing and
+   the dense-branch low-variance argument; (P3) implementability.
+3. **Confidence %** the proof is complete + audit-surviving (and for any residual).
+4. **Verdict** (proved / proved-modulo-precise-residual / obstruction / open).
+5. *(If sandbox allows Python)* re-confirm end-to-end query = Õ(n^{1/3}) + accuracy → (1±ε) on islands,
+   diagonal-filament, **uniform-grid (your counterexample)**, dense-gadget, random; else say so.
+
+We will run ≥3 independent adversarial audits (hunting: a √n cost smuggled into either branch or the
+adaptive selection; an unbounded/biased estimator; a scale whose error exceeds its share; an N_i
+relative-error count; a floor violation; a non-implementable primitive; a new c(λ) regime not covered).
+A clean, audit-surviving proof CLOSES the gap.
+</stdin>
+codex
+I’ll first check whether there is any local context beyond the brief, then I’ll test the claimed branch-cost behavior with small synthetic instances. The main risk I’m auditing is whether the dense point-sampling estimator is actually estimating the same scalar `c(lambda)` with bounded variance for non-singleton components.
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force' in E:\Project-git\emst-oracle-lower-bound\attack_loop\codex_scratch_upper6
+ succeeded in 1066ms:
+codex
+There are no workspace files, so I’m treating the brief itself as the artifact to audit. A key issue has already surfaced: `n/c(lambda)` samples are enough only for the ideal estimator `n/|component_lambda(p)|`, but the brief’s allowed primitives do not give a way to compute that component size from range counts at the claimed cost.
+codex
+I’m going to run a small in-memory Python check of the cost model on representative instances. This can confirm the algebraic `min(n/c, sqrt(c))` behavior, but it cannot validate the full theorem because the dense estimator’s required per-sampled-point value is not implementable from the stated primitives.
+2026-06-21T18:02:07.248440Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import math, random
+
+class DSU:
+    def __init__(self,n):
+        self.p=list(range(n)); self.sz=[1]*n; self.c=n
+    def find(self,x):
+        while self.p[x]"'!=x:
+            self.p[x]=self.p[self.p[x]]; x=self.p[x]
+        return x
+    def union(self,a,b):
+        ra,rb=self.find(a),self.find(b)
+        if ra==rb: return
+        if self.sz[ra]<self.sz[rb]: ra,rb=rb,ra
+        self.p[rb]=ra; self.sz[ra]+=self.sz[rb]; self.c-=1
+
+def comp_count(points, lam):
+    n=len(points); d=DSU(n); L2=lam*lam
+    for i in range(n):
+        xi,yi=points[i]
+        for j in range(i+1,n):
+            xj,yj=points[j]
+            if (xi-xj)**2+(yi-yj)**2 <= L2 + 1e-9:
+                d.union(i,j)
+    return d.c
+
+def report(name, pts, lams):
+    n=len(pts); floor=n**(1/3)
+    print(name, '"'n=', n, 'n"'^(1/3)='"', round(floor,3))
+    for lam in lams:
+        c=comp_count(pts, lam)
+        cost=min(n/c, math.sqrt(c))
+        print('  lambda=', lam, 'c=', c, 'mincost=', round(cost,3))
+
+# Small representatives, exact pairwise connectivity.
+q=12; spacing=10
+uniform=[(i*spacing,j*spacing) for i in range(q) for j in range(q)]
+report('uniform-grid', uniform, [spacing/2, spacing*1.1])
+
+filament=[(i*2,i*2) for i in range(144)]
+report('diagonal-filament', filament, [2.7, 2.9, 20])
+
+# islands: 24 islands of 6 tight points, far apart
+islands=[]
+for k in range(24):
+    bx=(k%6)*50; by=(k//6)*50
+    for t in range(6): islands.append((bx+t%3, by+t//3))
+report('islands', islands, [1.5, 10, 60])
+
+random.seed(1)
+rnd=[(random.randrange(144), random.randrange(144)) for _ in range(144)]
+report('random', rnd, [4,8,16])
+
+# dense gadget toy: 12 dense blocks of 12 points each, separated moderately
+blocks=[]
+for k in range(12):
+    bx=(k%4)*40; by=(k//4)*40
+    for t in range(12): blocks.append((bx+(t%4), by+(t//4)))
+report('dense-gadget-toy', blocks, [2,8,45])
+'@ | python -"` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import math, random
+
+class DSU:
+    def __init__(self,n):
+        self.p=list(range(n)); self.sz=[1]*n; self.c=n
+    def find(self,x):
+        while self.p[x]"'!=x:
+            self.p[x]=self.p[self.p[x]]; x=self.p[x]
+        return x
+    def union(self,a,b):
+        ra,rb=self.find(a),self.find(b)
+        if ra==rb: return
+        if self.sz[ra]<self.sz[rb]: ra,rb=rb,ra
+        self.p[rb]=ra; self.sz[ra]+=self.sz[rb]; self.c-=1
+
+def comp_count(points, lam):
+    n=len(points); d=DSU(n); L2=lam*lam
+    for i in range(n):
+        xi,yi=points[i]
+        for j in range(i+1,n):
+            xj,yj=points[j]
+            if (xi-xj)**2+(yi-yj)**2 <= L2 + 1e-9:
+                d.union(i,j)
+    return d.c
+
+def report(name, pts, lams):
+    n=len(pts); floor=n**(1/3)
+    print(name, '"'n=', n, 'n"'^(1/3)='"', round(floor,3))
+    for lam in lams:
+        c=comp_count(pts, lam)
+        cost=min(n/c, math.sqrt(c))
+        print('  lambda=', lam, 'c=', c, 'mincost=', round(cost,3))
+
+# Small representatives, exact pairwise connectivity.
+q=12; spacing=10
+uniform=[(i*spacing,j*spacing) for i in range(q) for j in range(q)]
+report('uniform-grid', uniform, [spacing/2, spacing*1.1])
+
+filament=[(i*2,i*2) for i in range(144)]
+report('diagonal-filament', filament, [2.7, 2.9, 20])
+
+# islands: 24 islands of 6 tight points, far apart
+islands=[]
+for k in range(24):
+    bx=(k%6)*50; by=(k//6)*50
+    for t in range(6): islands.append((bx+t%3, by+t//3))
+report('islands', islands, [1.5, 10, 60])
+
+random.seed(1)
+rnd=[(random.randrange(144), random.randrange(144)) for _ in range(144)]
+report('random', rnd, [4,8,16])
+
+# dense gadget toy: 12 dense blocks of 12 points each, separated moderately
+blocks=[]
+for k in range(12):
+    bx=(k%4)*40; by=(k//4)*40
+    for t in range(12): blocks.append((bx+(t%4), by+(t//4)))
+report('dense-gadget-toy', blocks, [2,8,45])
+'@ | python -" in E:\Project-git\emst-oracle-lower-bound\attack_loop\codex_scratch_upper6
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import math, random
+
+class DSU:
+    def __init__(self,n):
+        self.p=list(range(n)); self.sz=[1]*n; self.c=n
+    def find(self,x):
+        while self.p[x]"'!=x:
+            self.p[x]=self.p[self.p[x]]; x=self.p[x]
+        return x
+    def union(self,a,b):
+        ra,rb=self.find(a),self.find(b)
+        if ra==rb: return
+        if self.sz[ra]<self.sz[rb]: ra,rb=rb,ra
+        self.p[rb]=ra; self.sz[ra]+=self.sz[rb]; self.c-=1
+
+def comp_count(points, lam):
+    n=len(points); d=DSU(n); L2=lam*lam
+    for i in range(n):
+        xi,yi=points[i]
+        for j in range(i+1,n):
+            xj,yj=points[j]
+            if (xi-xj)**2+(yi-yj)**2 <= L2 + 1e-9:
+                d.union(i,j)
+    return d.c
+
+def report(name, pts, lams):
+    n=len(pts); floor=n**(1/3)
+    print(name, '"'n=', n, 'n"'^(1/3)='"', round(floor,3))
+    for lam in lams:
+        c=comp_count(pts, lam)
+        cost=min(n/c, math.sqrt(c))
+        print('  lambda=', lam, 'c=', c, 'mincost=', round(cost,3))
+
+# Small representatives, exact pairwise connectivity.
+q=12; spacing=10
+uniform=[(i*spacing,j*spacing) for i in range(q) for j in range(q)]
+report('uniform-grid', uniform, [spacing/2, spacing*1.1])
+
+filament=[(i*2,i*2) for i in range(144)]
+report('diagonal-filament', filament, [2.7, 2.9, 20])
+
+# islands: 24 islands of 6 tight points, far apart
+islands=[]
+for k in range(24):
+    bx=(k%6)*50; by=(k//6)*50
+    for t in range(6): islands.append((bx+t%3, by+t//3))
+report('islands', islands, [1.5, 10, 60])
+
+random.seed(1)
+rnd=[(random.randrange(144), random.randrange(144)) for _ in range(144)]
+report('random', rnd, [4,8,16])
+
+# dense gadget toy: 12 dense blocks of 12 points each, separated moderately
+blocks=[]
+for k in range(12):
+    bx=(k%4)*40; by=(k//4)*40
+    for t in range(12): blocks.append((bx+(t%4), by+(t//4)))
+report('dense-gadget-toy', blocks, [2,8,45])
+'@ | python -"` rejected: blocked by policy
+codex
+The Python call was blocked by the execution policy wrapper, so I won’t claim an empirical end-to-end confirmation. I can still complete the audit mathematically; the cost-model algebra is straightforward, but the theorem does not close under the stated oracle.
+codex
+**Verdict: obstruction, not proved.**
+
+The added dense branch fixes the Round-5 uniform-grid counterexample at the cost-model level, but it does **not** yet give an implementable theorem under only orthogonal range-counting queries.
+
+For a scale `lambda`, the ideal dense estimator is valid:
+
+Let components at threshold `lambda` have sizes `s_1, ..., s_c`. If a sampled point `p` lies in component `C(p)`, define
+
+```text
+Y_lambda(p) = 1 / |C(p)|.
+```
+
+Then
+
+```text
+E[Y_lambda] = (1/n) sum_j s_j * (1/s_j) = c(lambda)/n,
+Var(Y_lambda) <= E[Y_lambda] = c(lambda)/n.
+```
+
+So `m = O((n/c(lambda)) eps^-2 log(1/delta))` samples estimate `c(lambda)` to relative error. In the dense regime `c(lambda) >= n^{2/3}`, this is `O~(n^{1/3})`. For the uniform grid counterexample, `c(lambda)=n`, every point is isolated, variance is zero or constant, and the dense branch is `O~(1)` per scale. That part is mathematically correct.
+
+The problem is implementability. The estimator requires either `|C_lambda(p)|`, or an equivalent “one marked live representative per component” death-label predicate, computable in polylogarithmic range-counting queries. The stated primitive “death scale of p’s single-linkage component by binary search on a box” is false for general components. A centered box count gives local isolation or nearest-neighbor information; it does not identify the full connected component or its persistence death under single linkage.
+
+Concrete failure mode: take `n^{2/3}` disjoint chains, each of length `n^{1/3}`, with adjacent spacing below `lambda` and chains separated above `lambda`. Then `c(lambda)=n^{2/3}`, exactly the crossover case. Dense sampling uses `n/c = n^{1/3}` samples, but computing `1/|C(p)|` by exploration costs `n^{1/3}` per sampled point in the obvious range-reporting implementation, giving `n^{2/3}` queries. Local box counts only reveal local degree, not chain length. If instead the dense branch only tests singleton isolation, it is biased: components of size 2 already make `c(lambda)=n/2` while the singleton fraction is zero.
+
+The sparse branch also lacks a proved primitive as stated. Small `c(lambda)` does not imply only `O(c(lambda))` nonempty `lambda`-cells: a single long connected filament can occupy many cells while `c(lambda)=1`. A 2-axis nonempty-cell estimator estimates spatial support, not component count, unless an additional structural lemma is supplied.
+
+So the conditional theorem would be:
+
+If, per sampled point and scale, range-counting could compute an unbiased bounded variable with expectation `c(lambda)/n` in `polylog(n)` queries, and if the sparse 2-axis estimator really estimates `c(lambda)` in `O~(sqrt(c(lambda)))` queries for all sparse instances, then the min-cost proof closes:
+
+```text
+min(n/c, sqrt(c)) <= n^{1/3}
+```
+
+with the maximum at `c=n^{2/3}`, geometric scale summation hidden in `O~`, and median-of-means giving the `(1±eps)` error budget.
+
+But under the actual oracle, those primitives are not established. I therefore cannot honestly return the claimed theorem as proved.
+
+Confidence: 80% that the current proof attempt has a real implementability gap; 60% that the theorem itself may still be salvageable with a new component-size/death-label primitive or a stronger structural decomposition.
+
+Python reconfirmation: attempted, but command execution was blocked by the sandbox policy, so I cannot report end-to-end empirical confirmation.
+tokens used
+24,849
+**Verdict: obstruction, not proved.**
+
+The added dense branch fixes the Round-5 uniform-grid counterexample at the cost-model level, but it does **not** yet give an implementable theorem under only orthogonal range-counting queries.
+
+For a scale `lambda`, the ideal dense estimator is valid:
+
+Let components at threshold `lambda` have sizes `s_1, ..., s_c`. If a sampled point `p` lies in component `C(p)`, define
+
+```text
+Y_lambda(p) = 1 / |C(p)|.
+```
+
+Then
+
+```text
+E[Y_lambda] = (1/n) sum_j s_j * (1/s_j) = c(lambda)/n,
+Var(Y_lambda) <= E[Y_lambda] = c(lambda)/n.
+```
+
+So `m = O((n/c(lambda)) eps^-2 log(1/delta))` samples estimate `c(lambda)` to relative error. In the dense regime `c(lambda) >= n^{2/3}`, this is `O~(n^{1/3})`. For the uniform grid counterexample, `c(lambda)=n`, every point is isolated, variance is zero or constant, and the dense branch is `O~(1)` per scale. That part is mathematically correct.
+
+The problem is implementability. The estimator requires either `|C_lambda(p)|`, or an equivalent “one marked live representative per component” death-label predicate, computable in polylogarithmic range-counting queries. The stated primitive “death scale of p’s single-linkage component by binary search on a box” is false for general components. A centered box count gives local isolation or nearest-neighbor information; it does not identify the full connected component or its persistence death under single linkage.
+
+Concrete failure mode: take `n^{2/3}` disjoint chains, each of length `n^{1/3}`, with adjacent spacing below `lambda` and chains separated above `lambda`. Then `c(lambda)=n^{2/3}`, exactly the crossover case. Dense sampling uses `n/c = n^{1/3}` samples, but computing `1/|C(p)|` by exploration costs `n^{1/3}` per sampled point in the obvious range-reporting implementation, giving `n^{2/3}` queries. Local box counts only reveal local degree, not chain length. If instead the dense branch only tests singleton isolation, it is biased: components of size 2 already make `c(lambda)=n/2` while the singleton fraction is zero.
+
+The sparse branch also lacks a proved primitive as stated. Small `c(lambda)` does not imply only `O(c(lambda))` nonempty `lambda`-cells: a single long connected filament can occupy many cells while `c(lambda)=1`. A 2-axis nonempty-cell estimator estimates spatial support, not component count, unless an additional structural lemma is supplied.
+
+So the conditional theorem would be:
+
+If, per sampled point and scale, range-counting could compute an unbiased bounded variable with expectation `c(lambda)/n` in `polylog(n)` queries, and if the sparse 2-axis estimator really estimates `c(lambda)` in `O~(sqrt(c(lambda)))` queries for all sparse instances, then the min-cost proof closes:
+
+```text
+min(n/c, sqrt(c)) <= n^{1/3}
+```
+
+with the maximum at `c=n^{2/3}`, geometric scale summation hidden in `O~`, and median-of-means giving the `(1±eps)` error budget.
+
+But under the actual oracle, those primitives are not established. I therefore cannot honestly return the claimed theorem as proved.
+
+Confidence: 80% that the current proof attempt has a real implementability gap; 60% that the theorem itself may still be salvageable with a new component-size/death-label primitive or a stronger structural decomposition.
+
+Python reconfirmation: attempted, but command execution was blocked by the sandbox policy, so I cannot report end-to-end empirical confirmation.

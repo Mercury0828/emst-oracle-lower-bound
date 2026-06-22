@@ -1,0 +1,2459 @@
+
+===== PAGE 1 =====
+Sublinear-Time Approximation of Euclidean Minimum Spanning Tree
+Artur Czumaj
+ 
+Funda Erg¨un
+
+Lance Fortnow
+
+. Avner Magen
+
+Ilan Newman
+
+Ronitt Rubinfeld
+
+Christian Sohler
+
+Abstract
+We consider the problem of computing the weight of a Euclidean
+minimum spanning tree for a set of  points in 	 . We focus on the
+situation when the input point set is supported by certain basic (and
+commonly used) geometric data structures that can provide efﬁcient
+access to the input in a structured way. We present an algorithm
+that estimates with high probability the weight of a Euclidean
+minimum spanning tree of a set of points to within 
+
+ using only
+
+
+ poly
+
+
+
+ queries for constant  . The algorithm assumes
+that the input is supported by a minimal bounding cube enclosing
+it, by orthogonal range queries, and by cone approximate nearest
+neighbors queries.
+1 Introduction
+As the power and connectivity of computers increases, and
+the cost of memory becomes cheaper, we have become
+inundated with large amounts of data. Although traditionally
+linear time algorithms were sought to solve our problems, it
+is no longer clear that a linear time algorithm is good enough
+in every setting. The question then is whether we can solve
+anything of interest in sublinear time, when we are not even
+given time to read all of the input data. In recent years,
+several sublinear time algorithms have been presented which
+solve a wide range of property testing and approximation
+problems.
+In this paper we consider the problem of estimating the
+
+Department of Computer Science, New Jersey Institute of Technology,
+Newark, NJ 07102, USA. Email: czumaj@cis.njit.edu. Research supported
+in part by NSF grant CCR-0105701.
+
+Electrical Engineering and Computer Science Department, Case
+Western Reserve University, Cleveland, OH 44107, USA. Email:
+afe@eecs.cwru.edu. This work was done while the author was at NEC Re-
+search, Princeton, NJ 08540, USA.
+
+NEC Research, Princeton, NJ 08540, USA. Email:fortnow,
+ronitt@research.nj.nec.com
+Department of Computer Science, University of Toronto, Toronto,
+Ontario M5S 3G4, Canada. Email: avner@cs.toronto.edu. This work was
+done while the author was at NEC Research, Princeton, NJ 08540, USA.
+ 
+Department of Computer Science, University of Haifa, Haifa, Israel.
+Email: ilan@cs.haifa.ac.il Part of this work was done while the author was
+at NEC Research, Princeton, NJ 08540.
+!
+Heinz Nixdorf Institute and Department of Mathematics & Computer
+Science, University of Paderborn, D-33095 Paderborn, Germany. Email:
+csohler@uni-paderborn.de. Research partly supported by DFG grant Me
+872/8-1 and EU grant IST-1999-14186 (ALCOM-FT).
+weight of a minimum spanning tree, where the input is a set
+of points in the Euclidean space #" . Since the location of
+a single point may dramatically inﬂuence the value of the
+weight of the Euclidean minimum spanning tree (EMST), we
+cannot hope to get a reasonable approximation in sublinear
+time with only access to the locations of the points. This is
+true even when we consider probabilistic algorithms. How-
+ever, it is often the case that massive databases, particularly
+in a geometric context, contain sophisticated data structures
+on top of the raw data, that support various forms of queries.
+Examples of such queries are the nearest neighbor of a point,
+or the point with the highest value in a coordinate. Conse-
+quently, in this paper, we assume that algorithms have access
+to certain commonly used data structures which aid the algo-
+rithm in its computation. This may be considered a motiva-
+tion for maintaining such data structures, particularly if they
+aid in other tasks as well.
+Results. In this paper we describe three algorithms for
+estimating the weight of a Euclidean minimum spanning
+tree over $ given points in a Euclidean space 
+"
+, where
+the algorithms are given access to basic geometric data
+structures supporting the input. It should be noted that our
+algorithms do not supply a low weight spanning tree (which
+takes linear space to represent), but only estimate its weight.
+We ﬁrst consider the case when the algorithm is given,
+in addition to access to the input point set, (1) a minimal
+bounding cube that contains all points in the input set and
+(2) access to an orthogonal range query data structure which,
+given an axis-parallel cube, answers whether there is an input
+point within the cube. In this model, we give an %'&($*),+.-0/ -
+time algorithm for the 1 -dimensional case which outputs a
+value 2 such that
+)
+3
+EMST &(4/65879$;:=<	>?2@>BA EMST &4/DC
+79$
+:=<
+, where AFEHGI&J$
+)K+.LNMPO6Q
+$R/ , 7 is the side-length of a
+minimal axis parallel bounding cube of the point set, and S is
+an arbitrary constant. We also show that any algorithm that
+uses no more than %T&J$*)K+.-U/ orthogonal range queries cannot
+signiﬁcantly improve the quality of approximation.
+We next consider the case when in addition to the above
+data structures, we are also given (3) access to a cone nearest
+neighbor data structure, which given a point V and a cone W ,
+returns a nearest point to V in the cone V'CXW . Our second
+algorithm combines the extra power of the cone nearest
+
+===== PAGE 2 =====
+neighbor data structures with some ideas from the recent
+sublinear-time algorithm for estimating the MST in general
+graphs [13]. The algorithm outputs a value which is within
+a YZC\[ factor of the EMST and it runs in %'&]16^`_
+"ba9cedgf
+[ih/
+time, where
+d
+is the spread of 4 (ratio between maximum
+and minimum distance between points in 4 ); observe that
+d
+can be arbitrarily large.
+The third algorithm we present does not have any de-
+pendency on
+d
+and requires only cone approximate nearest
+neighbor queries which we deﬁne in the next section. For a
+constant j , the algorithm needs k%l&]m $ poly &,Y
+f
+[i/K/ time and
+outputs an approximation of the EMST weight to within a
+multiplicative factor of YnC?[ . The algorithm combines the
+ideas from our ﬁrst two algorithms. It partitions the input
+points into components and estimates the EMST separately
+by considering pairs of points that lie in the same component
+and pairs of points that belong to different components. To
+estimate the EMST within components, we use an extension
+of our second algorithm. To estimate the weight required
+to connect the components we use a variant of our ﬁrst al-
+gorithm. The combination of these two algorithms leads to
+a signiﬁcant improvement in the quality of approximation
+(compared to the ﬁrst algorithm) and in the running time
+(compared to the second algorithm).
+Relation to previous works. The Euclidean minimum
+spanning tree problem is a classical problem in computa-
+tional geometry and has been extensively studied in the lit-
+erature for more than two decades. It is easy to see that to
+ﬁnd the EMST of $ points, %T&(jo$p-U/ time sufﬁces, by reduc-
+ing it to the MST problem in dense graphs. In the simplest
+case where jXEq1 (on the plane), Shamos and Hoey [29]
+show that the EMST problem can be solved in %T&J$
+MrOeQ
+$R/
+time. For j?sut , no k
+%T&J$R/ -time algorithm is known and it
+is a major open question whether an %T&J$
+MrOeQ
+$R/ -time algo-
+rithm exists even for j@Evt [17]. Yao [32] was the ﬁrst
+who broke the %'&($p-U/ -time barrier for jwsut and designed
+an k%l&J$*)yx L/ -time algorithm for jzE{t . This bound has been
+later improved and the fastest currently known (randomized)
+algorithm achieves the running time of k%T&J$}|y+Kh0/ [2] for jIE~t
+(and the running time tends to %'&($p-U/ as j grows). Sig-
+niﬁcantly better bounds can be achieved if one allows to
+approximate the output. Callahan and Kosaraju [8] give a
+%'&($
+MrOeQ
+$C$
+MrOeQ
+&,Y
+f
+[i/[:
+"
++.-/ -time algorithm that ﬁnds an
+approximate Euclidean minimum spanning tree to within a
+multiplicative factor of Y9C[ .
+Our algorithms rely on a recent algorithm of [13] that,
+given a connected graph in adjacency list representation with
+average degree j , edge weights in the range PYoKF , and a
+parameter [
+)
+-
+, approximates, with high probability,
+the weight of a minimum spanning tree in time k%T&(j[:h/
+within a factor of YnC[ . The time bound does not directly
+depend on the number of vertices or edges in the graph.
+Dynamic algorithms. Our model of computation is also
+interesting in the context of dynamic algorithms. There
+exist fully dynamic algorithms that maintain EMST subject to
+point insertions and deletions; [16] gives an algorithm with
+amortized time k
+%T&]m $R/ and %T&J$*)y:/ per update operation
+for j> and ju respectively. A disadvantage of this
+algorithm (and of all typical dynamic algorithms) is that it
+requires as much as k%l&]m $R/ time per input update, making
+the algorithm very costly in situations where the EMST
+queries are very rare. The data structures we require in our
+setting are dynamically maintained by standard geometric
+databases anyway. Thus, if the database supports all required
+data structures in polylogarithmic time, the amortized time
+required by our algorithm is k%T&]m $
+fe
+/ , where
+
+is the
+typical number of updates per one EMST calculation. We
+note again that our algorithm does not supply the minimum
+spanning tree, but returns only its approximate weight.
+Organization of the paper. We start by presenting an algo-
+rithm that only needs access to a minimal bounding cube of
+the point set 4 and to an orthogonal range query oracle in
+Section 3. In Section 5, we present a simple algorithm that
+uses additionally the cone nearest neighbor oracle. Finally,
+in Section 6, we discuss the main contribution of this pa-
+per, a sublinear time algorithm that uses a minimal bounding
+cube oracle, the orthogonal range query oracle and the cone
+&,Y9Ci/ -approximate nearest neighbor oracle.
+2 Preliminaries
+For a given set 4 of points in a Euclidean space 
+"
+, a
+(Euclidean) graph on 4 can be modeled as a weighted
+undirected graph E&(4	K/ , where 4 is a vertex set,
+ is a subset of the (unordered) pairs of points in 4 , and
+the length/weight of edge KV*K  is equal to the Euclidean
+distance between points V and  , denoted ¡ V¢¡ . The weight of
+the graph is the sum of the weights of its edges.
+Throughout the paper we denote by £	¤ the complete
+graph on 4 where the edge weights are the Euclidean
+distances between the endpoints. A graph  on a set
+of points 4 is called a Euclidean minimum spanning tree
+(EMST) of 4 if it is a minimum-weight spanning subgraph
+of £
+¤
+. We denote by EMST &(4/ both the EMST of 4 and the
+weight of the EMST of 4 . Similarly, for a given graph  we
+will denote by MST &(/ the minimum spanning tree of  as
+well as the weight of the minimum spanning tree of  .
+For a given point set 4 , we denote by
+d
+the spread of
+4 , that is, the ratio between the maximum and the minimum
+distances between points in 4 . We let ¥9¦ be a minimal
+bounding cube of 4 (which is made available via the minimal
+bounding cube oracle) and let 7 denote its side length.
+2.1 Models of computation. In this paper we use some
+basic geometric data structures supporting access to the input
+
+===== PAGE 3 =====
+point set. Given a point set 4 in #" , we use data structures
+supporting the following types of queries:
+§
+minimal bounding cube of P: returns the location
+of a minimum size axis-parallel j -dimensional cube
+containing 4 , that is, returns the location of a cube
+W{E¨ ©
+)
+.©
+)
+CBªn;« ©
+-
+K©
+-
+C?ªZ*«« ©
+"
+K©
+"
+CwªZ
+that contains 4 such that no axis-parallel cube of edge
+length smaller than ª contains 4 .
+§
+(orthogonal) range query oracle: for a given axis-
+parallel cube W , tests if W contains a point from 4 .
+§
+cone &¬Y­CXi/ -approximate nearest neighbor oracle:
+ is any non-negative real number and it is assumed
+that a set of cones ¦ with apexes at the origin is given
+in advance. The cone &,Y'Cui/ -approximate nearest
+neighbor oracle, for a given point V®F4 and a given
+cone W¯®°¦ , returns a &¬YIC±i/ -approximate nearest
+neighbor1 of V in &4{²I.Vp 0/9³\&´VCW­/ . (We denote
+by VµCW the translated cone U©'C?V·¶	©®·W  .) If
+&(4@²KVp D/;³w&´VlCXW­/ is empty, then a special value is
+returned.
+In the special case where E~ , the oracle gives the true
+nearest neighbor, and is simply called the cone nearest
+neighbor oracle.
+Appendix A presents a discussion about the complex-
+ity of these data structures, which can be implemented efﬁ-
+ciently by standard data structures. The cone nearest neigh-
+bor oracle, however, is more costly and less common than
+the cone approximate nearest neighbor oracle..
+3 Estimating the EMST with bounding cube and range
+queries
+Here we describe a natural approach to the approximation
+of EMST &(4/ using minimum bounding cube oracle and
+orthogonal range queries. This approach, by itself, does
+not give a good enough multiplicative approximation, but
+is used as a building block in the sublinear algorithm we
+present later. For simplicity, we only describe here the two
+dimensional case ( jHE¸1 ). The algorithm we supply is
+deterministic, has running time %T&J$
+)K+.-
+/ and outputs a value
+2 such that
+)
+3
+EMST &(4/p5l¹>?2@>BA EMST &4/Cº¹ , where
+A{E%T&J$*)K+.L
+MPO6Q
+$R/ , and ¹»E¼7'$;:}< where 7 is the side-
+length of a minimal bounding cube of 4 and S is a constant.
+We also show that any algorithm that uses the same running
+time (in fact, the same amount of queries and arbitrary large
+running time) cannot signiﬁcantly improve the quality of the
+approximation.
+1For a point ½¿¾¿À and a set of points ÁÃÂ'	 , a Ä(ÅÆIÇ.È -approximate
+nearest neighbor of ½ in Á is any point É9¾Á such that for every Ê­¾Á it
+holds that Ë ½iÉ0ËÌzÄÅ=ÆÇbÈÍË ½DÊ¢Ë .
+The quad-tree algorithm. We apply a standard quad-tree
+subdivision to the bounding cube ¥9¦ (see, e.g., [7, Chap-
+ter 14]). That is, we ﬁrst partition ¥`¦ into four disjoint
+blocks (squares) of equal size. We can check which blocks
+contain points from 4 via orthogonal range queries. We
+then further subdivide those nonempty blocks, and iterate
+this process as long as fewer than GI&]m $R/ queries are made.
+This induces a tree structure on the blocks, where a block
+at level Î has side length 7
+f
+1iÏ . Let Ð be the depth of this
+tree. We may assume that all nonempty blocks at level ÐN5Y
+were subdivided into subblocks (of level Ð ) and each sub-
+block of level Ð was queried. Let Ñ be the set of nonempty
+blocks at level Ð and let ÒEH¡ Ñz¡ . Clearly ÒE·%T&]m $R/ . We
+now run any minimum spanning tree algorithm (a &¬YnC~[e/ -
+approximation is good enough) on the centers of the blocks
+in Ñ . This would result in a value Ó . We set
+
+E~ÓCzÔ
+m
+Ò$
+where ÔzEÕ7
+c
+1
+:=Ö
+and output the value 2HE
+m
+Ó
+
+as an
+approximation for ×¿Ø#E EMST &4/ .
+CLAIM 3.1.
+)
+3
+×¿Ø5¹Ù>Ú2¯>ÛA×¿Ø8C±¹ , where AÙE
+%T&J$*)K+.L
+MPO6Q
+$R/ , ¹ºE~7'$;:}< and S is an arbitrary constant.
+Proof. (sketch) First note that the minimum spanning tree
+of any $ points in a square with side-length Ü is %'&]ÜZm $R/
+and this bound is tight. (e.g., when the points are uniformly
+spread (say, on the grid with edge length Ü
+f
+m $ .)
+Now, we set Ó	Ø be the weight of a minimum weight tree
+that touches every block in Ñ . It is easy to see that Ó	ØÝ>
+×NØ>
+
+(the last inequality is by the above upper bound
+and using convexity). Assume now that ÒZs\m $
+f
+&¬YU
+MrOeQ
+$R/ ;
+then it can be seen that Ó upper bounds ÓØ and approximates
+it within an additive term of %T&ÔÞÒ/ , and hence within a
+constant factor, say  . Namely, ©
+c
+Ò
+c
+ÔI>XÓ
+Ø
+>XÓF>\
+c
+Ó
+Ø
+for some constants © and  .
+Hence, as
+
+is an upper bound on ×¿Ø , the approximation
+factor is A±>qß àÕEâá ß ã¨EH%T&,&Uäå æ0çãè/.),+.-0/ (where the last
+inequality follows by plugging in the expression for
+
+and
+Ó ). Now, by the above bound on Ó and on Ò we obtain that
+A>êé %T&J$*)K+.LU/ .
+Assume now that Òwqm $
+f
+&¬YU
+MPO6Q
+$R/ , then it can be
+seen that the depth of the quad-tree is at least Y
+MrOeQ
+$ and
+hence Ô­>?7
+c
+$;:p)ë . Therefore, the additive term is bounded
+by
+
+5ÓB>\%T&Ô
+c
+m
+Ò$p/oEF%T&J$;:p)ë
+c
+7
+c
+$R/oEì%'&($;:íU/ . î
+A note on the running time is due here. We use %T&]m $R/
+queries in the course of constructing the quad-tree. Next,
+we have to ﬁnd the minimum spanning tree (or any &¬Y#C?i/
+approximation to it for any ﬁxed  ). In the two dimensional
+case this can be done in é
+ï
+&
+m
+$R/ time ([29]), and this term
+dominates the total complexity.
+As it turns out, the above quality of approximation is
+optimal for the given time bound as shown by the following
+claim whose proof is deferred to the full version of the paper.
+
+===== PAGE 4 =====
+CLAIM 3.2. Any algorithm with %T&]m $p/ orthogonal range
+queries has an approximation factor for EMST &(4/ of
+ð
+&J$*)K+KLU/ .
+Higher dimension. For ﬁxed j?1 , the quad-tree can be
+replaced by a 1
+"
+-ary tree. A total of %T&1
+"
+m $R/ orthogonal
+range queries will be made in a similar way. Then 7
+will be set as in the 2-dimensional case while
+
+Eñ7XC
+Ô*Ò
+)K+
+"
+$
+_
+"
+:p)
+a
++
+"
+. In this case we get an approximation with a
+multiplicative factor of AEÚé
+ï
+&($;_
+"
+:})
+a
++_´|
+"ba
+/ and an additive
+term which is 7
+c
+$;:=< for arbitrary constant S .
+Finally, we note that our choice of using %'&
+m
+$R/ orthog-
+onal range queries was arbitrary, in the sense that one can
+use a different number of queries and obtain a whole range
+of tradeoffs between the running time and the quality of ap-
+proximation.
+4 Two related previous results
+We now describe two previous results that we utilize in our
+EMST algorithms: the concept of Yao graphs [32] and an
+algorithm for approximating the MST in bounded degree
+graphs due to Chazelle et al. [13].
+Yao graphs. Yao graphs are Euclidean graphs that relate
+the EMST to the cone nearest neighbor oracle presented in
+Section 2.1. Fix an integer jìs1 . Let ¦ be a collection
+of j -dimensional cones with apex at the origin such that (a)
+each cone has angular diameter2 at most ò , where ò is some
+ﬁxed angle, and (b) ó8ôoõiöWâE÷
+"
+. There is always such
+a collection ¦ of %T&(jh.+.-
+ciøKùPú
+:
+"
+&Jò
+f
+1e/
+c
+MPO6Q
+&j
+ø,ùrú
+:p)
+&Jò
+f
+1e/K/,/
+cones (not necessarily disjoint); note that for òTE{%T&¬Y0/ this
+bound is 1^`_
+"ba
+. Yao [32] gives one possible construction for
+such a collection.
+For a point Vû®ü
+"
+and a cone Wý®â¦ , let Woþ be
+VCìWÿEÙU© CBV ¶H©ì®±W  , that is, a translation of W
+so that its apex is at V . Let
+
+¤
+VRbW be the nearest neighbor
+of V in the set &(4»²8KVR 0/;³Woþ . Given a point set 4 and a
+collection of cones ¦ , the Yao graph of 4 (with respect to ¦ )
+is the Euclidean graph  with vertex set 4 and (undirected)
+edge set âE°& V*Ki/¿¡Wâ®B¦ such that E
+
+¤
+VRbWb  .
+That is, each V~®?4 is connected to its nearest neighbor in
+each cone which has V at its apex. The following result due
+to Yao [32] motivates our use of these graphs.
+CLAIM 4.1. [32] For any point set 4v®»
+" , let  be the
+undirected Yao graph for 4 with òü	
+f
+t . Then, the
+Euclidean minimum spanning tree of 4 is a subgraph of the
+Yao graph  . î
+2The angular diameter of a cone 
+ in 	 having its apex at point
+½¾
+ is deﬁned as the maximum angle between any two vectors  ½DÊ
+and
+ 
+½
+ , Ê
+n¾
+ .
+Chazelle et al.: approximate MST in low-degree graphs.
+Our algorithms make use of a recent algorithm for estimating
+the MST in graphs due to Chazelle et al. [13]. This
+algorithm assumes that the input graph (i) is represented by
+an adjacency list, (ii) has degree at most  (the full version of
+[13] allows  to be the average degree), and (iii) has known
+minimum and maximum edge weights. Then, for w[
+)
+-
+,
+the algorithm estimates the weight of the minimum spanning
+tree with a relative error of at most [ , with probability at least
+h
+|
+, and runs in time %'&
+cdc
+MPO6Q
+&
+d	f
+[i/
+f
+[ih/ .
+Let  EÙ&`K8/ , be an input graph having $ vertices
+with maximum degree  and edge weights in the interval
+PYe
+d
+ . For any 2ü®F , let _
+à
+a
+denote the maximal sub-
+graph of  containing edges of weight at most 2 , and S
+à
+denote the number of connected components in _
+à
+a
+. The
+main ingredient of the algorithm from [13] is a procedure
+approx-number-connected-components run on 
+_
+à
+a
+for estimat-
+ing S
+à
+for 2ÙEê&
+)
+-
+CÎ/
+c
+[ with ÎzEÛYe.1¢y
+dgf
+[ . For
+integer weights, the weight of the MST of  is equal to
+$5
+d
+C
+:p)
+
+)
+S
+
+. The algorithm uses the above estima-
+tions to produce a value which, with probability at least
+h
+|
+, is
+a &¬Y [e/ -approximation of the MST of  .
+Procedure approx-number-connected-components works by
+sampling %T&¬Y
+f
+[i-/ vertices in  . For each sampled ver-
+tex ! , a random estimator "$# is computed by travers-
+ing _
+à
+a
+from ! (for example, using breadth-ﬁrst search)
+with a stochastic stopping rule. "
+#
+is a random variable
+whose distribution is a function of only the size of the con-
+nected component containing ! (i.e., the number of vertices
+reached from ! in the traversal) in _
+à
+a
+. The simple re-
+lation between these sizes and S
+à
+together with the fact
+that the distribution of "
+# is concentrated around the ex-
+pected value yields the connection between "
+# and S
+à
+. Pro-
+cedure approx-number-connected-components runs in expected
+time %'&[:-
+MrOeQ
+&
+d	f
+[e/,/ . Therefore, the expected running
+time of the algorithm in [13] is %T&
+d
+[:h
+MPO6Q
+&
+d	f
+[i/K/ .
+5 A simple estimation for EMST using Yao graphs
+The algorithm we present in this section is conceptually an
+important component of the sublinear algorithm we design
+later in Section 6. It combines the two results described
+in Section 4. Our algorithm uses the cone nearest neighbor
+oracle and achieves a query complexity of 16^`_
+"bapc
+k%l&
+dgf
+[i-/ .
+Since by Claim 4.1 the undirected Yao graph  for 4
+contains all edges of the EMST of 4 , it is natural to try to
+apply the algorithm of Chazelle et al. to  to estimate the
+weight of the EMST of 4 . To do that efﬁciently, instead of
+generating  at the beginning of the algorithm, we generate
+the edges of  (using the cone nearest neighbor queries)
+only when the edges are needed in the algorithm. That is,
+whenever the algorithm needs edges adjacent in  to a vertex
+V , we use the cone nearest neighbor query to obtain the
+nearest neighbor of V in each cone in .V;CW 
+ô õiö
+. Motivated
+
+===== PAGE 5 =====
+by Claim 4.1, we set the angular diameter of the cones to
+
+f
+ . This creates parts of an implicit directed Yao graph 
+on 4 with edges &´VR.i/ such that there is a WÚ®»¦ where
+NE
+
+¤
+VR.W .
+The above approach has a number of problems. First,
+the algorithm of Chazelle et al. requires the input graph to be
+undirected and represented by an adjacency list, whereas in
+our model, we have fast access only to the out-going edges
+at a vertex in  . Furthermore, the running time is linear
+in
+d
+, which can be arbitrarily large. The following lemma
+helps in overcoming the ﬁrst difﬁculty, while the second one
+is tackled in the main algorithm in Section 6. The proof of
+Lemma 5.1, being a special case of Claim 6.1, is omitted.
+LEMMA 5.1. Let $&%
+#
+be the number of vertices in £
+¤ that
+are reachable from ! using only edges of weight at most ' .
+Let (
+%
+#
+be the number of vertices in directed Yao graph 
+reachable from ! using only edges of weight at most ' . Then
+(
+%
+#
+E\$
+%
+#
+. î
+Equipped with this lemma, we can modify the algo-
+rithm due to Chazelle et al. to obtain its efﬁcient imple-
+mentation in our model. The only difference is in pro-
+cedure approx-number-connected-components. We still sample
+%'&,Y
+f
+[i-/ vertices and randomly traverse _
+à
+a
+from the sam-
+pled vertices. To implement the traversing algorithm we ex-
+plore the graph in a breadth-ﬁrst search fashion by going to
+the outgoing neighbors of the vertices that are closer than the
+current threshold weight 2 . Such a procedure can be easily
+implemented in our model by using the cone nearest neigh-
+bor queries; the running time is proportional to the number
+of the edges traversed. To estimate the value of S
+à
+we use
+the same estimators as in [13]. Since for each vertex ! in
+the sample, the distribution of "
+# depends only on (
+à
+#
+, the
+number of the vertices reachable from ! in _
+à
+a
+, by Lemma
+5.1, we can conclude that "
+# has identical distribution as in
+the algorithm of Chazelle et al. [13]. Therefore, the quality
+of this algorithm of the estimation of EMST of 4 is the same
+as in the algorithm of Chazelle et al. [13]. Since the maxi-
+mum out-degree of the directed Yao graph is 1
+^`_
+"ba
+, the mod-
+iﬁed procedure approx-number-connected-components has iden-
+tical complexity as that of running the original algorithm of
+Chazelle et al. in a (undirected) graph with maximum degree
+16^`_
+"ba
+. Thus, we obtain the following lemma.
+LEMMA 5.2. Let 4 be a set of points in 
+" . Assume the
+value
+d
+of the spread of 4 is known and access to a cone
+nearest neighbor oracle for 4 is given. Then, there is an
+algorithm that outputs a value ) which, with probability
+at least
+h
+|
+, approximates the values of EMST &(4/ to within
+a factor of Y*º[ with query complexity k%,+ 16^`_
+"baRcdf
+[ih.- . î
+For constant j and [ , this complexity is k%T&
+d
+/ , which is
+sublinear for
+d
+E0/ &J$R/ . However, for example, on the plane,
+d
+is known to be
+ð
+& m $R/ . Next we discuss a truly sublinear
+approximation algorithm whose complexity is independent
+of
+d
+.
+6 Sublinear-time approximation algorithm
+We show how the two algorithms from Sections 3 and 4 can
+complement each other. In addition to improving the running
+time, our algorithm requires a weaker computational model,
+in which the cone nearest neighbor query is replaced by the
+cone &¬Y9Cwi/ -approximate nearest neighbor query.
+Overview of the algorithm. In Section 6.1, we begin by
+partitioning a minimal bounding cube ¥`¦ of 4 into blocks
+of equal size; we then consider only blocks containing points
+from 4 . Next, we group together blocks that are “close” to
+each other. We call the resulting clusters connected block-
+components. The algorithm then proceeds in two phases.
+First, in Section 6.3, we show how to approximate the weight
+of a minimum spanning forest (MSF) of the connected block-
+components by using the ideas of Section 5. We then, in
+Section 6.4, approximate the optimal way to connect differ-
+ent connected block-components. We prove in Lemma 6.1
+that the MSF of the connected block-components combined
+with the optimal set of edges joining them approximates the
+EMST of 4 .
+6.1 Partitioning bounding cube into active blocks, and
+connected block-components. After translation and scal-
+ing of the points in 4 we can assume that ¥9¦ , the bounding
+cube of 4 , is  ¢K$
+f
+[0
+"
+. In particular the side length is 7@E
+$
+f
+[ and we have the trivial lower bound EMST &(4/	sB$
+f
+[ .
+Partitioning the bounding cube into active blocks. We
+follow the approach from Section 3 with small modiﬁcations,
+by extending it to higher dimensions and applying a different
+stopping procedure. We ﬁrst partition ¥`¦ into 1
+"
+disjoint
+blocks of equal size, then partition iteratively the nonempty
+ones into 1
+"
+disjoint subcubes, and so on. As before, Ò
+Ö
+is the number of blocks at level Ð that contain points from
+4 (active blocks), and 1
+Ö
+E 7
+f
+1eÖ is the side length
+of blocks in the Ð th level of the subdivision. Let ÒØ±E
+2$354
+[
+"
++.-:hRm $ .1
+"76
+)  . We stop our subdivision at the
+ﬁrst level Ð
+ë
+such that either Ò
+Ö78
+s ÒØ or 1
+Ö78
+ 1D[ .
+Let ÒwEêÒ
+Ö78
+and 1 E91
+Ö78
+. Notice that Ò~>Ù1
+"
+ÒØ and
+1÷s~[ . By our arguments from Section 3, the active blocks
+at level Ð
+ë
+can be found by querying the range query oracle
+%T&Ò}1
+"
+MrOeQ
+&($
+f
+&J[51/K/ times.
+Spanners and connected block-components. For any :¿s
+Y , a : -spanner (see, e.g., [8, 15, 21]) for a set ; of points in
+a Euclidean space is any Euclidean graph  with the vertex
+set ; such that for every pair of points <*>=~®0; there is a
+path in  between < and = of total length at most :
+c
+¡ <?=p¡ .
+
+===== PAGE 6 =====
+Let Ñ be the set of centers of active blocks and let
+@BADC
+be a &¬Y'C{[
+f
+/ -spanner of Ñ with %T&Ò;&(
+f
+[e/
+"
+:})y/
+edges. Such a spanner can be found in time %T&Ò
+MrOeQ
+ÒNC
+Ò
+MrOeQ
+&¬Y
+f
+[e/[:
+"
+/oEük %T&1
+"
+m $µ[6)y:
+"
++.-/ [8].
+Call two blocks close if the distance between their
+centers in
+@BADC
+is at most E
+c
+1 , where EºE»Y
+m
+j
+f
+[ .
+We use equivalence classes of the relation close to deﬁne
+the connected block-components. That is, two blocks are in
+the same connected block-component if there is a sequence
+of active blocks between them where every consecutive
+pair of blocks in the sequence is close. We shall abuse
+notation and refer also to the partition of 4 induced by
+the connected components as connected block-components.
+Notice that all connected block-components can be found in
+time proportional to the number of edges in
+@BADC
+, which is
+%'&]Ò;&J
+f
+[e/
+"
+:})/ .
+6.2 The EMST of P and connected block-components.
+We refer to the spanning forest of a graph  as a union
+of spanning trees of the connected components of  . A
+minimum spanning forest of  , denoted by MSF &(/ , is a
+spanning forest of  having the minimum weight.
+Let 
+Ï
+ç
+be the set of edges of £	¤ whose endpoints lie
+within the same connected block-component. Let  E±&EgC
+m
+j/F1 . We now relate block-components to the distances
+between points.
+OBSERVATION 6.1. Let V and  be an arbitrary pair of
+points in 4 .
+1. If ¡ V¢¡9>¼&E5B
+m
+j/F1 then V and  are in the same
+connected block-component.
+2. If V and  are in the same connected block-component
+then there is a path between V and  consisting of edges
+in 
+Ï
+ç
+that are of length at most &ETC
+m
+j/F1{EF .
+3. If ¡ V¢¡	&EÃC
+m
+j /F1ñE , and V and  are in the
+same connected block-component, then EMST &(4/ does
+not contain the edge V . î
+In our algorithm we use the following graphs:
+§
+
+æGIH
+<Ö
+is the graph containing all edges in 
+Ï
+ç
+of
+weight at most  . By Observation 6.1, the connected
+components of MSF &
+æGIH
+<Ö
+/ are identical to the con-
+nected block-components and the minimum spanning
+forest of these components is the same as MSF &(
+æGIH
+<Ö
+/ .
+§
+J is the directed &¬Y¿Cìi/ -Yao graph that is obtained
+from £¤ using the cone &,YNCFi/ -approximate nearest
+neighbor oracle. Formally, we use the same deﬁnitions
+as in the deﬁnition of directed Yao graphs and deﬁne
+
+_ )
+6
+J
+a
+¤
+
+VRbW to be the point that is returned by the
+cone &¬YNCXi/ -approximate nearest neighbor oracle for
+V and W . If &4X²ZKVR 0/p³Woþ ELK , then
+
+_ )
+6
+J
+a
+¤
+
+VRbW is
+undeﬁned. Then, J is a directed Euclidean graph on
+4 with the edge set containing an edge & V*Ki/ if there is
+W»®l¦ such that ­E
+
+_ )
+6
+J
+a
+¤
+
+VR.W .
+§NM
+is the minimum weight subgraph of £	¤ that, when
+added to 
+æGIH
+<Ö
+ forms a connected graph.
+§
+
+H
+#PO is the same as £	¤ except that the weights of edges
+in 
+Ï
+ç
+are considered to be zero. Observe that the
+weight of MST &(
+H
+#.O
+/ is identical to the weight of
+M
+.
+The following lemma displays the two-level nature of
+the algorithm that we will present.
+LEMMA 6.1. The union of MSF &(
+æGIH
+<Ö
+/ and
+M
+is a span-
+ning tree of £
+¤
+whose weight approximates the weight of
+EMST &(4/ to within a factor of Y9C[
+f
+1 .
+Proof. Clearly, the union of MSF &
+æGIH
+<Ö
+/ and
+M
+forms a
+spanning tree of £	¤ . To prove the second part of the lemma,
+let us consider an undirected graph 8Ø obtained from £	¤ by
+decreasing to &E5Ý
+m
+j/F1 the weight of every edge in 
+Ï
+ç
+having weight larger than &E5Ã
+m
+j/F1 and smaller than or
+equal to  . (Note that we change only the weights of the
+edges in 
+æGIH
+<Ö
+.) Since the weight of every edge decreases
+by a factor of at most Q
+_SR :|
+å
+"Ka.T
+E
+_IR
+6
+å
+"baUT
+_SR :|
+å
+".aPT
+>{Y	Cw[
+f
+1 ,
+we have MST &(8ØU/>ì&,YDC¿[
+f
+1e/
+c
+EMST &(4/ . Notice further that
+by Observation 6.1 (1), each edge in 8Ø that is not in 
+æGVH
+<Ö
+has weight larger than &EÃ5B
+m
+j/F1 . Therefore, MST &(8ØU/
+can be obtained by ﬁrst taking any minimum spanning forest
+induced by the edges in 
+æGIH
+<Ö
+and then taking some further
+edges in
+M
+. Hence, the weight of the union of MSF &(
+æGIH
+<Ö
+/
+and
+M
+is a &,Y9C[
+f
+1e/ approximation to EMST &(4/ . î
+Consequently, to estimate EMST &(4/ it sufﬁces to esti-
+mate the weights of MSF &(
+æGIH
+<Ö
+/ and MST &(
+H
+#PO
+/ .
+6.3 First level - estimating the weight of MSF &(
+æGIH
+<Ö
+/ .
+In this section we show how to estimate the weight of the
+MST within a single block component. This, combined for
+all block components, yields an estimate on the weight of
+MSF &
+æGIH
+<Ö
+/ . Since our model does not allow direct access
+to the edges of £9¤ , we will use the directed Yao graph 
+J
+to estimate the weight of MSF &
+æGIH
+<Ö
+/ . Our analysis will
+explore the relationship between 
+J and 
+æGIH
+<Ö
+.
+For a weighted graph  denote by ¹
+c
+ the graph
+ with edge weights multiplied by ¹ . Recall that _IW
+a
+denotes the subgraph of  consisting of the edges of weight
+at most X , and S
+W
+is the number of connected components in
+
+_VW
+a
+æGIH
+<Ö
+. Let $YW
+#
+and (ZW
+#
+be the number of of vertices in 
+_IW
+a
+æGVH
+<Ö
+and in J
+_IW
+a
+reachable from ! , respectively. Notice that
+S
+W
+EL
+#
+õ
+¤
+Y
+f
+$YW
+#
+. Analogously, deﬁne SØ
+W
+E[
+#
+õ
+¤
+Y
+f
+(ZW
+#
+.
+Also, let \S
+W
+be the number of connected components in
+&,Y9Ci/
+c
+
+_IW
+a
+æGIH
+<Ö
+.
+
+===== PAGE 7 =====
+It follows from [13] (see also Section 4) that
+(6.1) MSF &(
+_IW
+a
+æGIH
+<Ö
+/>?$¿5]XDS
+W
+C
+W:})
+^
+Ï
+
+)
+S
+Ï
+> MSF &(
+_IW
+a
+æGIH
+<Ö
+/eCT$ 
+Since we only have access to 
+J , we can only deal with
+the SØ
+W
+’s rather than the S
+W
+’s. To bound the error due to this
+replacement, now we relate reachability in 
+J
+to reachability
+in 
+æGVH
+<Ö
+.
+CLAIM 6.1. Let [±>
+)
+_
+and @>
+)
+)¬ë
+. Then for every X ,
+$
+W.+_ )
+6
+J
+a
+#
+>N(ZW
+#
+>B$YW
+#
+. In particular, S
+W.+_ )
+6
+J
+a
+sSØ
+W
+s?S
+W
+.
+x
+β
+xx 23
+yb
+a
+α
+c
+γ
+z=x1
+Illustration to the proof of Claim 6.1. The ﬁgure shows the
+reachability in ` a . The dashed line is the path showing the
+connectivity of b and c in ` aPdVdfeg
+a>h7ijh
+.
+Proof. The right inequality clearly holds. To show the left
+inequality, it sufﬁces to show that for every k , if a vertex =
+is reachable in 
+_Il
+a
+æGIH
+<Ö
+from a vertex < , then = is reachable
+from < in J
+_(_ )
+6
+J
+a
+l
+a
+. Assume that = is reachable from
+< in 
+_Il
+a
+æGVH
+<Ö
+; this implies that < and = are in the same
+connected block-component. Assume further, without loss
+of generality, that kÝ>F (indeed, if kºF then 
+_Il
+a
+æGIH
+<Ö
+E
+
+_
+Q
+a
+æGVH
+<Ö
+).
+Let m be the &¬Y	Cwi/ -approximate nearest neighbor of <
+(returned by the cone approximate nearest neighbor oracle)
+in the cone W n containing = . Clearly, if mFEo= , then the
+lemma holds. So let us assume that mp Eq= . Let ©E¡ <rm=¡ ,
+ÒEÙ¡ <r=p¡ , SEñ¡ =m=¡ , and A{Ets¿&<?=um/ , ¹±Evs¿&w<xmy=¢/ , and
+z
+E[s¿&w=<xm/ . Notice that since = and m are contained in the
+cone W
+n
+with the angular diameter 
+f
+ , we have
+z
+>{
+f
+ .
+We ﬁrst show the following three inequalities: (i)
+©>u&¬Y#C~i/¢Ò , (ii) S {Ò , and (iii)
+2
+ùPú
+0©KS0 z>±Ò
+f
+&,YgCB[e/ .
+Inequality (i) follows directly from the deﬁnition of the cone
+approximate nearest neighbor oracle. To prove inequality
+(ii), let us suppose that SsÿÒ . Then, ¹â>
+z
+, and since
+z
+>0
+f
+ , we obtain that As0
+f
+1 . This in turn implies that
+©'s
+m
+Ò
+-
+CS
+-
+s
+m
+1oÒ , which contradicts the ﬁrst inequality
+that ©T>@&,YCi/Ò¿>ìY6PY
+c
+Ò . For inequality (iii), we ﬁrst use
+the law of cosines to get S-NEF©-CwÒy-#51o©ÒD|
+O
+ø
+z
+>~©-9C
+Òy-R5
+m
+1;©Ò , since
+z
+>}
+f
+ . To show
+2
+ùPú
+U©KS0 ­>~Ò
+f
+&,YRCz[e/
+we assume ©{Ò
+f
+&¬Y#CB[e/ and show Sl>{Ò
+f
+&,YgC?[i/ . Since
+©wuÒ
+f
+&,YgC~[e/Is
+å
+-
+-
+c
+Ò , the expression ©-#CXÒ-Z5
+m
+1;©Ò
+increases with © . Therefore, by inequality (i) we obtain
+S
+-
+> ©
+-
+CBÒ
+-
+5
+m
+1D© ÒZ>F&,&,YCwi/,Ò/
+-
+CwÒ
+-
+5
+m
+1¢&,Y9Ci/KÒ
+-
+E Ò
+-
+&,&]1N5
+m
+16/}&¬Y9Cwi/RCw
+-
+/l>&]Ò
+f
+&,YoC[e/,/
+-
+
+where the last inequality holds for [8>
+)
+_
+and >
+)
+)ë
+.
+Now we prove the lemma using inequalities (i–iii).
+Assume, without loss of generality, that ¡ <?=p¡>~k ; otherwise
+apply the following arguments to all edges on the path
+between < and = in 
+_Il
+a
+æGVH
+<Ö
+(all the edges on this path are
+of length at most k ). We deﬁne inductively the sequence
+<\E<
+ë
+><
+)
+<
+-
+>= such that for every Î , if <
+Ï
+pE= , then
+<
+Ï
+6
+)
+is the &¬YpCi/ -approximate nearest neighbor of <
+Ï
+in the
+cone WnP containing = . By inequality (ii), the sequence ¡ <
+Ï
+=p¡
+is strictly decreasing. This immediately implies that <
+Ï
+E,=
+for some Î , and so the sequence is ﬁnite.
+Next, we show inductively that each <
+Ï
+is in the same
+connected block-component as = . Suppose that <
+Ï
+is in the
+same connected block-component as = . Since the sequence
+¡ <
+Ï
+=p¡ is decreasing and since ¡ <r=}¡ >}kz> E±&EnC
+m
+j/
+c
+1 ,
+we obtain
+¡ <
+Ï
+=}¡
+Y9C[
+>
+¡ <r=}¡
+Y9C[
+
+&ElC
+m
+j/
+c
+1
+Y9C[
+>
+&ElC
+m
+j/
+c
+1
+Y9C[
+
+Therefore, using inequality (iii) with <XE<
+Ï
+and mE
+<
+Ï
+6
+)
+, we obtain
+2
+ùrú
+ ¡ <
+Ï
+<
+Ï
+6
+)
+¡´U¡ <
+Ï
+6
+)
+=p¡ /b >
+¡ <
+Ï
+=p¡
+Y9C[
+> &E5
+m
+j /
+c
+1 
+Hence, by Observation 6.1, either <
+Ï
+and <
+Ï
+6
+)
+are in
+the same connected block-component or <
+Ï
+6
+)
+and = are in
+the same connected block-component. In either case, the
+transitivity ensures that <
+Ï
+6
+)
+and = are in the same connected
+block-component. We ﬁnally observe that inequality (i)
+implies that ¡ <
+Ï
+<
+Ï
+6
+)
+¡>&¬YCTi/p¡ <
+Ï
+=p¡ , and since ¡ <
+Ï
+=p¡>¡ <r=p¡ ,
+we obtain ¡ <
+Ï
+<
+Ï
+6
+)
+¡>v&,Y8Ci/p¡ <?=p¡ . Hence, the sequence
+<HE<
+ë
+><
+)
+><
+-
+>= corresponds to a path contained in
+a connected block-component having all edges of length at
+most &,YZC\i/k . This implies that = is reachable from < in
+J
+_J_ )
+6
+J
+a
+l
+a
+. î
+We introduce an estimator  for the value of
+MSF &
+æGIH
+<Ö
+/ .
+qE°$'C
+
+Q
+_ )
+6
+J
+a
+:p)
+^
+Ï
+
+)
+S
+Ø
+Ï
+5v&¬Y9Cwi/
+c
+S
+Ø
+
+Q
+_ )
+6
+J
+a
+
+We analyze now the quality of this estimator.
+LEMMA 6.2. MSF &(
+æGIH
+<Ö
+/>~{>&¬YC'i/ MSF &(
+æGIH
+<Ö
+/DC$ .
+Proof. We start with the following two observations.
+
+===== PAGE 8 =====
+§
+If Xzsì then S
+W
+E»S
+Q
+. As a corollary, S
+Ø
+
+Q
+_ )
+6
+J
+a
+E
+S
+Q
+E\S
+
+Q
+_ )
+6
+J
+aw
+.
+§
+\S
+W
+E~S
+W.+_ )
+6
+J
+a
+.
+Now, we have the following sequence of inequalities:
+MSF &
+æGIH
+<Ö
+/=> $ C
+Q
+:})
+^
+Ï
+
+)
+S
+Ï
+5S
+Q
+Eê$'C
+
+Q
+_ )
+6
+J
+aw
+:})
+^
+Ï
+
+)
+S
+Ï
+5Ù&,YCwi/
+c
+S
+
+Q
+_ )
+6
+J
+a
+Eê$'C
+
+Q
+_ )
+6
+J
+aw
+:})
+^
+Ï
+
+)
+S
+Ï
+5Ù&,YCwi/
+c
+S
+Ø
+
+Q
+_ )
+6
+J
+a
+>ñ$'C
+
+Q
+_ )
+6
+J
+aw
+:})
+^
+Ï
+
+)
+S
+Ø
+Ï
+5v&¬Y9Cwi/
+c
+S
+Ø
+
+Q
+_ )
+6
+J
+a
+E
+>ñ$'C
+
+Q
+_ )
+6
+J
+aw
+:})
+^
+Ï
+
+)
+S
+Ï
++_ )
+6
+J
+a
+5,(v&¬Y9Cwi/
+c
+S
+Q
+Eê$'C
+
+Q
+_ )
+6
+J
+aw
+:})
+^
+Ï
+
+)
+\S
+Ï
+5Ù&,YCwi/
+c
+\S
+
+Q
+_ )
+6
+J
+a
+> MSF &K&¬YCwi/
+c
+
+æGIH
+<Ö
+/RC$
+E &,Y9Ci/
+c
+MSF &(
+æGIH
+<Ö
+/RC$u
+The ﬁrst inequality is due to inequality (6.1). The ﬁrst
+equality follows from the ﬁrst observation above. Next, we
+use Corollary 6.1 and the both observations above. The last
+inequality is implied by inequality (6.1). î
+We now modify the algorithm of Chazelle et al.
+[13] to obtain a good approximation of  . Follow-
+ing the approach from Section 5, we run procedure
+approx-number-connected-components to estimate the number
+of connected components of the graph with edges of weight
+at most XwEÙ&
+)
+-
+C\Î¬/[ for Î'EñYeb1 y
+d	f
+[ (where
+d
+E
+(v&¬Y9Cwi/ is an upper bound of the weights in the graph).
+This estimation is achieved using the estimation of Y
+f
+$YW
+#
+. As
+was discussed in Section 5, if there is an efﬁcient way to tra-
+verse 
+J
+, we can modify the algorithm to apply this traversal
+and we get an estimation of the SØ
+W
+with the same probabilis-
+tic guarantees. As was pointed in Section 5, traversing in
+J
+_IW
+a
+is easy: each time we want to access all edges incident
+to a point VB®4 , we ﬁrst ask the cone approximate nearest
+neighbor queries to all cones W
+þ and then for each nearest
+neighbor  of V in W
+þ , we verify if ¡ V¢¡ >NX and if the blocks
+to which V and  belong are in the same connected block-
+component. The ﬁrst test is a simple 1^`_
+"ba
+time calculation,
+while the second requires the computation of the connected
+block-components. This is done in a preprocessing step as
+described in Section 6.1. Therefore, following the analysis
+from [13] (see also Section 5) we can estimate the value of
+
+
+Q
+_ )
+6
+J
+a
+:})
+W
+
+)
+S
+Ø
+W
+using k
+%T&]
+c
+1
+^`_
+"ba
+[
+:h
+/ cone approximate
+nearest neighbor queries and k%T&Ò
+c
+[:
+"76
+)/ orthogonal range
+queries. The algorithm approximates 
+
+Q
+_ )
+6
+J
+a
+:})
+W
+
+)
+SUØ
+W
+to
+within an additive error of
+)
+í
+$ with probability at least
+h
+|
+(see
+[13]). Next, observe that SØ
+
+Q
+_ )
+6
+J
+a
+is nothing but the num-
+ber of connected block-components, which is known to the
+algorithm that computes the connected block-components.
+Therefore, together with Lemma 6.2 we get an algorithm
+that approximates MSF &
+æGIH
+<Ö
+/ to within an additive factor
+of
+)¬ë
+í
+$ .
+We note that by scaling down all weights by a factor
+
+uY , applying the algorithm above, and then rescaling to
+the original weight, we decrease the running time by a factor
+of
+
+, and increase the additive error by the same factor. In
+this way we obtain an algorithm that performs k%T&
+f
+&
+
+[
+h
+/,/
+cone approximate nearest neighbor queries and achieve an
+additive error of
+)ë
+í
+
+$ .
+Let us examine the term 
+f
+
+in the running time and
+the additive error term
+)¬ë
+í
+
+$ . Recall that there are two
+possible termination states: ÒZs~ÒØ or 1u1D[ .
+Consider ﬁrst the case ÒwsüÒØ . Since 4 has Ò active
+blocks of size 1 we have that EMST &4/	s
+)
+-
+1z&.(Ò
+f
+1
+"
+n5?YU/
+3. Since Ò s·Ò
+Ø
+s{1
+"76
+)
+we get ,;;×8&(4/8s
+)
+|
+1
+c
+Ò
+f
+1
+"
+.
+Setting
+
+E
+í
+|.ë
+c
+T
+æ
+
+-
+ç
+and applying the above scaling
+procedure, we upper bound the multiplicative error by
+Y9Cw	C
+)ë
+í
+
+$
+)
+|
+1
+c
+Ò
+f
+1
+"
+E@Y`CB	C[\
+The running time, using the fact that Ò#s~ÒØ¿sB[
+"
++K-:h
+m
+$ is
+bounded by
+
+f
+&
+
+[
+h
+/ÃE k%'&
+m
+j1
+"
+c
+$
+f
+&Ò.[
+_
+/K/	>¼k %T&
+m
+$
+f
+[
+"
++.-
+6
+-
+/Ý
+On the other hand, when 1ñÕ10[ , we use the trivial lower
+bound EMST &(4/Is»$
+f
+[ , and by setting
+
+E
+f
+Y obtain a
+multiplicative error of Y­C@CF[ . In this case notice that
+ E1
+m
+j=&¬Y
+f
+[ CÕY0/E
+ï
+&¬Y0/ . And so we bound the
+running time by
+
+f
+&
+
+[
+h
+/ E¯k %l& [
+:=h
+/>âk %'&
+m
+$
+f
+[
+"
++K-
+6
+-
+/
+for j's1 . Thus we have the following lemma.
+LEMMA 6.3. Given the graph 
+æGIH
+<Ö
+, there is an algorithm
+that estimates with probability at least
+h
+|
+the weight of
+3This bound is achieved by considering a subdivision of the active
+block to 
+.
+subcubes of size 7 . Now colour these subdivisions
+using 
+
+colours, using the same arrangement of colours for each of the
+original active blocks. This induces a partition of the active blocks into 
+
+monochromatic sets. There has to be a set of 
+
+7
+.
+points in À , from
+different active blocks that are coloured the same. Clearly, the minimal
+distance between these points must be at least 7 , and hence the bound.
+
+===== PAGE 9 =====
+MSF &(
+æGIH
+<Ö
+/ to within a multiplicative relative error of C[ .
+The algorithm requires k%T& m $
+f
+[
+"
++.-
+6
+-
+/ range queries and
+cone &¬Y Ci/ -approximate nearest neighbor queries (for ­E
+[
+f5
+). î
+6.4 Second level — estimating the weight of MST &
+H
+#PO
+/ .
+Let  be the complete undirected graph with the vertex
+set Ñ , the set of active blocks, and with the edge weights
+equal to the Euclidean distances between the corresponding
+block-centers if the blocks are in different connected block-
+components, and zero otherwise. Arguments similar in
+spirit to Observation 6.1 can be used to show that Y5
+[
+f
+1l> MST &(
+H
+#PO
+/
+f
+EMST &/N>·Y	Cw[
+f
+1 . To obtain a good
+estimation of the weight of MST &(
+H
+#.O
+/ we therefore estimate
+the weight of a minimum spanning tree of  .
+We could ﬁnd a minimum spanning tree of  by calling
+any algorithm that ﬁnds a minimum spanning tree in graphs.
+However, any such algorithm requires time
+ð
+&Ò
+-
+/ , because
+ contains GI&Òy-U/ edges. To improve the running time
+to k
+%'&]Ò[e)y:
+"
+/E
+k
+%'& m $
+f
+[
+"
++K-
+6
+-U/ we use
+@BADC
+, which is
+the &¬YNC\[
+f
+/ -spanner of Ñ (having %T&Ò;&¬Y
+f
+[e/
+"
+:p)/ edges)
+deﬁned in Section 6.1. Let  be any spanning forest of the
+subgraph of  induced by the edges of weight  . It is easy
+to see that the weight of any minimum spanning tree of  is
+identical to the weight of a minimum spanning tree of  that
+uses the edges from  .
+We create a new graph ;  with the vertex set Ñ and
+the edge set which is the union of the edges in  and
+the spanner edges. Then, apply, for example, the classical
+Kruskal’s algorithm to ﬁnd in time %T&Ò[6)y:
+"
+MrOeQ
+&Ò
+f
+[
+"
+/K/8E
+k%'&
+m
+$
+f
+[
+"
++.-
+6
+-/ a minimum weight spanning tree of ;  . It
+is easy to see now that the obtained spanning tree of Ñ is
+a spanning tree of Ñ that uses edges from  and whose
+weight is at most
+)
+|
+[ times greater than the minimum. We
+summarize the discussion in this section in the following
+lemma.
+LEMMA 6.4. There is an algorithm which, given as input
+the graph 
+æGIH
+<Ö
+, estimates the weight of
+M
+to within a
+relative error of
+h
+|
+[ with running time k%l&
+m
+$
+f
+[
+"
++.-
+6
+-/ .
+Our entire analysis can be improved in the case jzE·1 .
+In this case, one simplify our arguments to achieve the the
+running time of %T&Ò
+MPO6Q
+Ò/oEì%'& m $
+MrOeQ
+&]m $
+f
+[e/
+f
+[e/ .
+6.5 Estimating the weight of MSF &(
+æGIH
+<Ö
+/ MST &
+H
+#PO
+/ .
+Now, we can summarize our algorithm for estimating the
+EMST of any set of points in #" . Since 7 EqGI&J$
+f
+[i/ , by
+Lemmas 6.1, 6.3, and 6.4, we obtain the following theorem.
+Summing up the errors made in our estimation we get that
+the multiplicative relative error is at most CÕ1
+)
+|
+[ with
+probability at least
+h
+|
+. Using [5¿E÷[
+f
+t as input parameter
+for our algorithm we get:
+THEOREM 6.1. Let 4 be a set of $ points in #" for a
+constant j . Let [ be any real number, @û[@
+)
+-
+, and
+let >ü[
+f
+ . There is an algorithm that with probability
+at least
+h
+|
+estimates the weight of a Euclidean minimum
+spanning tree of 4 with a relative error of at most [ . It
+runs in k
+%l& m $
+f
+[
+"
++K-
+6
+-/ time and requires k
+%l&]m $
+c
+[
+"
++.-
+6
+-/
+orthogonal range queries, k
+%T&]m $
+f
+[
+"
++.-
+6
+-/ cone &,Y'CÕi/ -
+approximate nearest neighbor queries, and a single minimal
+bounding cube of 4 . î
+References
+[1] P. K. Agarwal. Range searching. In Handbook of Discrete
+and Computational Geometry, pp. 575–598. CRC Press, Boca
+Raton, FL, 1997.
+[2] P. K. Agarwal, H. Edelsbrunner, O. Schwarzkopf, and
+E. Welzl. Euclidean minimum spanning trees and bichro-
+matic closest pairs. Discrete & Computational Geometry,
+6:407–422, 1991.
+[3] P. K. Agarwal and J. Erickson. Geometric range searching
+and its relatives. In Advances in Discrete and Computational
+Geometry, pp. 1–56. AMS Press, 1999.
+[4] S. Arya, G. Das, D. M. Mount, J. S. Salowe, and M. Smid.
+Euclidean spanners: Short, thin, and lanky. In Proceedings of
+the 27th Annual ACM Symposium on Theory of Computing,
+pp. 489–498, 1995.
+[5] S. Arya, D. M. Mount, and M. Smid. Dynamic algorithms for
+geometric spanners of small diameter: Randomized solutions.
+Discrete & Computational Geometry, 13(2):91–107, 1999.
+[6] S. Arya and M. Smid. Efﬁcient construction of a bounded-
+degree spanner with low weight. Algorithmica, 17(1):33–54,
+January 1997.
+[7] M. de Berg, M. van Kreveld, M. Overmars, and
+O. Schwarzkopf. Computational Geometry – Algorithms and
+Applications. Springer-Verlag, Berlin, 1997.
+[8] P. B. Callahan and S. R. Kosaraju. Faster algorithms for
+some geometric graph problems in higher dimensions. In
+Proceedings of the 4th Annual ACM-SIAM Symposium on
+Discrete Algorithms, pp. 291–300, 1993.
+[9] B. Chazelle. Filtering Search: A new approach to query-
+answering SIAM Journal on Computing, 15:703–724, 1986.
+[10] B. Chazelle. A functional approach to data structures and
+its use in multidimensional searching. SIAM Journal on
+Computing, 17:427–462, 1988.
+[11] B. Chazelle. Lower bounds for orthogonal range searching:
+I. The reporting case. Journal of the ACM, 37(2):200–212,
+April 1990.
+[12] B. Chazelle. Lower bounds for orthogonal range searching:
+II. The arithmetic model. Journal of the ACM, 37(3):439–
+463, June 1990.
+[13] B. Chazelle, R. Rubinfeld, and L. Trevisan. Approximating
+the minimum spanning tree weight in sublinear time. In
+Proceedings of the 28th Annual International Colloquium on
+Automata, Languages and Programming, pp. 190–200, 2001.
+
+===== PAGE 10 =====
+[14] A. Czumaj and C. Sohler. Property testing with geometric
+queries. In Proceedings of the 9th Annual European Sympo-
+sium on Algorithms, pp. 266–277, 2001.
+[15] D. Eppstein. Spanning trees and spanners. In Handbook
+of Computational Geometry, pp. 425–461. Elsevier Science
+B.V., 1997.
+[16] D. Eppstein. Dynamic Euclidean minimum spanning trees
+and extrema of binary functions. Discrete & Computational
+Geometry, 13(1):111–122, Jan 1995
+[17] J. Erickson. On the relative complexity of some geometric
+problems. In Proceedings of the 7th Canadian Conference on
+Computational Geometry, pp. 85–90, 1995.
+[18] R. A. Finkel and J. L. Bentley. Quad trees: A data structure
+for retrieval on composite keys. Acta Informatica, 4:1–9,
+1974.
+[19] M. Fischer, F. Meyer auf der Heide, and W.-B. Strothmann.
+Dynamic data structures for realtime management of large
+geormetric scences. In Proceedings of the 5th Annual Eu-
+ropean Symposium on Algorithms, pp. 157–170, 1997.
+[20] O. Goldreich, S. Goldwasser, and D. Ron. Property testing
+and its connection to learning and approximation. Journal of
+the ACM, 45(4):653–750, July 1998.
+[21] J. Gudmundsson, C. Levcopoulos, and G. Narasimhan. Fast
+greedy algorithms for constructing sparse geometric span-
+ners. SIAM Journal on Computing, 31(5): 1479–1500, 2002.
+[22] G. S. Lueker. A data structure for orthogonal range queries.
+In Proceedings of the 19th IEEE Symposium on Foundations
+of Computer Science, pp. 28–34, 1978.
+[23] J. Matouˇsek. Range searching with efﬁcient hierarchical
+cutting. In Proceedings of the 8th Annual ACM Symposium
+on Computational Geometry, pp. 276–285, 1992.
+[24] J. S. B. Mitchell and J. O’Rourke. Computational geometry
+column 42. SIGACT News 32(3):63–72, 2001.
+[25] J. Ruppert and R. Seidel. Approximating the  -dimensional
+complete Euclidean graph. In Proceedings of the 3rd Cana-
+dian Conference on Computational Geometry, pp. 207–210,
+1991.
+[26] J. S. Salowe. Constructing multidimensional spanner graphs.
+International Journal of Computational Geometry and Appli-
+cations, 1(2):99-107, 1991.
+[27] H. Samet. Applications of Spatial Data Structures: Computer
+Graphics, Image Processing, and GIS. Addison-Wesley,
+Reading, MA, 1990.
+[28] H. Samet. The Design and Analysis of Spatial Data Struc-
+tures. Addison-Wesley, Reading, MA, 1990.
+[29] M. I. Shamos and D. Hoey. Closest-point problems. In
+Proceedings of the 16th IEEE Symposium on Foundations of
+Computer Science, pp. 151–162, 1975.
+[30] P. M. Vaidya. Minimum spanning trees in   -dimensional
+space. SIAM Journal on Computing, 17(3):572–582, 1988.
+[31] D. E. Willard. Predicate-Oriented Database Search Algo-
+rithms. PhD thesis, Harvard University, Aiken Computation
+Lab, Cambridge, MA, 1978. Report TR-20-78.
+[32] A. C.-C. Yao. On constructing minimum spanning trees in   -
+dimensional spaces and related problems. SIAM Journal on
+Computing, 11(4):721–736, November 1982.
+Appendix
+A Implementing supporting data structures
+To make our model of computations viable, we discuss here
+how our supporting data structures (oracles) can be imple-
+mented efﬁciently using standard geometric data structures.
+Minimal bounding cube. The query about the minimal
+bounding cube of a set of points 4â®B#" can be supported
+by many standard geometric data structures. Indeed, the
+only information required to ﬁnd the minimal bounding
+cube is to know the minimum and maximum j -dimensional
+coordinates of all input points. Therefore, many standard
+geometric data structures can support this query in time
+%T&(j/ .
+Orthogonal range query oracle. There are many efﬁcient
+data structures supporting the orthogonal range query oracle
+and actually, orthogonal range queries are perhaps the most
+widely supported geometric queries for a survey, see, e.g.,
+[1, 3, 7]). One of the ﬁrst data structures for orthogonal
+range searching is the quadtree. Despite its bad worst-
+case behavior, the quadtree is still used in many applications
+because it provides an easy-to-implement linear-space data
+structure that often has a very good performance. The
+best known data structure for orthogonal range searching
+based on compressed range trees and some other techniques
+such as ﬁltering search ([11, 12]). The time for a query
+is
+ï
+&
+MrOeQ
+"
+:})
+$R/ . If one uses standard range trees with the
+fractional cascading technique then the same bound on the
+query time can be achieved ([22, 31]).
+Cone nearest neighbor oracle. In his seminal paper on
+Euclidean minimum spanning trees, Yao [32] examined
+algorithms for cone nearest neighbor in the cones with the
+angular diameter 
+f
+ . Cone nearest neighbor queries have
+been also studied extensively in follow-up papers dealing
+with the EMST problem (see, e.g., [2]).
+Cone approximate nearest neighbor oracle. Cone ap-
+proximate nearest neighbor queries have been widely inves-
+tigated. They play an important role in the context of con-
+struction of Euclidean spanners (see, e.g., [5, 6, 15, 25]).
+And so, among others, Ruppert and Seidel [25] show how
+to answer a query in amortized time %T&J$
+MrOeQ
+"
+:p)
+$R/ per each
+cone in W ; a similar construction is presented in [6]. Arya et.
+al. [5] present a fully dynamic algorithm which in polylog-
+arithmic time supports cone approximate nearest neighbor
+queries. Notice also that a single cone approximate nearest
+neighbor query can be answered using a logarithmic num-
+ber of simplex (triangular) range queries, which is another
+classical geometric data structure (see, e.g., [1, 3, 7]).

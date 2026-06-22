@@ -1,0 +1,1292 @@
+
+===== PAGE 1 =====
+Range Counting Oracles for Geometric Problems
+Anne Driemel /envel⌢pe
+University of Bonn, Germany
+Morteza Monemizadeh /envel⌢pe
+Department of Mathematics and Computer Science, TU Eindhoven, the Netherlands
+Eunjin Oh /envel⌢pe
+Department of Computer Science and Engineering, POSTECH, Korea
+Frank Staals /envel⌢pe
+Department of Information and Computing Sciences, Utrecht University, The Netherlands
+David P. Woodruff/envel⌢pe
+Carnegie Mellon University, Pittsburgh, PA, USA
+Abstract
+In this paper, we study estimators for geometric optimization problems in the sublinear geometric
+model. In this model, we have oracle access to a point set with sizen in a discrete space[∆]d,
+where queries can be made to an oracle that responds to orthogonal range counting requests. The
+query complexity of an optimization problem is measured by the number of oracle queries required
+to compute an estimator for the problem. We investigate two problems in this framework, the
+Euclidean Minimum Spanning Tree (MST) and Earth Mover Distance (EMD). For EMD, we show
+the existence of an estimator that approximates the cost of EMD withO(log ∆)-relative error and
+O( n∆
+s1+1/d )-additive error using O(s polylog ∆) range counting queries for any parameters with
+1≤ s≤ n. Moreover, we prove that this bound is tight. For MST, we demonstrate that the weight
+of MST can be estimated within a factor of(1± ε) using ˜O(√n) range counting queries.
+2012 ACM Subject ClassificationTheory of computation→ Computational Geometry
+Keywords and phrasesRange counting oracles, minimum spanning trees, Earth Mover’s Distance
+Acknowledgements This research was initiated during the Workshop on Big Data and Computational
+Geometry, held at the Hausdorff Center for Mathematics (Bonn, Germany) in September 2024, and
+we gratefully acknowledge the workshop’s organizers and participants for their contributions to the
+fruitful discussions.
+1 Introduction
+In recent years, the size of data encountered in various applications has grown exponentially.
+While classical algorithms are designed to process the entire input to get exact or approximate
+solutions, the increasing demand forefficiency in massive datasets necessitates approaches
+that can provide useful results without examining all of the input data. Motivated by
+this, a wide range of sublinear-time algorithms has been extensively studied over the past
+few decades from various subfields in theoretical computer science. For instance, there are
+sublinear-time algorithms for the longest increasing subsequence and edit distance problems
+on strings [35, 37, 31], the triangle counting and vertex cover problems on graphs [10, 28, 41],
+the Earth Mover’s Distance problem on probability distributions [9], and the minimum
+spanning tree problem on general metric spaces [24]. Moreover, there are sublinear-time
+algorithms for several fundamental geometric problems [17, 22, 23, 33, 38]. For further
+information, refer to [26, 42].
+To obtain sublinear-time algorithms, we need anoracle to access the input data. There
+are various sublinear-time oracle models in the geometric setting although there are common
+oracles for strings, graphs and metric spaces. Chazelle et al. [17] presented several geometric
+arXiv:2504.15292v1  [cs.CG]  10 Apr 2025
+
+===== PAGE 2 =====
+2 Range Counting Oracles for Geometric Problems
+algorithms assuming that the input is given without any preprocessing. In the case of point
+inputs, the only thing one can do is uniform sampling. In the case of polygons, one can
+also check if two edges are adjacent. Although they showed that several problems admit
+sublinear-time algorithms in this model, it seems not strong enough to solve a wider range of
+fundamental geometric problems such as the clustering problems, the Earth Mover’s Distance
+problem, and the minimum spanning problem. Subsequently, many researchers developed
+sublinear-time algorithms for several different models. Examples are models in which the
+oracle can answer orthogonal range emptiness queries and cone nearest point queries [22],
+orthogonal range counting queries [23, 38], or separation queries [33].
+In this paper, we study therange counting oracle modelfor geometric optimization
+problems. Here, we do not have direct access to the input point set, but instead we use an
+orthogonal range counting data structure for access. More specifically, given an orthogonal
+range as a query, it returns the number of input points contained in the query range. In
+fact, many database software systems, such as Oracle1 and Amazon SimpleDB2, provide
+built-in support for such range queries. These queries allow users to compute aggregates,
+such as the count, sum, or average of records that fall within a specified range of values for
+a set of attributes, which is crucial for a wide array of applications. For example, in data
+analytics, range queries are used to calculate the number of sales within a specific date range
+or determine the total revenue from products within a given price interval. In geographic
+information systems (GIS), range queries help aggregate spatial data points within certain
+coordinate bounds, such as counting the number of locations within a specific radius of a
+given point. Furthermore, in machine learning, range queries are employed during data
+preprocessing to summarize statistics over selected subsets, which supports tasks such as
+data filtering and dimensionality reduction.
+The following are desirable properties for a reasonable oracle model: the queries to
+the oracle should be efficient to implement, it is preferable for it to be supported by lots
+of well-known databases, and it should allow sublinear-time algorithms for fundamental
+geometric problems. First, this model clearly satisfies the first property; there are numerous
+works on data structures for range counting queries and their variants [2, 7, 14, 15, 13, 27, 43].
+In particular, one can preprocess a set ofn points in Rd in O(n logd−1n) time to construct
+a data structure of sizeO(n logd−1n) so that the number of points inside a query range
+can be found inO(logd−1n) time. Second, range counting queries are already supported
+by well-known public databases as we mentioned earlier. Therefore, without any special
+preprocessing, we can apply sublinear-time algorithms designed on the range counting oracle
+for such databases in sublinear time. Third, we show that several fundamental problems can
+be solved in sublinear time on the range counting oracle model in this paper.
+We focus on the following three fundamental geometric problems: the Earth Mover’s
+Distance problem, the minimum spanning tree problem, and the cell sampling problem. The
+Earth Mover’s DistanceEMD(R,B ) between two point setsR and B in Rd and the cost
+MST(P ) of a minimum spanning tree of a point setP∈ Rd are defined as follows.
+EMD(R,B ) = min
+π:R→B
+∑
+r∈R
+∥r−π(r)∥ and MST(P ) = min
+T
+∑
+uv∈E(T)
+∥u−v∥,
+1 https://docs.oracle.com/en/database/other-databases/nosql-database/24.3/
+sqlreferencefornosql/operator1.html
+2 https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/RangeQueriesSelect.
+html
+
+===== PAGE 3 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 3
+Additive Error Multiplicative Error Query Complexity
+EMD UB O(n∆/s1+1/d) O(log ∆) ˜O(s)
+LB Ω(n∆/s1+1/d) - ˜O(s)
+Cell Sampling UB - 1± ε ˜O(√n)
+LB - O(1) Ω(√n)
+MST UB - 1± ε ˜O(√n)
+LB - O(1) Ω(n1/3)
+Table 1Summary of our results. Here,n denotes the number of points, and∆ denotes the size
+of the domain. ForEMD, a parameters determines a trade-off between the additive error and the
+query complexity.
+where π ranges over all one-to-one matchings betweenR and B, and T ranges over all
+spanning trees ofP. If we have direct access to the input point set(s), thenEMD(R,B ) can
+be computed exactly in near quadratic time inR2 [4], and approximately within(1 +ε)-
+relative error in near linear time [3]. Similarly, MST(P ) can be computed exactly in near
+quadratic time by computing the complete graph onP and applying Kruskal’s algorithm, and
+computed approximately in near linear time [32]. Note that EMD can be used for measuring
+the similarity between two point sets, andMST can be used for summarizing the distribution
+of a point set. Thus these problems have various applications in multiple areas of computer
+science including computer vision [11], machine learning [29] and document similarity [36].
+The cell sampling problem is defined as follows. LetP be a set of points in a discrete
+space [∆]d. Given a valuer with 1≤r≤ ∆, letG be the grid imposed on[∆]d whose cells
+have side lengthr. We say a grid cell isnon-empty if it contains a point ofP. Our goal is to
+sample one non-empty cell almost uniformly at random from the set of all non-empty cells of
+G. If we have direct access toP, this problem is trivial as we can compute all non-empty
+cells explicitly. However, in our sublinear model, we cannot compute all non-empty cells if
+the number of non-empty cells exceeds our desired query complexity. We believe that cell
+sampling can be considered as a fundamental and basic primitive in sublinear models as
+sublinear algorithms rely on efficient sampling to extract meaningful information from large
+data sets. In fact, this problem has been studied in the dynamic streaming model, and has
+been used as a primitive for several geometric problems [30, 39] and graph problems [21].
+Our results. We present sublinear-time algorithms forEMD, Cell Sampling, andMST in
+the orthogonal range counting oracle model. Our results are summarized in Table 1.
+For EMD, we present an algorithm for estimating the Earth Mover’s Distance between
+two point sets of sizen in [∆]d within a multiplicative error ofO(log ∆) in addition to
+an additive error ofO(n∆/s1+1/d). Our algorithm succeeds with a constant probability,
+and uses ˜O(s) range counting queries for any parameters. Notice that the optimal
+solution can be as large asΘ(n∆), and in this case, the additive error is relatively small.
+Furthermore, we show that this trade-off is tight for any parameters.
+For Cell Sampling, we present an algorithm that samples a non-empty cell in a grid so
+that the probability that a fixed non-empty cell is selected is in[(1−ε)/m, (1 +ε)/m] for
+any constant0<ε< 1. Herem denotes the number of non-empty cells. We also show
+that the query complexity here is tight. Moreover, if we sample˜O(√n log(n)) non-empty
+cells, we can estimate the number of non-empty cells within(1±ε)-factor.
+
+===== PAGE 4 =====
+4 Range Counting Oracles for Geometric Problems
+For MST, we present an algorithm for estimating the cost of a minimum spanning tree
+of a point set of sizen in [∆]2 within a multiplicative error of1±ε. Our algorithm
+again succeeds with constant probability, and uses˜O(√n) range counting queries. Also,
+we show that any randomized algorithm usingo(n1/3) queries has at least a constant
+multiplicative error.
+Related work. Both EMD and MST have been extensively studied across various sublinear
+models over the past few decades. The work most closely related to ours is the one by Czumaj
+et al. [22]. They studied the Euclidean minimum spanning tree problem in a different model.
+In particular, their oracle supportscone nearestqueries, orthogonal range emptinessqueries,
+and point samplingqueries.3 Here, given a cone nearest query consisting of a coneC with
+apex p, the oracle returns(1 +δ)-approximate nearest neighbor ofp inC∩P, whereP is the
+set of input points. Using˜O(√n) queries, their algorithm estimates the cost of theMST of
+n points within a relative error of(1±ε). Moreover, they showed that if the oracle supports
+orthogonal emptiness queries only, then any deterministic algorithm for estimating the cost of
+MST withinO(n1/4)-relative error usesΩ(√n) orthogonal range emptiness queries. Sublinear
+time algorithms for computing a metric minimum spanning tree problem have also been
+studied [25]. Here, the oracle supportsdistance queries: Given two points, it returns their
+distance in the underlying space. The most popular sublinear-space model is the streaming
+model. In this model, the input arrives as data stream, and an algorithm is restricted to
+using a sublinear amount of memory relative to the input size. BothEMD and MST are
+studied extensively in this model [5, 19, 30], showcasing the challenges and techniques for
+processing large datasets in the steaming model.
+Although no sublinear algorithms forEMD and MST were known in the range counting
+oracle model prior to our work, other geometric optimization problems have been studied in
+this model. Monemizadeh [38] presented an algorithm for the facility location problem using
+˜O(√n) queries, and Czumaj and Sohler [23] studied clustering problems and map labeling
+problems. To the best of our knowledge, these are the only work done in the range counting
+oracle model. However, there are several closely related models such as the range-optimization
+model. For instance, Arya et al. [8] studied the range MST problem, where the goal is to
+construct a data structure for computing the cost of MST within a query orthogonal range.
+In this setting, clustering problems also have been considered [1, 40].
+Preliminaries. We make use of quadtrees for both EMD and MST. Consider a discrete
+space [∆]2. Fori∈{ 0, 1,..., log ∆}, we useGi to denote a grid over the discrete space[∆]2
+consisting of cells with side lengths of2i. A quadtreeQ on [∆]2 is then constructed as
+follows. The root of the quadtree corresponds to the unique cell ofGlog ∆. For each nodev
+of the quadtree of depthi has four equal sized children, each corresponding to a cell inGi−1
+contained in the cell corresponding tov. Note that the depth ofQ is O(log ∆). If it is clear
+from the context, we use a node of the quadtree and its corresponding cell interchangeably.
+For MST, we use the quadtree as it is, but for EMD, we need a randomly shifted quadtree.
+Here, we select a vector from[∆]2 uniformly at random, and we shift all the gridsGi’s by
+the vector. Then any rectangle shifted by the vector can be represented as the union of
+four orthogonal rectangles in[∆]2. Therefore, without loss of generality, we assume that the
+chosen vector is the origin.
+3 More precisely, the oracle supports cone nearest queries and orthogonal range queries only, but they are
+also given the access to the input point set, which allow them to sample a vertex uniformly at random.
+
+===== PAGE 5 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 5
+Now we introduce two basic operations we use for both EMD and MST. LetP be a point
+set in [∆]2. We can find the lexicographicallyk-th smallest point in a given query range
+using O(log ∆) range counting queries: apply binary search for thex-coordinates and then
+apply binary search for they-coordinates. Here, for any two pointsp and q, we sayp is
+lexicographically smaller thanq if px <q x, orpx =qx and py <q y, wherepx and py denote
+the x-coordinate and they-coordinate ofp, respectively. Similarly, we can find thek-th
+smallest point according to thez-order in a given query range usingO(log ∆) range counting
+queries. Here thez-order of a point setP is defined recursively on the quadtreeT as follows.
+For each cellc, we do the following. Letc1,c 2,c 3 and c4 be the children ofc sorted in the
+lexicographical order of their centers. Then thez-ordering ofP is the concatenation of the
+z-ordering ofP∩ci for i = 1, 2, 3, 4.
+Let P be a point set in[∆]d. Furthermore, we will often want to sample a point fromP
+uniformly at random. We can do so usingO(log ∆) range counting queries in a procedure
+called telescoping sampling[38].
+▶ Lemma 1(Telescoping Sampling [38]). We can select a point ofP uniformly at random
+using O(log ∆) range counting queries.
+Throughout this paper, we use˜O(f(s)) to denoteO(f(s) polylog ∆).
+2 Sublinear algorithms for the Earth Mover’s Distance problem
+In this section, we present several sublinear-time algorithms that approximate the cost
+of the Earth Mover’s Distance between two point sets in[∆]d for an integerd≥ 1. The
+approximation bounds we obtain are tight up to a factor ofO(log ∆)for any integerd≥ 1.
+In a one-dimensional space, we know the configuration of an optimal matching: thekth
+leftmost red point is matched with thekth leftmost blue point for all1≤ k≤ n. Thus
+it suffices to estimate the cost of this matching. On the other hand, we do not know the
+exact configuration of an optimal matching in a higher dimensional space. Thus instead of
+considering an optimal matching, we consider a matching of costO(OPT log ∆), where OPT
+is the Earth Mover’s Distance between two point sets. This is where the multiplicative error
+ofO(log ∆) comes from. Apart from this, we use the same approach for all dimensionsd≥ 1.
+2.1 A sublinear algorithm for points in 1D
+In this section, we present a sublinear algorithm using˜O(s) range counting queries in a
+one-dimensional space. More precisely, we prove the following theorem. The optimal solution
+can be as large asΘ(n∆), and in this case, the additive error is relatively small.
+▶ Theorem 2. Given two setsR and B of sizen in a discrete space[∆] and a parameter
+s> 1, we can estimate the cost of the Earth Mover’s Distance betweenR and B within O(1)
+multiplicative error in addition toO( ∆n
+s2 ) additive error with probability at least2/3 using
+˜O(s) range counting queries.
+If no two points coincide, we haveOPT≥n. Therefore, we have the following corollary.
+▶ Corollary 3.Given two setsR and B of sizen in a discrete space[∆] such that no two
+points ofR∪B coincide, and a parameters >1, we can estimate the cost of the Earth
+Mover’s Distance betweenR and B within O( ∆
+s2 ) multiplicative error with probability at least
+2/3 using ˜O(s) range counting queries.
+
+===== PAGE 6 =====
+6 Range Counting Oracles for Geometric Problems
+Let R ={r1,r 2,...,r n} and B ={b1,b 2,...,b n} be two sets in[∆] sorted along the axis.
+Let M be an optimal matching betweenR and B. We separate two cases:long edges and
+short edges. An edge ofM is long if its length is at least∆/s, and it isshort, otherwise. Let
+OPT be the Earth Mover’s Distance betweenR and B.
+We employ the followingwin-win strategy: For a long edge, a slight perturbation of
+its endpoints introduces only a constant relative error. Thus, we move its endpoints to
+the center of a grid, enabling us to estimate the total length efficiently. For short edges,
+we can disregard cases where the number of such edges is small, as this results in only a
+small additive error. Consequently, we may assume that the number of short edges is large,
+allowing us to estimate their total length using sampling. To further reduce the additive
+error, we partition the set of short edges intolog(∆/s) subsets based on edge length and
+then consider each subset separately.
+Long edges. For long edges, we subdivide[∆] into segments each of length∆/(2s). For each
+long edge (ri,bi), imagine that we moveri and bi to the centers of the segments containing
+them. Since (ri,bi) is long, this introduces an additive error ofO(∆/s), resulting in a constant
+relative error. Using this fact, we estimate the total length of all long edges within a constant
+relative error using ˜O(s) range counting queries. LetLlong be the resulting estimator.
+▶Lemma4. We can estimate the total length of the long edges inM withinO(1) multiplicative
+error using ˜O(s) range counting queries.
+Proof. We subdivide [∆] into s segments each of length ∆/(2s). Here, the number of
+segments isO(s). LetS be the set of the resulting segments. Then a long edge contains
+at least one segment. Imagine that we move every pointp incident to a long edge to the
+center of the segment containingp. For each segmentS, we compute the numbernr(S) of
+red points contained inS and the numbernb(S) of blue points contained inS, respectively,
+using O(s) queries. Then we construct another point setP′ by addingnr(S) red points to
+the center ofS and addingnb(R) blue points to the center ofS. We can do this without
+using queries. For a pointp∈ R∪B, letp′ be the its corresponding point inP′. Then
+consider the matchingM′ ={(r′,b′)| (r,b )∈M}. We can computeM′ explicitly without
+using any queries. LetM′
+long be the set of edges ofM′ containing at least one segment ofS.
+A long edge ofM has its corresponding edge inM′
+long. However, some short edge ofM might
+have its corresponding edge inM′
+long. Here, observe that the short edges ofM having their
+corresponding edges inM′
+long have length at least∆/(2s), thus the cost induced by those
+edges are also within a constant factor ofOPT. They will be also counted for short edges,
+but this also increases the total cost by a constant factor. Therefore, the lemma holds.◀
+Short edges. For short edges, we use random sampling. More specifically, we subdivide
+the set of short edges intot = log(∆/s) subsets with respect to their lengths:E1,E 2,...,E t,
+where Ei is the set of all edges ofM of lengths in[2i−1, 2i). Then we estimate thenumber
+of edges ofEi for every indexi. To do this, we choose a random sample ofR of size
+x =O(s log2 ∆). For each chosen point, we can find its mate. LetSi denote the set of all
+edges between the sampled points and their mates. If|Ei|≥ n/(s log ∆) then the number of
+edges inEi∩Si would be a good estimator for|Ei|. Otherwise, we can ignore them asEi
+induces an additive error of at most∆n/(s2 log ∆). This is because every short edges has
+length at most∆/s. Letℓi =|Ei∩Si|· (n/x). Then we have the following lemma.
+▶ Lemma 5. If|Ei| ≥n/(s log ∆), we have ℓi = Θ(|Ei|) with a constant probability.
+Otherwise, we haveℓi≤O(|Ei|) with a constant probability.
+
+===== PAGE 7 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 7
+Proof. Let Yj be the random variable whereYj = 1 if thejth edge inSi is contained inEi,
+and Yj = 0 otherwise. LetY =Y1 +... +Yx, wherex =s log2 ∆ is the number of sampled
+points. By definition, we haveE[Yj] = |Ei|
+n , and E[Y ] =x·|Ei|
+n . Now we analyze the failure
+probability. If|Ei|≥ n/(s log ∆), we use Chernoff bounds as stated in Lemma 33. Then the
+probability that|E[Y ]−Y|≥ εE[Y ] is at most2 exp(−ε2·p· (s log2 ∆)/3), wherep is the
+probability thatYj = 1. In our case,p =|Ei|/n≥ 1/(s log ∆). Thus the failure probability
+is at most1/∆ in this case. If|Ei|<n/ (s log ∆), we use Markov’s inequality as stated in
+Lemma 34. Then the probability thatYi≥c˙|Ei| is less than a small constant for a large
+constantc. Therefore, the second part of the lemma also holds. ◀
+To amplify the success probability of Lemma 5, we repeat the procedure for computing
+ℓi O(log ∆)times. Then we take the minimum, and letL =∑t
+i=1 2i·ℓi +Llong.
+▶ Lemma 6. With a constant probability,(1/4)· OPT−n∆/s2≤L≤ 4· OPT +n∆/s2.
+Proof. Since we can estimate the total length of long edges with an additive error of2· OPT,
+it suffices to focus on short edges. For each edge ofEi, we round up its length to2i. This
+induces the additive error of2· OPT. Now we use Lemma 5. Consider the event that we
+have the desired bounds for all indicesi in Lemma 5. Due to the amplification of success
+probability we made before, this total success probability is a constant. If|Ei|≥ (n/(s log ∆),
+the estimatorℓi has an error ofO(1)· OPT in total for all such indices. If|Ei|<n/ (s log ∆),
+we do not have a lower bound guarantee forℓi. However, since the number of such edges
+is n/s in total, and the length of each such edge is∆/s, this induces the additive error of
+n∆/s2. Therefore, the total additive error isn∆/s2. ◀
+2.2 A sublinear algorithm for higher dimensions
+In this section, we present a sublinear algorithm that approximates the cost of the Earth
+Mover’s Distance between two point sets in[∆]d for an integerd≥ 2. More specifically, we
+prove the following theorem. Again, notice that the Earth Mover’s Distance between two
+point sets can be as large asΘ(∆n) in the worst case.
+▶ Theorem 7. Given two setsR and B of sizen in a discrete space[∆]d and a parameter
+s >1, we can estimate the cost of the Earth Mover’s Distance betweenR and B within
+O(log ∆)-relative error in addition toO( ∆n
+s1+1/d ) additive error with probability at least2/3
+using ˜O(s) range counting queries.
+If no two points coincide, we haveOPT≥n. Therefore, we have the following corollary.
+▶ Corollary 8.Given two setsR and B of sizen in a discrete space[∆]2 and a parameter
+s> 1 such that no two points inR∪B coincide, we can estimate the cost of the Earth Mover’s
+Distance betweenR and B within O(max{log ∆, ∆
+s1+1/d})-relative error with probability at
+least 2/3 using ˜O(s) range counting queries.
+Let OPT be the Earth Mover’s Distance betweenR and B. This algorithm is essentially
+the same as the algorithm for the one-dimensional case. The only difference is that we do
+not know the configuration of an optimal matching in a higher dimensional space. Instead,
+we can use a matching obtained from the quadtree on[∆]d, which has cost ofO(log ∆)· OPT.
+Then as before, we separate two cases. If an edge has length at least∆/s1/d, it isshort.
+Otherwise, it islong. Then we can compute all long edges exactly, and we can estimate short
+edges using sampling.
+To make the description easier, we considers the case thatd = 2 only. It is not difficult
+to see that this algorithm indeed works for any higher dimensional space.
+
+===== PAGE 8 =====
+8 Range Counting Oracles for Geometric Problems
+Greedy matchingM with O(log ∆) multiplicative error. We first define a greedy matching
+betweenR and B of costO(log ∆)· OPT. For this, we define a new metric space([∆]2,ℓ )
+based on a randomly shifted quadtreeT as follows. First, we define the length to each edge
+of T. For each edge of the quadtreeT between leveli and leveli + 1, its length is defined as
+2i+1. Recall that a leaf has level zero. Then, for any two pointsp and q in [∆]2, we define
+ℓ(p,q ) as the distance in the quadtreeT between the leaves corresponding top and q. By
+construction,∥p−q∥≤ ℓ(p,q ), where∥p−q∥ denotes the Euclidean distance betweenp
+and q. Moreover, by [16, 34], we have the following lemma. This implies that the expected
+value of the Earth Mover’s Distance betweenR and B under ([∆]2,ℓ ) yields a multiplicative
+error ofO(log ∆). Also, notice that it is always at leastOPT. This fact will be used later to
+analyze the success probability of the entire algorithm.
+▶ Lemma 9([16, 34]). For any two pointsp and q in [∆]2, the expected value ofℓ(p,q ) is at
+most O(log ∆)·∥p−q∥, where∥p−q∥ denotes the Euclidean distance betweenp and q.
+Thus we may focus on an optimal matching betweenR and B for the Earth Mover’s
+Distance under ([∆]2,ℓ ). In fact, a greedy solution computed in a bottom-up fashion yields
+an optimal solution in this case as shown in [16, 34]. More specifically, we consider the cells
+c in the quadtree in a bottom-up fashion. It is partitioned into four cellsc1,c 2,c 3 and c4
+in the previous level. As an invariant, assume that the number of edges matched insideci
+is max{nr(ci),nb(ci)}, wherenr(ci) and nb(ci) be the numbers of red and blue points inci,
+respectively. Let Rc and Bc be the sequences of red points and blue points not matched
+inside ci for i = 1, 2, 3, 4, respectively, sorted in thez-order. Then we match the points in
+Rc and Bc as many as possible according to their orderings in the sequences. For a point
+p∈B∪R, we call the point inB∪R matched withp the mate ofp. LetM be the matching
+obtained in this way. It is known thatM is an optimal matching under([∆]2,ℓ ) [16, 34].
+Also, notice thatℓ(M) =∑log ∆
+i=0
+∑
+c∈Gi|nr(c)−nb(c)|· 2i+1. In the following, we letℓ(X)
+denote the total length of all edges ofX for an edge setX⊆B×R.
+▶ Lemma 10. We can find the mate of a given point usingO(log ∆) range counting queries.
+Proof. Let b be a given point. Without loss of generality, assume that it is a blue point.
+We traverse the quadtreeT from the leaf corresponding tob until we find its mate, sayr.
+Assume that we are at a node corresponding to a cellc. As an invariant, assume that the
+mate ofp is not matched in a descendant ofc (excluding c). In other words, no descendant
+of c contains bothb and r. Then our goal in this level ofT is to determine ifr is contained
+in c. If so, we want to returnr.
+For this, letc1,c 2,c 3 andc4 denote the children ofc sorted along the lexicographical order
+of their centers. Notice that for each cellc′ of the quadtree, we can compute the number of
+unmatched blue points insidec′, which ismax{nr(ci)−nb(ci), 0}. Symmetrically, we can
+compute the number of unmatched red points insidec′. Using this, we can compute the
+numberk of unmatched blue points inc1,...,c 4 whose z-order is less than thez-order of
+b using O(log ∆) range counting queries. If this is at least the number of unmatched red
+points inc1,...,c 4, thenb is not matched insidec. Thus we need to consider the ancestors.
+Otherwise, b is matched with the(k + 1)th unmatched red points (along thez-order) in
+c1,...,c 4. Such a point can be found usingO(log ∆)range counting queries. ◀
+A sublinear algorithm for estimating the cost ofM. Now it suffices to estimate the cost
+of M. As before, we consider two cases. An edge ofM is short if its length is less than
+∆/√s; otherwise it is along edge. By the construction ofM, we can compute all long edges
+
+===== PAGE 9 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 9
+exactly usingO(s) range counting queries. This is because long edges are defined inside the
+grids of level at leastlog(∆/√s). The number of all grid cells in those grids isO(s). Let
+Llong be the total length of long edges.
+Thus we can focus on estimating the total length of short edges ofM. Here, we again
+subdivide the set of all short edges intot = log(∆/√s) subsets: E1,E 2,...,E t, whereEi is
+the set of all edges ofM of lengths in[2i−1, 2i). Then we estimate the number of edges of
+Ei for every indexi. To do this, we choose a random sample ofR of sizex =O(s log2 ∆).
+For each chosen point, we can find its mate using Lemma 10. LetSi denote the set of all
+edges between the sampled points and their mates. Then the number of edges inEi∩Si
+would be a good estimator for|Ei| if|Ei|≥ n/(s log ∆). Otherwise, we can ignore it as it
+induces the additive error of at most∆n/(s1.5 log ∆). This is because every short edges has
+length at most∆/s0.5. Letℓi =|Ei∩Si|· (n/x). Then we have the following lemma.
+▶ Lemma 11. If|Ei| ≥n/(s log ∆), we have ℓi = Θ(|Ei|) with a constant probability.
+Otherwise, we haveℓi≤O(|Ei|) with a constant probability.
+Proof. Let Yj be the random variable whereYj = 1 if thejth edge inSi is contained inEi,
+and Yj = 0 otherwise. LetY =Y1 +... +Yx, wherex =s log2 ∆ is the number of sampled
+points. By definition, we haveE[Y ] = x·|Ei|
+n . Now we analyze the failure probability. If
+|Ei|≥ n/(s log ∆), we use Chernoff bounds as stated in Lemma 33. Then the probability
+that|E[Y ]−Y|≥ εE[Y ] is at most2 exp(−ε2·p· (s log2 ∆)/3), wherep is the probability
+that Yj = 1. In our case,p =|Ei|/n≥ 1/(s log ∆). Thus the failure probability is at most
+1/∆ in this case. If|Ei|<n/ (s log ∆), we use Markov’s inequality as stated in Lemma 34.
+Then the probability thatY ≥ c˙|Ei| is less than a small constant for a large constantc.
+Therefore, the lemma holds. ◀
+To amplify the success probability of Lemma 5, we repeat the procedure for computing
+ℓi O(log ∆)times. Then we choose the minimum, and letL =∑t
+i=1 2i·ℓi +Llong.
+▶ Lemma 12. With a constant probability, the estimatorℓ approximates OPT within the
+relative error ofO(log ∆) and the additive error ofO(n∆/s1.5).
+Proof. Since we can compute the total length of long edges exactly, it suffices to focus on
+short edges. For each edge ofEi, we round up its length to2i. Here, we have the additive
+error of 2·ℓ(M). Now we use Lemma 5. Consider the event that we have the desired bounds
+for all indicesi in Lemma 11. Due to the amplification of success probability we made before,
+this total success probability is a constant. If|Ei|≥ n/(s log ∆), the estimatorℓi has an
+additive error ofO(1)· OPT in total for all such indices by Lemma 11. If|Ei|<n/ (s log ∆),
+we haveℓi≤O(|Ei|). Since the number of such edges isn/s in total, and the length of each
+such edge is∆/s0.5, this induces the additive error ofn∆/s1.5. Therefore, we can estimate
+the cost ofM the relative error ofO(1) and the additive error ofO(n∆/s1.5).
+Thus assuming that M is within a multiplicative error ofO(log ∆) from OPT, our
+estimator estimates OPT within the relative error ofO(log ∆) and the additive error of
+O(n∆/s1.5). Then we repeat the entire algorithmO(log ∆) times and take the smallest
+estimator L. Since the cost ofM is always at leastOPT, we can use Markov’s inequality in
+Lemma 34 to analyze the success probability. Therefore, the lemma holds with a constant
+probability. ◀
+3 Lower bounds for the Earth Mover’s Distance
+Inthissection, weshowthatforanyparameter s, anyrandomizedalgorithmthatapproximates
+the Earth Mover’s Distance between two sets within an additive error ofO(n∆/s1+1/d)
+
+===== PAGE 10 =====
+10 Range Counting Oracles for Geometric Problems
+(a)
+(b)
+Figure 1 (a) All segments use the near gadget. The cost of this instance isn. (b) The gray
+segment uses the far gadget. The cost of this instance isΘ(n∆/s2).
+requires at leasts orthogonal range counting queries. More specifically, we prove:
+▶ Lemma 13. For any parameters and any integersd≥ 1 and ∆≥ 1, any randomized
+algorithm for approximating the Earth Mover’s Distance between two point sets of sizen in a
+discrete space[∆]d within additive errorO(n∆/s1+1/d) uses Ω(s) range counting queries.
+If points fromB∪R may coincide, achieving any multiplicative approximation factor is
+impossible. Even when no two points ofB∪R coincide, Lemma 13 shows that no randomized
+algorithm with a multiplicative error ofO(∆/s1+1/d) uses o(s) range counting queries.
+3.1 A lower bound for points in 1D
+In this section, we prove Lemma 13 in the one-dimensional space. This will be extended for a
+higher dimensional space later. To analyze the lower bound on the additive error of a Monte
+Carlo algorithm, we use the following version of Yao’s Minmax Theorem [6]: Assume that
+there exists a randomized algorithm usings range counting queries with success probability
+at least 2/3. Then for any distributionµ of instances, there exists a deterministic algorithm
+using s range counting queries that returns desired answers on instances chosen fromµ with
+probability at least 2/3. Here, the success probability of a randomized algorithm is the
+probability that the output is within our desired bound.
+Thus it suffices to construct a distributionµ of instances such that no deterministic
+algorithm usings range counting queries has success probability at least2/3. For this, we
+define two types of gadgets on a segmentS of length∆/(8s): thenear gadget andfar gadget.
+See Figure 1. For the far gadget, we put4n/s red points near the left endpoint ofS and
+4n/s blue points near the right endpoint ofS. For the near gadget, we put2n/s red points
+and 2n/s blue points alternately starting from the left endpoint ofS so that the distance
+between any two consecutive points is one, and the starting point lies in the left endpoint of
+S. Additionally, we put2n/s red points and2n/s blue points alternately so that the distance
+between any two consecutive points is one, and the last point lies in the right endpoint ofS.
+Notice that the cost induced by the near gadget isΘ(n/s), but the cost induced by the far
+gadget is Θ(n∆/s2). Our strategy is to placeO(s) copies of the near gadget inside[∆] and
+to hide one far gadget inside[∆] with probability 1/2. In this way, we can construct two
+types of instances, one with costn and one with costΘ(n∆/s2).
+More specifically, we define a distributionµ of instances as follows. We partition[∆] into
+8s segments each of length∆/(8s). LetS ={S1,S 2,...,S 8s} be the set of resulting segments
+along the axis. See Figure 1. With probability1/2, we lett = 0. Then with probability1/2,
+we choose one indext from 1, 2,...,s uniformly at random. That is, the probability that a
+fixed indexi is chosen is1/(16s) for i = 1, 2,..., 8s. Then for each indexi̸=t, we place the
+near gadget onSi. For indexi =t, we place the far gadget onSi. Notice that we do not
+place the far gadget anywhere ift = 0. Thus it suffices to show that, for any deterministic
+algorithm usings range counting queries, the probability that it estimates the cost ofOPT
+within an additive error ofO(n∆/s2) on the instances chosen fromµ is less than2/3.
+
+===== PAGE 11 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 11
+▶ Lemma 14.For any deterministic algorithm usings range counting queries, the probability
+that it estimates the cost of an instance chosen fromµ within an additive error ofO(n∆/s2)
+is less than2/3.
+Proof. Assume to the contrary that such a deterministic algorithmA exists. For instances
+in which we use the far gadget, its cost isO(n∆/s2). On the other hand, the instance for
+which we do not use the far gadget has cost exactlyn. ThusA must determine whether or
+not a given instance has the far gadget with probability at least2/3.
+We can considerA as a decision tree of depths. Here, each node corresponds to an
+orthogonal range, and each leaf corresponds to the output. Given a query intervalQ, we say
+that ithits a segmentS ofS if an endpoint ofQ is contained inS. Note that the algorithm
+cannot get any information for the segments not hit by queries. In particular, for any segment
+S and any interval rangeQ, the number of red (and blue) points inS∩Q remains the same
+unlessS contains an endpoint ofQ. On the other hand,A uses onlys range counting queries,
+and thus the probability that any of thes range queries hits the far gadget is less than2/3.
+More formally, we consider the event that an instance using the far gadget is chosen from
+µ. This even happens with probability at least1/2 by construction. Thus to get a success
+probability at least2/3, we need to detect the far gadget. Recall that we can detect the far
+gadget only when it is hit byQ. On the other hand, each query hits at most two segments.
+Notice that the probability that a fixed query range hits the far gadget is2/(8s) = 1/(4s)
+as the total number of segments inS is 8s. Therefore, the probability that at least one of
+the s queries hits the far gadget is1− (1− (4s)−1)s) < 1/3. In other words, the failure
+probability is at least2/3 assuming that we are given an instance using the far gadget.
+Since the probability that an instance using the far gadget is chosen is1/2, the total failure
+probability is larger than1/3, and thus the lemma holds. ◀
+3.2 Lower bounds for dimensions 2 and higher
+We now extend the construction of the 1D case to the 2D case. We again use Yao’s Minmax
+Theorem. Thus it suffices to construct a distributionµ of instances such that no deterministic
+algorithm usings range counting queries has success probability at least2/3.
+For this, we define two types of gadgets on a squareS of side length∆/(8√s): the near
+gadget andfar gadget. See Figure 2. For the far gadget, we put two copies of the far gadget
+constructed from the 1D case, one on the upper side ofS and one on the lower side ofS, so
+that a red point comes first in the upper side, and a blue point comes first in the lower side.
+For the near gadget, we do the same: Put two copies of the near gadget constructed from
+the 1D case, one on the upper side and one on the lower side, so that a red point comes first
+in the upper side, and a blue point comes first in the lower side. In this way, every gadget
+has 8n/s red points and8n/s blue points.
+Now define a distributionµ of instances as follows. We construct the grid on [∆]2
+consisting of 16s cells each of side length∆/(4√s). See Figure 2. We choose a cellW as
+follows. With probability1/2, we letW =∅. Then with probability1/2, we choose one cell
+from the 16s cells uniformly at random, and let itW. Then for each cell in the grid, except
+for W, we place the near gadget in the middle of the cell. Then we place the far gadget in
+the middle ofW. Notice that we do not place the far gadget anywhere ifW =∅. Thus it
+suffices to show that, for any deterministic algorithm usings range counting queries, the
+probability that it estimates the cost ofOPT within an additive error ofO(n∆/s1.5) on an
+instance chosen fromµ is less than2/3. We can prove this similarly to Lemma 14.
+
+===== PAGE 12 =====
+12 Range Counting Oracles for Geometric Problems
+Far gadget
+Near gadget
+Domain [∆]2
+∆
+4√s
+∆
+8√s
+∆
+8√s
+Figure 2We partition[∆]2 into 16s squares. In each square, we place either the far gadget or the
+near gadget. The cost of the far gadget is at leastn∆/s2, and the cost of the near gadget isΘ(n/s).
+▶ Lemma 15.For any deterministic algorithm usings range counting queries, the probability
+that it estimates the cost of an instance chosen fromµ within an additive error ofO(n∆/s1.5)
+is less than2/3.
+Proof. Assume to the contrary that such a deterministic algorithmA exists. For instances
+we use the far gadget, its cost isΘ(n∆/s1.5). On the other hand, the instance we do not use
+the far gadget has cost isΘ(n). ThusA must determine whether or not a given instance has
+the far gadget with success probability at least2/3.
+We can considerA as a decision tree of depths. Here, each node corresponds to an
+orthogonal range, and each leaf corresponds to the output. Given a query rectangleQ, we
+say that ithits a grid cellS if a corner ofQ is contained inS. Note that the algorithm
+cannot get any information for the segments not hit by queries. In particular, for a cellS and
+a rectangleQ, the number of red (and blue) points inS∩Q is the same unless a corner ofQ
+is contained inS. Then the remaining part of this proof is exactly the same as before. We
+consider the event that an instance using the far gadget is chosen. This even happens with
+probability 1/2 by construction. Thus to get a success probability at least2/3, we need to
+detect the far gadget. Each query hits at most four grid cells. Therefore, the probability that
+one range counting query hits the far gadget is4/(16s) = 1/(4s). The probability that at
+least one of thes queries hits the far gadget is1− (1− (4s)−1)s < 1/3. Since the probability
+that an instance using the far gadget is chosen is1/2, the total failure probability is larger
+than 2/3, and thus the lemma holds. ◀
+Extension to a higher dimensional space.The construction of an input distribution used
+in the two-dimensional case can be easily extended to a higher dimensional space. We again
+define two gadgets on ad-dimensional cubeS of side length∆/(4s1/d). For the far gadget,
+we put two copies of the far gadget we constructed from the(d− 1)-dimensional case, one on
+one facet ofS and one on its parallel facet ofS. We do the same for the near gadget using
+two copies of the near gadget we constructed from the(d− 1)-dimensional case.
+Now we define a distributionµ of instances as follows. We construct the grid on[∆]d
+consisting of 16s cells each of side length∆/(4s1/d). We choose a cellW as follows. With
+probability 1/2, we letW =∅. Then with probability1/2, we choose one cell from the16s
+cells uniformly at random, and let itW. Then for each cell in the grid, except forW, we
+place the near gadget in the middle of the cell. Then we place the far gadget in the middle
+of W. Notice that we do not place the far gadget anywhere ifW =∅. Thus it suffices to
+show that, for any deterministic algorithm usings range counting queries, the probability
+
+===== PAGE 13 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 13
+that it estimates the cost ofOPT within an additive error ofO(n∆/s1+1/d) on an instance
+chosen fromµ is less than2/3. We can prove this similarly to Lemma 15. Here, the cost
+difference between two types of instances isn/s times the side length of each cell, which
+is O(n∆/s1+1/d). This is because, in ad-dimensional space, the side length of each cell is
+O(∆/s1/d), and thus the lower bound on the additive error increases accordingly.
+4 Sampling a non-empty cell uniformly at random
+In this section, we show how to sample a grid cell (almost) uniformly at random from all
+grid cells containing points ofP. LetG be a grid of certain side lengthr imposed on the
+discrete space [∆]2. LetC ={c1,c 2,...,c m} denote the set of all grid cells ofG containing
+points ofP. We say such cells arenon-empty. For each cellci, we letni denote the number
+of points contained inci. Here, we say sampling isc-approximate uniform if the probability
+that each non-empty cell is chosen is in[1/(cm),c/m ] for a constantc with c> 1. Or, we
+simply say sampling isalmost uniform.
+One might want to use the telescoping sampling of Lemma 1 directly: In particular, we
+choose a pointv of P uniformly at random, and return the cell ofG containingv. However,
+the probability that a cellci is chosen in this way isni/n, not 1/m. So, instead, we use a
+two-step sampling procedure as stated in Algorithm 1. Here, we are required to check if it
+has at most√n non-empty cells. If so, we need to find all of them explicitly. This can be
+done O(√n log ∆)range counting queries:
+▶ Lemma 16. If the number of non-empty cells isO(√n) we can compute all of them using
+O(√n log ∆) range counting queries.
+Proof. We may consider each grid cell as a single point. Then imagine that we construct
+a quadtree on the set of the points corresponding to the grid cells. Clearly, the height of
+the quadtree isO(log ∆). We traverse the quadtree along the paths towards the leaves
+corresponding to the non-empty cells. The total number of nodes of the quadtree we visited
+is O(√n log ∆). Therefore, the lemma holds. ◀
+Algorithm 1 CellSampling(r)
+1: LetG be the grid of side lengthr imposed on the discrete space[∆]2.
+2: if the number of non-empty cells ofG is at most√n then
+3: LetC be the set of non-empty cells ofG.
+4: Return a cell chosen fromC uniformly at random.
+5: else
+6: Select a setT of x =√n logn points from P uniformly at random.
+7: Let np be the number of points ofP contained in the cell ofG containingp.
+8: Assign weightw(p) = n
+xnp
+to p.
+9: Let m′ =∑
+p∈Tw(p) denote the total weight of all points inT.
+10: Sample a pointp from T with probability w(p)
+m′ .
+11: Return the cell ofG containingp.
+▶ Lemma 17. CellSampling(r) selects a cell almost uniformly at random from all non-
+empty cells ofG using ˜O(√n) range counting queries.
+
+===== PAGE 14 =====
+14 Range Counting Oracles for Geometric Problems
+Proof. IfG has O(√n) non-empty cells, we can compute all of them deterministically using
+˜O(√n) range queries by Lemma 16. Then we choose one of them uniformly at random. Thus
+it suffices to consider the case thatG has Ω(√n) non-empty cells.
+Observe thatm′ is a random variable that corresponds to the total weight of all points
+in the sampled setT. Indeed, m′ estimates the numberm of non-empty cells in the grid
+G. We first show that the expected value ofm′ is m and with a high probability, the
+random variablem′ is sharply concentrated around its expectationm. Suppose the sampled
+points are denoted asp1,...,p x. For each sampled pointpi, we define a random variable
+Xi = 1
+npi
+, wherenpi represents the number of points in the cell that containspi. Recall that
+C ={c1,c 2,...,c m} denotes the set of non-empty cells ofG. Then, the expected value ofXi
+is E[Xi] =∑
+c∈C
+nc
+n· 1
+nc
+= m
+n. Now, the expected value of the random variableX =∑x
+i=1Xi
+is E[X] = xm
+n . Sincem′ =X· n
+x, we then haveE[m′] =m.
+Now we use Chernoff bounds stated in Lemma 33. Since0≤ Xi≤ 1, the probability
+that|X− E[X]|≥ (mx
+n )/10 is less thanδmx/n≤δlogn for a constant0<δ < 1. Recall that
+x =√n logn and m≥√n by the assumption. Therefore, we havem′∈ [9m/10, 11m/10]
+with probability at least1− 1/δ.
+In the following, assume that this event happens. For a fixed non-empty cellci in the grid
+G, we analyze the probability thatci is chosen. LetY be the number of sampled points in
+the first step contained inci. Then E[Y ] = xni
+n , whereni is the true number of points from
+P in ci. By Chernoff bounds, the probability thatY /∈ [xni
+4n, 4xni
+n ] is again less than a small
+constant. Again, assume the event thatY ∈ [xni
+4n, 4xni
+n ]. Then the total weight of all sample
+points contained inci is in the range[1/4, 4]. Thus the probability thatci is finally chosen is
+in the range[1/4m′, 4/m′]⊆ [1/(cm),c/m ] for a constantc. Therefore, CellSampling(r)
+returns a cell almost uniformly at random. ◀
+▶ Corollary 18. We can estimate the number of non-empty cells within anO(1)-relative
+error using ˜O(√n) range counting queries.
+Lowerbound. Now, weshowthatanyrandomizedalgorithmthatcanperform c-approximate
+uniform sampling for non-empty cells requires at leastΩ(√n/c) range counting queries for
+any parameterc≥ 1. Our lower bound holds even in a discrete one-dimensional space[∆]
+with ∆≥n. We assume that we have an intervalL of length ∆≥n consisting ofn cells
+each of length∆/n. We subdivideL into√n/(4c) segments each of length4c∆/√n. LetS
+be the set of the segments for the line segmentL. In this way, each segment inS contains
+(4c∆/√n)/(∆/n) = 4c√n cells. We construct a setI of√n/(4c) + 1instances as in Figure 3.
+We construct oneuniform instance ofL. In this instance, for each segmentS∈S , we
+identify its leftmost cell and place4c√n points in that cell. Therefore, each uniform instance
+contains√n/(4c) non-empty cells (one corresponding to each segment) while maintaining a
+total ofn points per uniform instance.
+Next, we construct√n/(4c) non-uniform instances ofL. For theith non-uniform instance,
+we select theith segment, which we refer to as thewitness segment. In the leftmost cell of this
+witness segment, we place2c√n points. Additionally, in each of the next2c√n cells following
+theleftmostcell, weplaceonepointpercell. Foreachoftheremaining √n/(4c)−1non-witness
+segments, we place4c√n points in the leftmost cell of each segment, as we did for the uniform
+instance. Inthisway, everynon-uniforminstancehas 2c√n+1+√n/(4c)−1 = 2c√n+√n/(4c)
+non-empty cells and contains4c√n· (√n/(4c)− 1) + 2c√n + 2c√n =n points in total. Thus,
+the ratio of the number of non-empty cells between a non-uniform instance and a uniform
+instance is (2c√n +√n/(4c))/(√n/(4c)) = 8c2 + 1. For both instances see Figure 3.
+
+===== PAGE 15 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 15
+Uniform Instance
+Non-uniform Instance
+4c∆/√n
+∆/n
+Figure 3Illustration for the uniform instance and a non-uniform instance. The gray segment is
+the witness of the non-uniform instance.
+▶ Lemma 19. Given an instanceI fromI, any randomized algorithm that determines
+whether I is uniform with a success probability of at least2/3 requires Ω(√n/c) range
+counting queries.
+Proof. By Yao’s Minimax Theorem, it suffices to construct a distributionµ over the instances
+described above such that no deterministic algorithm can determine, with probability at
+least 2/3, whether an input drawn fromµ is uniform while using fewer than√n/(16c) range
+counting queries. We construct the distributionµ as follows: the probability that the uniform
+instance is chosen is 1/2, and the probability that each non-uniform instance is chosen
+is 2c/√n. Since we have√n/(4c) non-uniform instances, the probability that we pick a
+non-uniform instance is1/2.
+Now, suppose there exists a deterministic algorithmA that, for an instance sampled from
+µ, can correctly determine with probability at leastδ whether the instance is uniform or
+non-uniform using fewer than√n/(16c) range counting queries. Since the success probability
+must be at least2/3, the algorithmA is required to provide the correct answer for the
+uniform instance. Otherwise, the success probability is less than 2/3 what proves this
+lemma. Moreover, sinceA is deterministic, for any non-uniform instance sampled from the
+distribution µ, ifA fails to identify the witness segment, it incorrectly concludes that the
+instance is uniform, despite it being non-uniform.
+Condition on the event that a non-uniform instance is chosen fromµ. We analyze
+the probability thatA fails to identify the witness segment. Note thatA can detect the
+witness segment only if one of its queries hits the witness segment of this instance. Here, we
+say a queryhits a segment if an endpoint of a query interval is contained in the segment.
+The probability that a single query made byA fails to identify the witness segment in a
+non-uniform instance is1− 4c√n. IfA performs at most
+√n
+16c queries, then the probability
+that none of these queries identifies the witness segment is
+(
+1− 4c√n
+)√n/(16c)
+≥e−1/4≥ 0.77.
+Thus, the probability thatA detects the witness segment is at most1−e−1/4≤ 1
+3, which is
+less than the required success probability of2
+3, leading to a contradiction. ◀
+▶Lemma 20.Any algorithm that can performc-approximate uniform sampling for non-empty
+cells requiresΩ(√n/c) range counting queries for any parameterc≥ 1.
+Proof. Assume that we have ac-approximate uniform sampling algorithmA. That is, the
+probability that each non-empty cell is chosen is in[1/(cm),c/m ], wherem is the number of
+
+===== PAGE 16 =====
+16 Range Counting Oracles for Geometric Problems
+non-empty cells. Consider the uniform instanceI and any non-uniform instanceI′. Recall
+that the number of non-empty cells inI is√n/(4c), and the number of non-empty cells inI′
+is at least2c√n. Therefore,A must distinguish the two cases with probability at least1/2.
+However, by Lemma 19, no such algorithm exists, which gives a contradiction. ◀
+5 An algorithm for the minimum spanning tree problem
+Given a pointP in [∆]2, we present an algorithm for estimating the cost of a minimum
+spanning tree ofP within a factor of(1 +ε) with a constant probability using˜O(√n) range
+counting queries. Here, we assume that∆ =O(n/ε). This assumption can be achieved in
+our case as follows. As preprocessing, we find the smallest square containingP. We can do
+this usingO(log ∆) range counting queries. Then, the size of the square is at leastOPT. We
+consider this cell as the new discrete space[∆]2. In this way, we obtainOPT≥ ∆.
+Now consider the grid of[∆]2 of side length(ε/n)· ∆. Imagine that we move each point
+to the center of its grid cell. This increases the optimal cost of the minimum spanning tree
+by at most(ε/n)· ∆·n≤ε· OPT, which is negligible. Then we can obtain a new discrete
+space of sizen/ε·n/ε by scaling. In this way, we can achieve the assumption we made before.
+However, since we do not have direct access toP in the range counting oracle model, we
+cannot explicitly move the points. We can do this implicitly because any query rangeR used
+by our algorithm will be a cell of the quadtree. More specifically, we expand the rangeR
+into a larger rangeR′, where the side length ofR′ is scaled by a factor ofn/ε relative to the
+side length ofR. Then we useR′ in the original domain to query the number of points inR.
+This is exactly the number we want to find ifR is a cell of the quadtree.
+5.1 The quadtree-based spanner
+The spanner ofP we use in this section is based on the well-separated pair decomposition
+(WSPD) of [∆]2 constructed using a quadtree [12]. LetQ be a quadtree constructed on[∆]2.
+We call a pair(c,c′) of cells inQ a well-separated pairif ε·d(c,c′)≥ max{r(c),r (c)}, where
+r(c) is the side length of a cellc and d(c,c′) is the distance between the centers ofc and c′.
+Then awell-separated pair decompositionof a setP of n points is a set{(c1,c′
+1),..., (cs,c′
+s)}
+of well-separated pairs such that for any two pointsx,y∈P, there is a unique pair(ci,c′
+i)
+with x∈ci and y∈c′
+i. Callahan and Kosaraju [12] showed that there is a well-separated
+pair decomposition ofP consisting ofO(ε−2n) pairs.
+As the way in which we construct the WSPD in our sublinear algorithm for the minimum
+spanning tree problem is important, we give its brief sketch. Then we runWSPD(cr,cr) with
+the rootcr ofQ. Then the resulting set is a well-separated pair decomposition ofP. We
+denote it byW. As the number of pairs ofW isO(ε−2n),4 we cannot compute all such pairs
+using a sublinear number of range counting queries. However, given a pair(c,c′) of cells of
+Q, we can determine if it is inW using O(1) range counting queries.
+▶ Lemma 21([32]). Each point of[∆]2 is contained inO(ε−2 log ∆) pairs ofW.
+▶ Lemma 22([32]). For a pair(c,c′)∈W , we haver(c′)/2≤r(c)≤ 2r(c′).
+Nowwearereadytodefineaquadtree-basedspanner S = (P,E (S))ofapointset P⊆ [∆]2.
+For each cellc of the quadtreeQ, itsrepresentativeis defined as the lexicographically smallest
+4 To get this bound, we need to remove all redundant pairs fromW. In particular, two pairs(c, c′) and
+(¯c, ¯c′) with P∩ c = P∩ ¯c and P∩ c′ = P∩ ¯c′ might be contained inW in our case.
+
+===== PAGE 17 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 17
+Algorithm 2 WSPD(c, c′)
+1: if c =c′ and r(c) = 0 then return∅
+2: if c or c′ is an empty setthen return∅
+3: if r(c′)<r (c) then exchangec′ and c
+4: if r(c′)≤εd(c,c′) then return{{c,c′}}
+5: c1,c 2,c 3,c 4← the children ofc′ inQ
+6: return WSPD(c1,c )∪WSPD(c2,c )∪WSPD(c3,c )∪WSPD(c4,c )
+point inc∩P. For each pair(c,c′) ofW, we add the edges between the representatives ofc
+and c′ to the edge set of the spannerS. Here, the edge length is set tod(c,c′).
+▶ Lemma 23([32]). The cost of the minimum spanning tree ofS is at most(1 +ε) times
+the cost of the Euclidean minimum spanning tree ofP.
+To estimate the cost of the minimum spanning tree ofP, we traverse a subgraph ofS
+using range counting queries only. Here, we use the following lemma.
+▶ Lemma 24. Consider a grid cellc ofQ of side lengthr/2. We can find all grid cellsc′ of
+Q of side lengthr/2 such that there is an edge inS between a point inc and a point inc′ of
+length at mostr using O(ε−2) range counting queries.
+Proof. If c and c′ are connected by an edge of length at mostr, d(c,c′)≤ 3r. Moreover, we
+haveO(1) grid cellsc′ withr(c) =r(c′) andd(c,c′)≤ 3r. For each such pair(c,c′), we check
+if they are connected by an edge of length at mostr. If so, we say(c,c′) is ayes-instance.
+Given two such cellsc and c′, we do the following. As(c,c′) is not well-separated for any
+ε≤ 3, it is sufficient to check if there is a pair inW consisting of cells, one contained inc
+and one contained inc′, of distance at mostr. This can be done by applyingWSPD(c,c′),
+but the number of queries we use here can be as large asΘ(n). To handle this issue, we stop
+traversingQ when we reach a grid cell of size at most a certain threshold. For this purpose,
+we leti∗ be the index where2i∗
+≤εr/10< 2i∗+1. We conclude that(c,c′) is a yes-instance
+if there exists a pair(¯c, ¯c′) of non-empty grid cells of side length at least2i∗
+with ¯c⊆c and
+¯c′⊆c′ such that either (1)(¯c, ¯c′)∈W and d(¯c, ¯c′)≤r, or (2)(¯c, ¯c′) is not well-separated,
+and d(¯c, ¯c′) +r(¯c) +r(¯c′)≤r. In this case, we say that such a pair(¯c, ¯c′) is awitness. Since
+there areO(ε−2) grid cells ¯c of side length at least2i∗
+with ¯c⊆c (or ¯c⊆c′), the number of
+candidate pairs for(¯c, ¯c′) is O(ε−4). But by slightly modifyingWSPD(c,c′), it is not difficult
+to see that we can complete this task usingO(ε−2) range counting queries.
+Now we prove the correctness of the algorithm. First, consider the case that our algorithm
+finds a witness (¯c, ¯c′). If (¯c, ¯c′)∈W and d(¯c, ¯c′)≤ r, then the edge introduced by this
+pair must connect c and c′, and thus we are done. If (¯c, ¯c′) is not well-separated and
+d(¯c, ¯c′) +r(¯c) +r(¯c′)≤r, then there must be a pair inW consisting of cells, one in¯c and
+one in ¯c′. Moreover, such cells have distance at mostr, and thus(c,c′) is a yes-instance.
+Now consider the other direction. Assume that(c,c′) is a yes-instance. That is, assume
+that there is an edge ofS between a point ina∈c and a pointa′∈c′ of length at mostr.
+Then consider the pair(ca,ca′) ofW defining the edgeaa′. As we observed at the beginning
+of this proof, we haveca⊆ c and ca′⊆ c′. If r(ca)≥ εr/10 and r(ca′)≥ εr/10, then we
+are done since the algorithm would have considered this pair as a candidate for a witness.
+Thus without loss of generality, we assume thatr(ca) < εr/10. Then r(ca′)≤ εr/5 by
+Lemma 22. By the construction, neither(p(ca),ca′) nor (ca, p(ca′)) is contained inW, where
+p(ca) denotes the parent cell ofca in the quadtree. Thus the distance betweenp(ca′) and ca
+
+===== PAGE 18 =====
+18 Range Counting Oracles for Geometric Problems
+must be less thanp(ca′)/ε≤r/5. Therefore,a and a′ is sufficiently close: their distance is
+at mostr/5 + 2εr/5≤ 2r/5. Now consider two cells(¯c, ¯c′) of side length2i∗
+containinga
+and a′. Then we haved(¯c, ¯c′) +r(¯c) +r(¯c′)≤r, and thus our algorithm will detect(¯c, ¯c′) as
+a witness, and then conclude that(c,c′) is a yes-instance. ◀
+5.2 Reduction to the component counting problem
+We can reduce the minimum spanning problem onS to the problem of counting connected
+components of a subgraph ofS. Let OPT denote the cost of the minimum spanning tree of
+S. LetSi denote the subgraph ofS induced by the edges ofS of length at most(1 +ε)i for
+i = 0, 1, 2,..., log1+ε(2∆). Here, the vertex set ofSi isV, andSi might have several isolated
+vertices. Let ci denote the number of connected components ofSi. Due to the following
+lemma given by [25], it is sufficient to estimate the number of connected components ofSi.
+To make our paper complete, we give its proof here.
+▶ Lemma 25([25]). OPT≤n− ∆ +ε∑log(1+ε)(2∆)−1
+i=0 (1 +ε)ici≤ (1 +ε)OPT
+Proof. Let M∗ be the set of edges of a minimum spanning tree ofS. Then we can partition
+the edges into subsetsM0,M 1,...,M s with respect to the edge lengths whereMi denotes
+the set of edges ofM∗ of length in[(1 +ε)i, (1 +ε)i+1]. Recall that the minimum distance
+of P is at least one, and the maximum distance ofP is at most2∆. Thuss≤ log(1+ε)(2∆).
+Now it suffices to analyze the size of each subsetMi. We claim that|Mi| =ci−1−ci.
+Consider the subgraphS∗
+i of Si induced byM0∪M1∪... ∪Mi. Clearly, each component
+of S∗
+i must be a tree. Each component ofS∗
+i is subdivided into subtrees inS∗
+i−1. Here, the
+number of edges ofS∗
+i not appearing inS∗
+i−1 is exactlyci−1−ci due to the cut property.
+Then we have the following.
+OPT≤
+s∑
+i=0
+(1 +ε)i(ci−1−ci)≤ (1 +ε)OPT.
+Then we can reformulate the inequality as follows.
+s∑
+i=0
+(1 +ε)i(ci−1−ci) =
+s∑
+i=0
+(1 +ε)ici−1−
+s∑
+i=0
+(1 +ε)ici
+=n− ∆ +
+s−1∑
+i=0
+((1 +ε)i− (1 +ε)i−1)ci
+=n− ∆ +
+s−1∑
+i=0
+ε(1 +ε)ici
+Therefore, the lemma holds. ◀
+In the following, we letw = log1+ε(2∆). For each indexi with i≤w, we estimate the
+numberci of components ofSi. Chazelle et al. [18] presented a sublinear-time algorithm for
+estimating the number of components of a graph with bounded average degree. However,
+there is an issue: The additive error of CRT algorithm isn/t, wheret is the number of
+queries. This additive error becomes(1+ε)i·(n/t) for the estimator of the cost of a minimum
+spanning tree by Lemma 25. Ifi is large, this error cannot be negligible. These issues can be
+easily resolved by applying CRT algorithm on a graphS′
+i obtained by contracting several
+vertices ofSi. This approach is also used in [30] to design dynamic streaming algorithms for
+the minimum spanning tree problem. The construction ofS′
+i uses the following lemma.
+
+===== PAGE 19 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 19
+▶ Lemma 26. Letc be a cell of the quadtree withr(c)≤ (1 +ε)i/4≤ 2r(c). Any two vertices
+in c∩V (Si) are connected inSi.
+Proof. Assume to the contrary thatu and v are contained in different components, sayCu
+and Cv, inSi. Then there must be a path inH betweenCu and Cv consisting of edges of
+length larger than(1 +ε)i. Note that the edge weight ofuv is at most2r(c)≤ (1 +ε)i/2,
+and this violates the cut property. Therefore, the lemma holds. ◀
+Then we constructS′
+i as follows. LetG be the grid of side length(1 +ε)i∗
+/4. For each
+cell c ofG, we contract all vertices inc∩V (Si) into a single vertex. After we do this for all
+cells ofG, then we remove all parallel edges and loops from the resulting graph. Notice that
+as the purpose ofS′
+i is to estimate the number of components ofS′
+i, we do not need to care
+about edge weights ofS′
+i. The number of connected components remains the same. In the
+following, we estimate the number of components ofS′
+i for each indexi∈{ 0, 1, 2,...,w }.
+5.3 Estimating the number of components
+Now we are ready to estimate the numberci of connected components ofSi for an indexi.
+We use the algorithm by Chazelle et al. [18] by setting parameters properly. This algorithm
+estimates the number of connected components of a graph with a bounded average degree. In
+our case, the maximum degree ofS′
+i is also bounded. Thus we can simplify CRT algorithm
+as we will describe below. The algorithm is based on the following simple observation. Let
+G = (V,E ) be a graph. For a vertexv∈ V, let d(v) denote the degree ofv in H. Let
+m(v) denote the number of edges in the connected component ofG containingv. Then let
+β(v) =d(v)/(2m(v)) if v is not isolated. Ifv is isolated inG, then we letβ(v) = 1.
+▶ Lemma 27([18]). The number of connected components ofG is∑
+v∈V β(v).
+CRT algorithm takesr = O(1/ε2) samples v1,v 2,...,v r from V. Then for each sampled
+vertexvj, it estimatesβj =β(vj). Let ˆβj be the estimator ofβj. Then this algorithm simply
+returns (n/r)·∑r
+i=1
+ˆβi. However, if the connected component ofG containingvi contains a
+large number of vertices, estimatingm(vi) requires a large number of queries. Thus it only
+counts the number of connected components ofG of size less than a certain threshold. This
+induces the additive error in the estimator for the number of connected components ofG. If
+the maximum degree ofG is constant, one can computeβj exactly and deterministically in
+the case that its connected component inG has size√n.
+Algorithm. First, we set the threshold tot =√n. We pickr =O(1/ε2) random samples
+c1,c 2,...,c r from V (S′
+i) uniformly at random. We call them theseeds. Recall that a vertex
+ofV (S′
+i) corresponds to a non-empty grid cell ofG, whereG is the grid of side length(1 +ε)i.
+This can be done usingO(√n logn) range counting queries as in Algorithm 1. This sampling
+algorithm also gives an estimatorˆn of the number of non-empty cells ofG withinO(1) relative
+error by Corollary 18.
+For each seedcj, letvj denote the vertex ofS′
+j corresponding tocj. We first compute the
+degree d′
+j of vj using O(ε−2) range counting queries using Lemma 24. To computem′
+j, we
+apply BFS onS′
+i fromvj until we visitt vertices ofS′
+i. Note that the edge set ofSi is exactly
+the set of all edges ofS of length [1, (1 +ε)i], and the side length of a cell ofG is at most
+(1 +ε)i/2. Thus we can use Lemma 24 to apply BFS onS′
+i. There are three possible cases.
+If traversal visits more thant vertices ofS′
+i, we letβ′
+j = 0. This will induce a small additive
+error as we will see later. Ifvj is isolated inS′
+i, letβ′
+j = 2. If BFS successfully terminates,
+
+===== PAGE 20 =====
+20 Range Counting Oracles for Geometric Problems
+we enumerate its all neighbors inS′
+i of the vertices visited by the BFS. In this way, we can
+compute the numberm′
+j of edges in the component ofS′
+i, and thus we can obtainβ′
+j. Then
+we return ˆci = (ˆn/r)·∑r
+i=1β′
+i.
+▶ Lemma 28. We have|(1−ε)ci− ˆci|≤ OPT/(1 +ε)i with probability at least2/3.
+Proof. In the following, we assume the event thatˆn∈ [n∗/2, 2n∗], wheren∗ is the number of
+vertices ofS′
+i, which occurs with a constant probability. We first analyze the expected value
+E[ˆci] of ˆci. We say a component ofS′
+i is small if it has at mostt vertices (cells), andlarge
+otherwise. Note that the number of large components isO(n∗/t). LetYj denote the random
+variable where, for thejth random seedvj, Yj =d′(v)/(2m′(v)) if vj is contained in a small
+component, Yi = 1 if it is isolated, andYi = 0 otherwise. Recall that seeds are chosen from
+V (S′
+i) uniformly at random. LetClarge denote the set of vertices ofS′
+i contained in the large
+components ofS′
+i. First, we can easily see thatE[ ˆci]≤ci. Then we analyze its lower bound.
+E[ ˆci]≥ ˆn
+r
+∑
+j
+E[Yj] = ˆn
+ˆn−|Clarge|
+∑
+v/∈Clarge
+d′(v)
+2m′(v)≥ci− ˆn/t.
+Here, notice thatn∗≤ 4· OPT/(1 +ε)i if n∗≥ 4. To see this, consider the adjacency graph
+between the non-empty cells of the gridG: a vertex corresponds to a grid cell, and two
+vertices are adjacent if they share a common edge on their boundaries. Then this graph
+is planar, and thus it has a 4-coloring. Thus it has an independent set of sizen∗/4. The
+distance between any two points from different cells in the independent set is at least(1 +ε)i,
+and thus OPT≥ (n∗/4)· (1 +ε)i. Therefore, the additive error in the lower bound is at most
+OPT/(1 +ε)i. Finally, we have
+E[ ˆci]≥ci− ˆn/ti≥ci−O(1)· OPT/(1 +ε)i.
+Now we can analyze the probability that|ˆci−ci|≥ OPT/(1 +ε)i using Chebyshev’s
+inequality in Lemma 35. Here, for each random variableYj, we have 0≤ Yi≤ 1. Let
+Y =Y1 +... +Yr. Therefore,
+Var[Yi]≤ E[Y 2
+i ]≤ E[Yi]≤ci/n∗, and Var[Y ] =
+∑
+i
+Var[Yi]≤ (rci)/n∗.
+Therefore, sincer =O(ε−2) we have
+Var[ˆci] = Var[(ˆn/r)·Y ]≤ (ˆn2/r2)· (rci)/n∗≤ 4cin∗ε
+Recall that|E[ˆci]−ci|≤ O(1)· OPT/(1 +ε)i. By Chebyshev’s inequality, for anya≥ 1, the
+probability that|ˆci− E[ˆci]| at leastO(OPT)/(1 +ε)i is at most
+(4cin∗ε)· (1 +ε)2i/O(OPT2)≤ε(ci· (1 +ε)i/O(OPT))≤O(ε).
+Therefore, we have the claimed bound. ◀
+5.4 Putting it all together
+In this subsection, we summarize our argument and analyze the approximation factor of the
+estimator forthe Euclideanminimum spanning tree. For eachindexi∈{ 0, 1,..., log1+ε(2∆)},
+letSi denote the subgraph ofG induced by the edges ofE(S) of length in[1, (1+ε)i+1]. Then
+we estimate the number of components ofSi (and S′
+i) using ˜O(√n) range counting queries.
+Let ˆci denote the estimator ofci. Then we returnˆL =n− ∆ +ε∑log(1+ε)(2∆)
+i=0 (1 +ε)iˆci.
+
+===== PAGE 21 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 21
+▶ Lemma 29. With a constant probability, we have(1−O(ε))· OPT≤ ˆL≤ (1 +O(ε))· OPT,
+where OPT denotes the cost of a minimum spanning tree ofP.
+Proof. By Lemma 25, it suffices to show that
+E[
+log1+ε ∆∑
+i=0
+(1 +ε)iˆci] = (1 +ε)
+log1+ε(2∆)∑
+i=0
+(1 +ε)ici +ε·n.
+This is becauseOPT≥n. The additive error ofε·n is at mostε· OPT, which is negligible.
+If we look at the proofs of the lemmas more carefully, by increasing the number of samples
+chosen by each step by a factor ofO(log ∆), we can increase the success probability to
+1− 1/∆. Then with a constant probability, we have the desired bound for all indicesi. We
+assume such an event occurs. For all indicesi, we haveˆci∈ [ci−n/(1 +ε)i,ci +n/(1 +ε)i]
+by the proof of Lemma 28. Since we havelog1+ε
+√n such indices, the additive error that
+comes from all indices will be at mostε·n. So far, we have focused on the cost of the spanner.
+However, we need to state our result with respect to the cost of a minimum spanning tree of
+P. Since the cost of a minimum spanning tree of the spanner is(1 +ε)· OPT, this induces a
+factor of (1 +ε), and thus the lemma holds. ◀
+Therefore, we have the following theorem.
+▶ Theorem 30. Given a setP of sizen in a discrete space[∆], we can estimate the cost of
+a minimum spanning tree ofP within a factor of(1 +ε) with a constant probability using
+˜O(√n) range counting queries.
+6 Lower bound for the minimum spanning tree problem
+In this section, we show that any randomized constant-factor approximation algorithm for
+the Euclidean minimum spanning tree problem usesΩ(n1/3) range counting queries. For this,
+we construct a distributionµ of instances where any randomized algorithm usingo(n1/3)
+queries fails to obtain a constant-factor approximate solution with probability at least1/3.
+Let [∆]2 be a discrete domain with∆ =O(n). We subdivide[∆]2 into 16n1/3 equal-sized
+cells where each has side length4n5/6. See Figure 4. In the middle of each cell, we place
+either thestrip gadget or theuniform gadget. Each gadget is defined on the domain[n5/6]2
+which we further subdivide inton4/3 finer cells of side lengthn1/6. For the strip gadget,
+we put one point to each finer cell on one diagonal of[n5/6]2. For the uniform gadget,
+we put one point to the cell in thei-th row and the((i·n1/3) mod n2/3)-th column for
+i = 0, 1, 2,...,n 2/3. In total, each gadget containsn2/3 points. Notice that the cost of a
+minimum spanning tree of the points inside the strip gadget isΘ(n5/6), and the cost of a
+minimum spanning tree of the points inside the uniform gadget isΘ(n7/6). Now we define a
+distribution µ of instances. First, with probability1/2, we place copies of the strip gadget in
+all cells of the domain[∆]2. Then with probability1/2, we pick one cellc of the domain
+[∆]2 uniformly at random. We place a copy of the uniform gadget inc, and place copies of
+the strip gadget in the other cells. Then we have the following lemma.
+▶ Lemma 31. LetI and I′ be two instances ofµ such thatI has the uniform gadget, but
+I′ does not use the uniform gadget. ThenMST(I′)≤ 2· MST(I), where MST(·) denotes the
+cost of a minimum spanning tree.
+Proof. Let M be a minimum spanning tree ofI. Observe that the cost ofM is at least
+2·n7/6. This is becauseM contains at leastn1/3 edges connecting two points contained
+different cells in the domain[∆]2. Their total length is at least2·n7/6.
+
+===== PAGE 22 =====
+22 Range Counting Oracles for Geometric Problems
+n1/6
+n1/6
+n1/3
+rows
+Strip gadget
+Uniform gadget
+4n5/6
+Domain [∆]2 = [O(n)]2
+Figure 4The domain [∆] is partitioned into16n1/3 cells. Each cell contains the strip gadget or
+the uniform gadget. The strip gadget has costΘ(n5/6) while the uniform gadget has costΘ(n7/6).
+Now we analyze an upper bound on the cost of a minimum spanning tree ofI′. We can
+construct a spanning tree ofI′ from M as follows. The two instances are the same, except
+thatI has a uniform gadget in a cell, sayc, andI′ has a strip gadget inc. By the cut property,
+there are at mostO(1) edges ofM having one endpoint inc and one endpoint lying outside
+of c. Moreover, such edges have length at most8n5/6. For each such edge, we reconnect it
+with any vertex inc. Then we remove all edges having both endpoints inc from M, and
+add the edges of the minimum spanning tree of the strip gadget. In total, the cost ofM
+decreases by at mostn7/6−O(1)·n5/6. Here, the termn7/6 is the cost of the uniform gadget.
+Therefore, we haveMST(I′)− MST(I)≤n7/6−O(1)·n5/6≤ (1/2)·n7/6≤ MST(I). ◀
+▶ Lemma 32. Any randomized constant-factor approximation algorithm for the minimum
+spanning tree problem on a point set of sizen in a discrete space[∆]d requires Ω(n1/3) range
+counting queries.
+Proof. Due to Yao’s Minmax theorem, it suffices to show that for any deterministic algorithm
+using n1/3 range counting queries, the probability that it estimates the cost of an instance
+chosen fromµ within a factor of1.5 is less than2/3.
+Assume to the contrary that such a deterministic algorithmA exists. By Lemma 31, it
+can distinguish the instance containing the uniform gadget and the instances not containing
+the uniform gadget.
+We can considerA as a decision tree of depthn1/3. Here, each node corresponds to an
+orthogonal range, and each leaf corresponds to the output. Given a query rectangleQ, we
+say that ithits a cellc of the domain[∆]2 if a corner ofQ is contained inc. Note that the
+algorithm cannot get any information for the cells not hit by queries. In particular, for any
+cell c and any query rectangleQ, the number of points inc∩Q remains the same unlessc
+contains a corner ofQ. On the other hand,A uses onlyn1/3 range counting queries, and
+thus the probability that any of then1/3 range queries hits the uniform gadget is less than
+2/3.
+More formally, we consider the event that an instance using the uniform gadget is chosen
+from µ. This even happens with probability at least1/2 by construction. Thus to get a
+success probability at least2/3, we need to detect the uniform gadget. Recall that we can
+detect the uniform gadget only when it is hit byQ. On the other hand, each query hits at
+most four cells. Notice that the probability that a fixed query range hits the uniform gadget
+is 1/(4n1/3) as the total number of cells in[∆]2 is 16n1/3. Therefore, the probability that at
+
+===== PAGE 23 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 23
+least one of then1/3 queries hits the far gadget is1− (1− 1/(4n1/3))n1/3
+< 1/3. In other
+words, the failure probability is at least2/3 assuming that we are given an instance using the
+uniform gadget. Since the probability that an instance using the uniform gadget is chosen is
+1/2, the total failure probability is larger than2/3, and thus the lemma holds. ◀
+References
+1 Mikkel Abrahamsen, Mark de Berg, Kevin Buchin, Mehran Mehr, and Ali D. Mehrabi. Range-
+Clustering Queries. InProceedings of the 33rd International Symposium on Computational
+Geometry (SoCG 2017), volume 77, pages 5:1–5:16, 2017.
+2 Peyman Afshani, Lars Arge, and Kasper Dalgaard Larsen. Orthogonal range reporting in three
+and higher dimensions. InProceedings of the 50th Annual IEEE Symposium on Foundations
+of Computer Science (FOCS 2009), pages 149–158, 2009.
+3 Pankaj K Agarwal, Hsien-Chih Chang, Sharath Raghvendra, and Allen Xiao. Deterministic,
+near-linear ε-approximation algorithm for geometric bipartite matching. InProceedings of
+the 54th Annual ACM SIGACT Symposium on Theory of Computing (STOC 2022), pages
+1052–1065, 2022.
+4 Pankaj K. Agarwal, Hsien-Chih Chang, and Allen Xiao. Efficient algorithms for geometric
+partial matching. In Proceedings of the 35th International Symposium on Computational
+Geometry (SoCG 2019), pages 6:1–6:14, 2019.
+5 Alexandr Andoni, Khanh Do Ba, Piotr Indyk, and David Woodruff. Efficient sketches for
+earth-mover distance, with applications. InProceedings of the 50th Annual IEEE Symposium
+on Foundations of Computer Science (FOCS 2009), pages 324–330, 2009.
+6 Sanjeev Arora and Boaz Barak.Computational complexity: a modern approach. 2009.
+7 Sunil Arya and David M Mount. Approximate range searching.Computational Geometry,
+17(3-4):135–152, 2000.
+8 Sunil Arya, David M. Mount, and Eunhui Park. Approximate geometric mst range queries. In
+Proceedings of the 31st International Symposium on Computational Geometry (SoCG 2015),
+volume 34, pages 781–795, 2015.
+9 Khanh Do Ba, Huy L Nguyen, Huy N Nguyen, and Ronitt Rubinfeld. Sublinear time algorithms
+for earth mover’s distance.Theory of Computing Systems, 48:428–442, 2011.
+10 Soheil Behnezhad, Mohammad Roghani, and Aviad Rubinstein. Sublinear time algorithms
+and complexity of approximate maximum matching. InProceedings of the 55th Annual ACM
+Symposium on Theory of Computing (STOC 2023), pages 267–280, 2023.
+11 Nicolas Bonneel, Michiel Van De Panne, Sylvain Paris, and Wolfgang Heidrich. Displacement
+interpolation using lagrangian mass transport. InProceedings of the 2011 SIGGRAPH Asia
+conference, pages 1–12, 2011.
+12 Paul B Callahan and S Rao Kosaraju. A decomposition of multidimensional point sets with
+applications to k-nearest-neighbors and n-body potential fields.Journal of the ACM (JACM),
+42(1):67–90, 1995.
+13 Timothy M Chan. Orthogonal range searching in moderate dimensions: kd trees and range
+trees strike back.Discrete & Computational Geometry, 61:899–922, 2019.
+14 Timothy M Chan, Kasper Green Larsen, and Mihai Pătraşcu. Orthogonal range searching on
+the RAM, revisited. InProceedings of the twenty-seventh annual Symposium on Computational
+Geometry (SoCG 2011), pages 1–10, 2011.
+15 Timothy M Chan and Konstantinos Tsakalidis. Dynamic orthogonal range searching on the
+RAM, revisited. Journal of Computational Geometry, 9(2):45–66, 2018.
+16 Moses Charikar. Similarity estimation techniques from rounding algorithms. In John H. Reif,
+editor, Proceedings on 34th Annual ACM Symposium on Theory of Computing, May 19-21,
+2002, Montréal, Québec, Canada (STOC 2022), pages 380–388. ACM, 2002.
+
+===== PAGE 24 =====
+24 Range Counting Oracles for Geometric Problems
+17 Bernard Chazelle, Ding Liu, and Avner Magen. Sublinear geometric algorithms. InProceedings
+of the thirty-fifth annual ACM Symposium on Theory of Computing (STOC 2003), pages
+531–540, 2003.
+18 Bernard Chazelle, Ronitt Rubinfeld, and Luca Trevisan. Approximating the minimum spanning
+tree weight in sublinear time.SIAM J. Comput., 34(6):1370–1379, 2005.
+19 Xi Chen, Vincent Cohen-Addad, Rajesh Jayaram, Amit Levi, and Erik Waingarten. Streaming
+Euclidean MST to a constant factor. InProceedings of the 55th Annual ACM Symposium on
+Theory of Computing (STOC 2023), pages 156–169, 2023.
+20 Herman Chernoff. A measure of asymptotic efficiency for tests of a hypothesis based on the
+sum of observations.The Annals of Mathematical Statistics, 23(4):493–507, 1952.
+21 Graham Cormode, Hossein Jowhari, Morteza Monemizadeh, and S. Muthukrishnan. The
+sparse awakens: Streaming algorithms for matching size estimation in sparse graphs. In Kirk
+Pruhs and Christian Sohler, editors,25th Annual European Symposium on Algorithms, ESA
+2017, September 4-6, 2017, Vienna, Austria, volume 87 ofLIPIcs, pages 29:1–29:15. Schloss
+Dagstuhl - Leibniz-Zentrum für Informatik, 2017. URL:https://doi.org/10.4230/LIPIcs.
+ESA.2017.29, doi:10.4230/LIPICS.ESA.2017.29.
+22 Artur Czumaj, Funda Ergün, Lance Fortnow, Avner Magen, Ilan Newman, Ronitt Rubinfeld,
+and Christian Sohler. Approximating the weight of the Euclidean minimum spanning tree in
+sublinear time. SIAM J. Comput., 35(1):91–109, 2005.
+23 Artur Czumaj and Christian Sohler. Property testing with geometric queries. InProceedings
+of the 9th Annual European Symposium on Algorithms (ESA 2001), pages 266–277, 2001.
+24 Artur Czumaj and Christian Sohler. Estimating the weight of metric minimum spanning trees
+in sublinear-time. InProceedings of the thirty-sixth annual ACM Symposium on Theory of
+Computing (STOC 2004), pages 175–183, 2004.
+25 Artur Czumaj and Christian Sohler. Estimating the weight of metric minimum spanning trees
+in sublinear time.SIAM J. Comput., 39(3):904–922, 2009.
+26 Artur Czumaj and Christian Sohler. Sublinear-time algorithms.Property testing: current
+research and surveys, pages 41–64, 2010.
+27 Mark de Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars.Computational
+Geometry: Algorithms and Applications. 2008.
+28 Talya Eden, Dana Ron, and C Seshadhri. On approximating the number ofk-cliques in
+sublinear time. InProceedings of the 50th annual ACM SIGACT Symposium on Theory of
+Computing (STOC 2018), pages 722–734, 2018.
+29 Rémi Flamary, Marco Cuturi, Nicolas Courty, and Alain Rakotomamonjy. Wasserstein
+discriminant analysis. Machine Learning, 107:1923–1945, 2018.
+30 Gereon Frahling, Piotr Indyk, and Christian Sohler. Sampling in dynamic data streams and
+applications. In Proceedings of the twenty-first annual symposium on Computational geometry
+(SoCG 2025), pages 142–149, 2005.
+31 Elazar Goldenberg, Robert Krauthgamer, and Barna Saha. Sublinear algorithms for gap edit
+distance. In Proceedings of the 60th Annual Symposium on Foundations of Computer Science
+(FOCS 2019), pages 1101–1120, 2019.
+32 Sariel Har-Peled. Geometric approximation algorithms. Number 173. American Mathematical
+Soc., 2011.
+33 Sariel Har-Peled, Mitchell Jones, and Saladi Rahul. Active-learning a convex body in low
+dimensions. Algorithmica, 83:1885–1917, 2021.
+34 Piotr Indyk. Algorithms for dynamic geometric problems over data streams. In László Babai,
+editor, Proceedings of the 36th Annual ACM Symposium on Theory of Computing (STOC
+2004), pages 373–380, 2004.
+35 Tomasz Kociumaka and Barna Saha. Sublinear-time algorithms for computing & embedding
+gap edit distance. InProceedings of the 61st Annual Symposium on Foundations of Computer
+Science (FOCS 2020), pages 1168–1179, 2020.
+
+===== PAGE 25 =====
+A. Driemel, M. Monemizadeh, E. Oh, F. Staals, D. Woodruff 25
+36 Matt Kusner, Yu Sun, Nicholas Kolkin, and Kilian Weinberger. From word embeddings to
+document distances. InProceedings of 32rd International Conference on Machine Learning
+(ICML 2015), pages 957–966, 2015.
+37 Michael Mitzenmacher and Saeed Seddighin. Improved sublinear time algorithm for longest
+increasing subsequence. In Proceedings of the 2021 ACM-SIAM Symposium on Discrete
+Algorithms (SODA 2021), pages 1934–1947, 2021.
+38 Morteza Monemizadeh. Facility location in the sublinear geometric model. InApproximation,
+Randomization, and Combinatorial Optimization. Algorithms and Techniques (APPROX-
+/RANDOM 2023), volume 275, pages 6:1–6:24, 2023.
+39 Morteza Monemizadeh and David P. Woodruff. 1-pass relative-error lp-sampling with ap-
+plications. In Moses Charikar, editor,Proceedings of the Twenty-First Annual ACM-SIAM
+Symposium on Discrete Algorithms, SODA 2010, Austin, Texas, USA, January 17-19, 2010,
+pages 1143–1160. SIAM, 2010.doi:10.1137/1.9781611973075.92.
+40 Eunjin Oh and Hee-Kap Ahn. Approximate range queries for clustering. In34th International
+Symposium on Computational Geometry (SoCG 2018), volume 99, pages 62:1–62:14, 2018.
+41 Krzysztof Onak, Dana Ron, Michal Rosen, and Ronitt Rubinfeld. A near-optimal sublinear-
+time algorithm for approximating the minimum vertex cover size. InProceedings of the
+twenty-third annual ACM-SIAM symposium on Discrete Algorithms (SODA 2012), pages
+1123–1131, 2012.
+42 Ronitt Rubinfeld and Asaf Shapira. Sublinear time algorithms.SIAM Journal on Discrete
+Mathematics, 25(4):1562–1588, 2011.
+43 Cheng Sheng and Yufei Tao. New results on two-dimensional orthogonal range aggregation in
+external memory. InProceedings of the thirtieth ACM SIGMOD-SIGACT-SIGART symposium
+on Principles of Database Systems (PODS 2011), pages 129–139, 2011.
+A Concentration bounds
+▶ Lemma 33(Chernoff Bound [20]). LetY1,··· ,Ym denote m independent Poisson trials
+such that P [Yi = 1] =pi for 1≤i≤m. LetY =∑m
+i=1Yi and µ = E[Y ]. For 0<δ < 1,
+P [|Y−µ|≥ δµ]≤ 2e−µδ2/3
+▶Lemma 34(Markov’s Inequality). LetX be a random variable that assumes only nonnegative
+values. Then, for alla> 0,
+P [X≥a]≤ E[X]
+a
+▶ Lemma 35(Chebyshev’s Inequality). LetX be a random variable. For anya> 0, we have
+P [|X− E[X]|≥ a]≤ VarX
+a2 .

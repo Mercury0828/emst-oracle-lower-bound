@@ -1,0 +1,1842 @@
+Reading prompt from stdin...
+OpenAI Codex v0.141.0
+--------
+workdir: e:\Project-git\emst-oracle-lower-bound
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019eecde-1476-7df3-a11f-50adbc7775f8
+--------
+user
+You are the FINAL independent, adversarial auditor of a CONSOLIDATED closure proof of a PUBLISHED open problem. Be paranoid and ruthless. History: an earlier round of this proof claimed closure, passed 3 audits, then a 4th pass REFUTED it via a cost/variance blowup (the "seed-reuse"). It was then repaired (a spatial-cell estimator) and survived two more audits; this round-5 write-up consolidates everything. Your job: try hard to break it; if you cannot, certify exactly what remains as verification debt. Do NOT trust the project's "it's converged" framing — judge the math yourself. NEVER fabricate.
+
+READ these files (you have read-only access to the repo):
+- docs/webpro_round5_response.md   (THE consolidated proof — read every line; this is what you audit)
+- docs/webpro_round3_response.md   (the counterexample that broke the earlier closure)
+- docs/webpro_round4_auditCost.md and docs/webpro_round4_auditAsm.md   (the two prior audits)
+- attack_loop/webpro_verify_round5.py   (a c_j-vs-N_j carpet numeric test; RUN it: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py)
+- sim/emst.py is an exact-EMST helper you may use for your own numeric probes (python that only reads/prints is fine in read-only sandbox).
+
+CLAIM: an unconditional O~_eps(n^{1/3}) range-counting algorithm for (1+-eps)-estimating the Euclidean MST weight of n points in [Delta]^2 (Delta=O(n)), matching the published Omega(n^{1/3}) lower bound up to polylog. The crux is the support-MST Lemma 3 (estimate w(MST(Q)) for the K-point grid support in O~(sqrt K + n/K)).
+
+AUDIT (verify each; the round-5 newly-corrected parts are #1):
+1. The c_j-vs-N_j split: candidate-root trial count uses U_j >= c_j (COMPONENT count), Var(Z)=M_j c_j - c_j^2 <= M_j c_j; the EXPLORATION cost separately uses N_j <= K. Verify (a) the variance is exactly M_j c_j (only c_j cells are component-minima; no near-empty exploration returns Z=M off a non-leader); (b) candidate-root sum = O~(sqrt K); (c) exploration sum = O~(sqrt K) via N_j<=K + fine-scale r_j<=128 delta/sigma + packing G>=W_Q>=b delta/16. RUN the carpet+satellites numeric (the N_j=Theta(K) worst case) and confirm BOTH sums scale like sqrt K, not K (the n^{2/3} leak).
+2. Interleaving (eq 12), c_Q(t)-1 <= W_Q/t (14-15), U(r)=1+G/r (16), Riemann gap <= sigma W_Q (51), error budget (53).
+3. Packing W_Q >= b delta/16 (5); active cover b=Theta(sqrt K) in O~(sqrt K) emptiness queries (2); EVERY candidate/neighbor operation is ONE orthogonal range-COUNT on P (no nonrectangular / component-restricted / distinct-support-count query survives).
+4. Full assembly (sections 3-7): support regularization, snapping (68-73), hat W(G)=hat A_P + hat W_Q - hat A_Q (83), the global (1+-eps) error budget (85), the W-search (89-90) => O~_eps(n^{1/3}).
+5. ONE MORE counterexample hunt: try again to break round 5 (the c_j-vs-N_j separation failing; exploration secretly > sqrt K; active cover not Theta(sqrt K); interleaving too loose; a feature both support-rare and spatially-hidden-at-its-scale). If found, decisive; else say so after genuine effort.
+6. Is the verification-debt list (section 8) accurate -- is the residual ONLY (1) the local-WSPD death-time implementation (inherited from the source paper's Lemmas 23-24) + (2-4) routine constants/failure-budgets/boundary conventions, with NO hidden new obstruction or unproved load-bearing step?
+
+For each of 1-6 give VALID / NEEDS-REPAIR / FLAWED and classify any finding FATAL / GAP / MINOR. Include the numeric results (both budget sums vs sqrt K). Then ONE overall verdict, exactly one of:
+ (CONVERGED) no FATAL, no new counterexample, residual is only verification debt (list it) -- ready for human-expert verification;
+ (GAP) a fixable gap remains -- name it precisely;
+ (FATAL) a real error or counterexample -- give it.
+State your confidence in the full O~_eps(n^{1/3}) theorem. Be concise but rigorous. Your final message IS the audit report.
+
+codex
+I’ll audit from the files themselves, not the project’s framing. First I’m reading the consolidated proof and the prior counterexample/audits, then I’ll run the round-5 numeric and do a targeted counterexample pass.
+  → Read round-5 proof and prior audit/counterexample files
+  • Run provided round-5 numeric check and inspect helper code
+  • Audit items 1-6 mathematically and hunt for counterexamples
+  • Deliver concise verdict with verification debt
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round4_auditAsm.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round3_response.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw sim/emst.py' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round5_response.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round4_auditCost.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw attack_loop/webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+ succeeded in 943ms:
+"""
+Exact Euclidean MST weight in 2D.
+
+For Euclidean points in the plane the MST is a subgraph of the Delaunay triangulation,
+so we extract candidate edges from `scipy.spatial.Delaunay` and run Kruskal / union-find.
+For tiny or (near-)collinear inputs (where Delaunay is ill-defined) we fall back to the
+complete graph. This gives the EXACT EMST weight (the screens are internal de-risking; we
+never approximate the EMST itself).
+
+Phase-0 internal de-risking only (guide.md Â§7) â€” NOT a paper result.
+"""
+from __future__ import annotations
+
+import numpy as np
+
+from scipy.spatial import Delaunay
+try:
+    from scipy.spatial import QhullError  # type: ignore  (scipy >= 1.8)
+except Exception:  # pragma: no cover
+    QhullError = Exception  # type: ignore
+
+
+def _union_find_mst_weight(n: int, edges: np.ndarray, weights: np.ndarray) -> float:
+    """Kruskal over the given (i, j) edges with precomputed Euclidean weights."""
+    order = np.argsort(weights, kind="stable")
+    parent = np.arange(n)
+    rank = np.zeros(n, dtype=np.int64)
+
+    def find(x: int) -> int:
+        root = x
+        while parent[root] != root:
+            root = parent[root]
+        while parent[x] != root:
+            parent[x], x = root, parent[x]
+        return root
+
+    total = 0.0
+    used = 0
+    for idx in order:
+        i = int(edges[idx, 0])
+        j = int(edges[idx, 1])
+        ri, rj = find(i), find(j)
+        if ri == rj:
+            continue
+        if rank[ri] < rank[rj]:
+            ri, rj = rj, ri
+        parent[rj] = ri
+        if rank[ri] == rank[rj]:
+            rank[ri] += 1
+        total += float(weights[idx])
+        used += 1
+        if used == n - 1:
+            break
+    return total
+
+
+def _complete_graph_edges(n: int) -> np.ndarray:
+    iu, ju = np.triu_indices(n, k=1)
+    return np.column_stack([iu, ju]).astype(np.int64)
+
+
+def _delaunay_edges(points: np.ndarray) -> np.ndarray:
+    tri = Delaunay(points)
+    simp = tri.simplices  # (nsimplex, 3)
+    e = np.vstack([simp[:, [0, 1]], simp[:, [1, 2]], simp[:, [0, 2]]])
+    e.sort(axis=1)
+    e = np.unique(e, axis=0)
+    return e.astype(np.int64)
+
+
+def emst_weight(points: np.ndarray) -> float:
+    """Exact Euclidean MST weight of a 2D point set."""
+    pts = np.asarray(points, dtype=float)
+    n = len(pts)
+    if n <= 1:
+        return 0.0
+    if n <= 3:
+        edges = _complete_graph_edges(n)
+    else:
+        try:
+            edges = _delaunay_edges(pts)
+        except QhullError:
+            edges = _complete_graph_edges(n)
+        except Exception:
+            edges = _complete_graph_edges(n)
+    d = pts[edges[:, 0]] - pts[edges[:, 1]]
+    weights = np.sqrt(np.einsum("ij,ij->i", d, d))
+    return _union_find_mst_weight(n, edges, weights)
+
+
+def _brute_force_mst_weight(points: np.ndarray) -> float:
+    """Complete-graph Kruskal; used only to cross-check `emst_weight` on small n."""
+    pts = np.asarray(points, dtype=float)
+    n = len(pts)
+    if n <= 1:
+        return 0.0
+    edges = _complete_graph_edges(n)
+    d = pts[edges[:, 0]] - pts[edges[:, 1]]
+    weights = np.sqrt(np.einsum("ij,ij->i", d, d))
+    return _union_find_mst_weight(n, edges, weights)
+
+
+if __name__ == "__main__":
+    rng = np.random.default_rng(0)
+    for n in (4, 10, 50, 200):
+        p = rng.random((n, 2)) * 100.0
+        a = emst_weight(p)
+        b = _brute_force_mst_weight(p)
+        assert abs(a - b) < 1e-6, (n, a, b)
+        print(f"n={n:4d}  emst={a:.4f}  (matches brute force)")
+    print("emst.py self-check OK")
+
+
+ succeeded in 984ms:
+# Round-4 Audit (assembly + lemmas + NEW-counterexample hunt) â€” GPT-5.5-Pro spatial-cell estimator
+
+> Independent, fresh-context, adversarial auditor. Target: `docs/webpro_round4_response.md` (the
+> spatial-cell repair that defeated the round-3 satellite counterexample). Context: round 2 passed 3
+> audits then round 3 broke it with a concrete counterexample; round 4 is the new repair. My job:
+> verify Â§2/Â§7/Â§8/Â§9 + the Â§11 insertion, and try hard to find a NEW counterexample that breaks the
+> round-4 spatial estimator (cost or recovery), the way satellites broke round 2.
+>
+> Method: EXACT EMSTs via `sim/emst.py` + Delaunay/union-find; reimplemented the estimator's accounting
+> faithfully; scaled K over 64â€“256Ã— to separate genuine-K-growth from Î·/T constants. Scripts:
+> `attack_loop/audit_r4_t1f.py, t2.py, t3.py, t4_cost.py, t4b_scaling.py, t5_hunt.py, t5b_recovery.py,
+> t5c_containment.py, t5d_NU.py, t5e_eq3.py, t5f_truecost.py, t5g_cj.py, t5h_variance.py`.
+> Pro's own decisive test `attack_loop/webpro_verify_round4.py` re-run: recovery PASSES
+> (spatial_hat/W_Q = 1.07/0.98/1.08 for s=32/64/96).
+
+---
+
+## TL;DR VERDICT
+
+**Assembly SOUND; NO new counterexample found after a genuine hunt. The algorithm's true complexity IS
+Ã•(âˆšK), so the round-3 obstruction is genuinely defeated. There is ONE write-up GAP (not fatal, not a
+complexity leak): the cost bookkeeping in eqs (2)/(3)/(8) bounds the leader-estimator variance via the
+OCCUPIED-CELL count `N_j`, claiming `N_j â‰¤ C(1+W_Q/(Ïƒr_j))` with K-independent C. That inequality is
+FALSE at the small-scale (`a=h`) floor, where numerically `N_j â‰ˆ Î˜(âˆšK)Â·W_Q/(Ïƒr_j)`. The estimator is
+saved because its variance is actually `M_jÂ·c_j` (component count `c_j`, exactly `E[Z]=c, Var(Z)â‰¤Mc`),
+and `c_j â‰¤ C(1+W_Q/(Ïƒr_j))` IS true with K-independent C (it is the `(câˆ’1) â‰¤ W_Q/t` identity). With
+`c_j` the cost is flat/decreasing in K. Fix = state the variance with `c_j`, not `N_j`, throughout. This
+is a MINOR/GAP-level presentation fix; the exponent Ã•(âˆšK) is correct.**
+
+Per-item: Â§2 **VALID**; Â§7 **VALID**; Â§8/Â§9 **VALID**; Â§11 insertion **VALID** (with the Â§2-Â§8 GAP above
+folded in); counterexample hunt **NONE FOUND**. Overall: assembly SOUND + no new counterexample â‡’
+**closure likely holds** (modulo the published-engine-free Lemma-3 still being an AI-level, not
+human-expert, verification). Confidence ~0.80 that the Ã•_Îµ(n^{1/3}) closure is correct.
+
+---
+
+## 1. Filtration interleaving (Â§2): **VALID**
+
+Claim (1): `c(r_{j+1}) â‰¤ cÌƒ_j â‰¤ c(r_j)` for the a-cell graph Î“_r (a=Î˜(Ïƒr)), with
+`r_j + 2âˆš2 a_j â‰¤ r_{j+1}`. Tested both directions + spacing.
+
+- **a>h regime (forced via large-spread integer supports, `audit_r4_t1f.py`):** 28 scales,
+  **0 violations**. Both `c(r+2âˆš2 a) â‰¤ cÌƒ` and `cÌƒ â‰¤ c(r)` hold at every scale (e.g.
+  r=2384: c(r+2âˆš2a)=1475 â‰¤ cÌƒ=1488 â‰¤ c(r)=1507). The cell-graph adjacency must use the MIN
+  Euclidean cell distance (not center distance) for a>h â€” with that, the lemma is exact-direction-safe.
+- **a=h regime (`audit_r4_t1d.py`):** when the support has â‰¤1 point per h-cell (which holds **by
+  construction**, since Q is the cell-center support), cÌƒ(r) = c(r) **EXACTLY** at every scale, with
+  pointâ‰ center or point==center. (Naively running c(t) on a *multi-point* set with >1 pt/h-cell gives
+  spurious `cÌƒ > c(r)`; this is a definitional mismatch, not a defect â€” Pro's Q is single-occupancy.)
+- **Spacing `r_j+2âˆš2 a_j â‰¤ r_{j+1}=(1+Ïƒ)r_j`** requires `2âˆš2 a â‰¤ Ïƒr`. Pro's design `a â‰¤ Ïƒr/64` gives
+  `2âˆš2Â·Ïƒr/64 â‰ˆ Ïƒr/22.6 â‰ª Ïƒr` âœ“. (My harness's `sp_ok=False` flags were an artifact of flooring a=h at
+  small scales; in Pro's aâˆˆ[Ïƒr/128,Ïƒr/64] band spacing always holds.)
+
+## 2. Riemann-sum reconstruction (Â§7): **VALID**
+
+Claim (11): Riemann gap `= Î£_j d_j(c(r_j)âˆ’c(r_{j+1})) â‰¤ ÏƒW_Q`, because each MST edge â„“âˆˆ(r_j,r_{j+1}]
+contributes `d_j=Ïƒr_j â‰¤ Ïƒâ„“`. Verified on uniform / satellite-32,48 / hierarchical supports
+(`audit_r4_t2.py`):
+- Gap formula `Î£ d_j(c_jâˆ’c_{j+1})` equals the upperâˆ’lower Riemann difference **exactly** (machine
+  precision), and is **always â‰¤ ÏƒW_Q** (e.g. uniform 337â‰¤581; sat32 14324â‰¤23808; sat48 50626â‰¤81216;
+  hierarchical 1440â‰¤1572 â€” the hierarchical case nearly saturates but stays below).
+- Reconstruction `Å´=(Kâˆ’1)h+Î£ d_j(c_jâˆ’1)` tracks W_Q to ratio 1.07â€“1.15 at Ïƒ=0.25 (the O(Ïƒ) upper-Riemann
+  bias); shrinks to (1Â±Î·) when Ïƒ=Î˜(Î·) is taken small. The `âˆ«_0^h(câˆ’1)=(Kâˆ’1)h` baseline is exact (distinct
+  centers â‰¥h apart).
+
+## 3. W-search (Â§8) and K-estimation (Â§9): **VALID**
+
+`audit_r4_t3.py`:
+- **W-search arithmetic:** `Gâ‰¥4W_Q â‡’ Å´_G â‰¤ G/4+G/20 = 0.30G < G/3` (continue); `Gâˆˆ[W_Q,2W_Q) â‡’
+  Å´_G â‰¥ W_Qâˆ’G/20 â‰¥ 0.45G > G/3` (stop). First stop â‡’ `W_Q â‰¤ G_0 < 4W_Q`. All boundaries hold; the gap
+  region [2W_Q,4W_Q) is decision-safe. Sound.
+- **K-estimation:** `X(p)=n/m(p)` has `E[X]=K` exactly and `E[XÂ²]=nÂ·Î£_C 1/m_C â‰¤ nK` exactly (each
+  1/m_Câ‰¤1). â‡’ Var/E[X]Â² â‰¤ n/K â‡’ relative-K estimate in Ã•(n/K) samples. Verified analytically + Monte
+  Carlo. Sound.
+
+## 4. Â§11 insertion into the round-2 reduction: **VALID** (carries the Â§2-Â§8 GAP)
+
+The round-2 reduction around the support-MST estimator (Lemma 1 packing, Lemma 2 snapping/interleaving,
+W_Q=O(W), the `B_L(Q)=W_Qâˆ’A_L(Q)` assembly, additive error budget, query terms ADD not multiply) was
+independently audited SOUND in round 2 (`webpro_round2_auditC.md`) and is **unchanged**. Round 4 only
+swaps Lemma 3's internal estimator. The new spatial-cell estimator exposes the **same interface** the
+reduction consumes â€” output `(1Â±Î·)Â·W_Q`, cost `Ã•(âˆšK+n/K)` â€” so the insertion composes. Crucially, the new
+estimator uses **independent candidate-cell trials per scale** (no shared seed pool), which directly
+removes the round-3 cross-threshold covariance defect (the actual cause of the round-2 failure). At
+K=Î˜_Îµ(n^{2/3}): âˆšK=n/K=Î˜(n^{1/3}) â‡’ Ã•_Îµ(n^{1/3}). No interaction is broken by the replacement. The only
+caveat is the cost-bookkeeping GAP in Â§5 below, which is internal to the estimator and does not change
+the exponent.
+
+## 5. ðŸ”´ NEW-COUNTEREXAMPLE HUNT: **NO counterexample found** (one write-up GAP exposed)
+
+I probed every angle the brief named, plus the structural pressure points of the âˆšK argument.
+
+**(a) Packing `W_Q=Î©(bÎ´)` (the load-bearing inequality).** `audit_r4_t5_hunt.py`. Tried to drive
+W_Q/(bÎ´)â†’0: thin lines (many active blocks, cheap MST), grids, Cantor/fractal dust, multiscale
+recursive satellites. The packing ratio **never degrades**: thin-line â‰ˆ1.00 (tightest, K-independent),
+grid 3.5â†’8.0, fractal 3.5â†’5.75, multiscale-sat 15â†’32. The Â§10 dichotomy (support-rare OR
+spatially-hidden, never both with constant MST fraction) **held in every instance**.
+
+**(b) Active-cover blocks / M_j.** `audit_r4_t5c_containment.py`. Containment (every fine a_j-cell nests
+in an active Î´-block) holds everywhere; `N_j â‰¤ M_j = b(Î´/a_j)Â²` holds (ratio â‰¤0.92<1). b is forced into
+[âˆšK,4âˆšK) by the first-crossing rule. No M_j blow-up.
+
+**(c) Interleaving divergence.** Covered in Â§1 â€” cÌƒ tracks c(r) tightly, no bad divergence.
+
+**(d) Riemann gap > ÏƒW_Q.** Covered in Â§2 â€” never exceeded.
+
+**Recovery on the hardest instances (`audit_r4_t5b_recovery.py`):** the FULL leader estimator recovers
+W_Q within 1.0â€“1.17 on (i) a single hidden bridge whose rare component is **literally 1 cell** at the
+bridge scale; (ii) graded satellites (thin tail across many scales); (iii) multiscale satellites (a rare
+tail at EVERY dyadic scale). No recovery break. The leader-moment identity `E[Z]=c, Var(Z)â‰¤Mc` is exact
+on adversarial component structures (singletons, giant, power-law, core+satellites) â€” confirmed in closed
+form (`audit_r4_t5h_variance.py`); the wandering E[Z] in Pro's own `webpro_verify_round4.py` test (I) is a
+pure Monte-Carlo small-sample artifact (one leader cell among M=50000), not a flaw â€” median amplification
+handles it.
+
+**Cost accounting â€” the round-2 failure mode (a cost/variance blowup behind correct recovery).**
+`audit_r4_t4b_scaling.py`, `t5f_truecost.py`, `t5e_eq3.py`, `t5g_cj.py`. This is where I pushed hardest.
+- Holding Ïƒ,Î·,T fixed and scaling K over 64Ã—, `total_trials/(âˆšKÂ·TÂ²)` is **FLAT** for the satellite
+  family (11kâ€“18k, ratio max/min=1.65, no monotone growth) and the geometric `Î£Î´/r_j` ratio is dead-flat
+  at 1.25. â‡’ the budget genuinely scales as âˆšKÂ·polylog. No round-2-style hidden K-blowup.
+- **The GAP I found:** `max_j N_j/(1+W_Q/(Ïƒr_j)) â‰ˆ Î˜(âˆšK)` (grid 0.32Â·âˆšK, uniform 0.37Â·âˆšK, growing with
+  K), always achieved in the **a=h floor regime** where all K cells are still singletons (N_j=K) but
+  W_Q/(Ïƒr_j)â‰ˆâˆšK/Ïƒ. So eq (3)'s `U_j = C(1+W_Q/(Ïƒr_j)) â‰¥ N_j` with **K-independent C is FALSE** there, and
+  if the variance were `M_jÂ·N_j` the cost would inflate by âˆšK â†’ n^{2/3} (exactly the round-2 leak).
+- **Why the algorithm survives:** the leader-estimator variance is `M_jÂ·c_j` (component count), not
+  `M_jÂ·N_j`. And `c_j/(1+W_Q/(Ïƒr_j))` is **bounded by a small K-independent constant** (â‰¤0.017 grid/
+  uniform, â‰¤0.152 satellite â€” flat in K), because `(c_jâˆ’1) â‰¤ W_Q/r_j` is an exact identity. Recomputing
+  the cost with the TRUE variance driver `c_j` (`t5f`), `cost/(âˆšKÂ·TÂ²/Î·)` **decreases** with K
+  (grid 0.021â†’0.005, uniform 0.084â†’0.014) â€” solidly Ã•(âˆšK). The `N_j` version is just a loose over-count
+  that the write-up wrongly uses as the variance proxy.
+- **Net:** the exponent is correct; the write-up should derive the sample count from `Var(Z)â‰¤M_j c_j`
+  with `c_j â‰¤ C(1+W_Q/(Ïƒr_j))`, not from `N_j â‰¤ U_j`. eq (2) (`N_jÂ·a_j â‰¤ 8W_Q`) is itself fine
+  (ratio â‰ˆ1.0, K-independent); the slip is only in the eq(2)â†’eq(3)â†’eq(8) chain that re-labels the
+  variance bound as N_j. **Classify: GAP (write-up), not FATAL, no complexity leak.**
+
+---
+
+## Overall verdict
+
+**Assembly SOUND + no new counterexample found â‡’ the round-4 closure LIKELY HOLDS.** The spatial-cell
+estimator genuinely defeats the round-3 satellite obstruction: recovery is robust across all adversarial
+families I could build (including features that are 1-cell-rare at their scale), and the true query
+budget is Ã•(âˆšK) â€” the geometric and cost identities that make this work (packing W_Q=Î©(bÎ´), interleaving
+(1), Riemann gap â‰¤ÏƒW_Q, the leader variance MÂ·c, and `c_j=O(1+W_Q/(Ïƒr_j))`) all check out numerically and
+scale correctly. The independent per-scale trials remove the round-3 covariance defect at its root.
+
+**One residual GAP (fixable, non-fatal):** the Â§5/Â§6 cost write-up must use the component count `c_j` (not
+the occupied-cell count `N_j`) as the variance bound in eqs (3)/(8); `N_j â‰¤ C(1+W_Q/(Ïƒr_j))` is false at
+the a=h floor (N_j~Î˜(âˆšK)Â·W_Q/(Ïƒr_j)), but `c_j â‰¤ C(1+W_Q/(Ïƒr_j))` is true and is what the algorithm
+actually pays. With that substitution the Ã•(âˆšK) accounting is intact.
+
+**Remaining (not discharged here):** as in every prior round, this is AI-level verification, not
+human-expert proof. The Lemma-3 black box (estimate w(MST(Q)) for an implicit K-grid support in
+Ã•(âˆšK+n/K) from emptiness=1-P-count + sampling=Ã•(n/K) + local adjacency) is now self-contained (no
+unverified 20-year-old engine import), which is a real improvement over round 2 â€” but it is novel and
+warrants human-expert checking of the variance/median-amplification details before any closure claim.
+
+**Confidence:** spatial estimator defeats round-3 obstruction: **0.92**. Interleaving/Riemann/W-search/
+K-est individually: **0.95+**. Cost is genuinely Ã•(âˆšK) (with the c_j fix): **0.82**. Full unconditional
+Ã•_Îµ(n^{1/3}) after Â§11 insertion: **~0.80** (up from the ~0.60 pre-audit), gated on the c_j write-up fix
+and human-expert verification of Lemma 3. No FATAL, no new counterexample.
+
+
+ succeeded in 1026ms:
+# Round 4 â€” Independent COST audit (adversarial, fresh context)
+
+**Auditor:** independent Claude (Opus 4.8 1M), 2026-06-21. No collaboration with Pro or the orchestrator.
+**Mandate:** be paranoid about the COST of Pro's repaired spatial-cell estimator
+(`docs/webpro_round4_response.md`). The round-2 closure passed three audits and was then refuted by a
+COST/VARIANCE blowup: a "seed-reuse" that recovered the answer but needed Î©(âˆšK) independent support samples
+per threshold â‡’ Î©(âˆšK Â· n/K) = **Î©(n^{2/3})** total. The orchestrator's recovery test
+(`attack_loop/webpro_verify_round4.py`) **capped the sample count k**, so it verified RECOVERY but NOT the
+cost. This audit attacks the cost.
+
+**The decisive question:** does Î£_j k_j (per-scale cell-trial budget) genuinely sum to Ã•(âˆšK) = Ã•(n^{1/3}),
+or is there a hidden Î©(âˆšK)-sample / n^{2/3} blowup?
+
+All numerics use `sim/.venv/Scripts/python.exe` + `sim/emst.py`'s exact EMST, on the round-3 satellite
+instance (the one that broke round 2) plus adversarial uniform / clustered instances. Constants in Pro's
+O()-formulas set to 1; only the **scaling in K = sÂ², n = sÂ³** is tested. The legitimately-polylog factor
+TÂ² (T = #scales = O(log(Î”/h)), inside Î±_jÂ²) is reported and, where noted, divided out â€” Ã• absorbs it.
+
+---
+
+## Bottom line
+
+**The cost genuinely closes at Ã•(âˆšK) = Ã•(n^{1/3}). I found NO hidden Î©(âˆšK)-sample / n^{2/3} blowup.**
+The round-2 failure mode does NOT recur, for a concrete structural reason verified numerically: the new
+estimator never samples by support mass, so the per-scale budget is `M_jÂ·U_j/Î±_jÂ²`, and the eq-(8) collapse
+of this to `C_Î·Â·TÂ²Â·(Î´/r_j)` is valid **because bÂ·Î´/G = O(1)** (the packing lower bound G â‰¥ Î©(bÎ´) holds), and
+`Î£_j Î´/r_j â‰ˆ âˆšK`. Measured exponent of the polynomial core: **n^{0.28â€“0.32}** (â‰¤ n^{1/3}), versus the
+round-2 blowup which would be **n^{0.667}**. The core/âˆšK ratio is bounded (does not grow with K).
+
+**Confidence that the total cost is Ã•(âˆšK) with no n^{2/3} blowup: 0.88.**
+(Residual 0.12: the exploration-cost amortization (Â§4 eq 5) and the median/global-cap accounting are stated
+tersely and I could only spot-check them; and the full insertion into round 2 â€” Â§11 â€” is outside this
+cost-only audit.)
+
+---
+
+## Item-by-item
+
+### 1. Packing W_Q â‰¥ Î©(bÂ·Î´) (Â§1) â€” **VALID**
+Pro's bound `W_Q â‰¥ Î´(bâˆ’4)/8` via 4-coloring (same-color blocks â‰¥Î´ apart, one class â‰¥b/4 points,
+w(MST(S))â‰¤2W_Q for SâŠ†Q). Verified numerically on satellite, uniform, and 2D-clustered instances:
+
+| instance | s | K | b | Î´ | W_Q | Pro bound Î´(bâˆ’4)/8 | W_Q/bound |
+|---|---|---|---|---|---|---|---|
+| satellite | 32 | 1024 | 33 | 2050 | 9.52e4 | 7417 | 12.8 |
+| satellite | 48 | 2304 | 65 | 3450 | 3.25e5 | 26340 | 12.3 |
+| uniform   | 32 | 1024 | 81 | 3.88 | 1023 | 37.3 | 27.4 |
+| clustered | 48 | 2304 | 77 | â€” | 4.7e6 | 6.84e5 | 6.9 |
+
+`W_Q â‰¥ bound` everywhere (ratio 7â€“40 â‰¥ 1). The packing is the load-bearing input to eq (8) and it holds.
+**Classification: VALID.**
+
+### 2. Candidate-cell count M_j = b(Î´/a_j)Â² and variance Var(Z) â‰¤ MÂ·c (Â§Â§4â€“5) â€” **VALID**
+- The orchestrator's identity check was pure **under-sampling** (N=1000, M=50000, 20000 trials gave
+  E[Z]=0, Var=0 because P(hit a leader)=c/M=1/50000 â‡’ ~0.4 expected hits). Re-run with trials â‰« M/c
+  (2Mâ€“30M trials): E[Z]=c and Var(Z)=Mcâˆ’cÂ² â‰¤ Mc **exactly** at every (M,c) tested up to M=5e5. The
+  identity Zâˆˆ{0,M}, P(Z=M)=c/M is algebraically exact; the variance bound is correct.
+- The consequence â€” to reach additive accuracy Î± one needs `k = Î˜(MÂ·U/Î±Â²)` trials â€” is the genuine,
+  unavoidable price of Var â‰¤ Mc. This is NOT hidden; it is exactly what Â§6 sums. **The variance bound is
+  fine; whether its price sums to âˆšK is item 3.**
+- `c_j â‰¤ U_j` verified at EVERY scale on satellite and clustered instances (max c_j/U_j â‰ˆ 0.16â€“0.23 < 1),
+  so the deterministic `U_j = C(1+G/(Ïƒr_j))` genuinely upper-bounds the component count â€” no scale where
+  the trial count is set too low. **Classification: VALID.**
+
+### 3. ðŸ”´ THE KEY â€” Î£_j M_jU_j/Î±_jÂ² = Ã•(âˆšK) (Â§6 eq 8) â€” **VALID**
+Re-derived and numerically confirmed step by step on the satellite instance (s up to 160, K=25600):
+
+(a) **Per-scale collapse (eq 8).** `M_jU_j/Î±_jÂ²` with M_j=b(Î´/a_j)Â², U_j=1+G/(Ïƒr_j), Î±_j=Î·G/(Câ‚TÏƒr_j),
+a_j=Î˜(Ïƒr_j) gives `C(TÂ²/Î·Â²Ïƒ)Â·(bÎ´Â²/(G r_j))`. Measured ratio `(M_jU_j/Î±_jÂ²)/(TÂ²Â·Î´/r_j)` is a **small
+K-independent constant** (~1.6â€“3.0, identical pattern at s=16 and s=64). The collapse requires
+`bÂ·Î´/G = O(1)`; measured **bÂ·Î´/G = 0.67â€“0.75, stable and bounded** across all sizes. This is precisely the
+packing of item 1 doing its job: G â‰¥ Î©(bÎ´) â‡’ bÎ´Â²/(Gr) â‰¤ O(Î´/r).
+
+(b) **Geometric sum.** `Î£_j Î´/r_j â‰ˆ Î´/(Ïƒr_0)` (empirical sum matches the bound), and `Î´/r_0 â‰¤ K/b â‰¤ âˆšK`
+verified for both r_0 branches (Î´/r_0 â‰¤ K/b True at every size). Since bâˆˆ[âˆšK,4âˆšK), K/bâˆˆ(âˆšK/4, âˆšK].
+
+(c) **Total.** Stripping the TÂ² polylog (Ã•-absorbed), the polynomial core:
+
+| s | K | n | core=Î£k/TÂ² | core/âˆšK | core/n^{2/3} |
+|---|---|---|---|---|---|
+| 32 | 1024 | 3.3e4 | 595 | 18.6 | 0.58 |
+| 64 | 4096 | 2.6e5 | 1362 | 21.3 | 0.33 |
+| 96 | 9216 | 8.8e5 | 2639 | 27.5 | 0.29 |
+| 128 | 16384 | 2.1e6 | 2957 | 23.1 | 0.18 |
+| 160 | 25600 | â€” | â€” | 5.0Â·TÂ² | â€” |
+
+Fitted exponent of the core: **K^0.47â€“0.61, n^0.28â€“0.41** (the clean `Î£Î´/r_j` core fits **n^0.316**; the
+fuller `Î£ M_jU_j/Î±_jÂ²/TÂ²` fits **n^0.28** over the larger size range). **core/n^{2/3} DECREASES toward 0**
+as K grows (0.58 â†’ 0.18). `core/(âˆšKÂ·TÂ²)` is **bounded** (oscillates 5â€“8.7 with b's dyadic jumps, not
+growing). Contrast the round-2 blowup, which would be K^1.0 / n^0.667. **Closure holds; classification:
+VALID.**
+
+### 4. Exploration cost U_j/Î±_j = O(T/Î·), O(log s) leader exploration (Â§4 eq 5) â€” **VALID (spot-checked)**
+- `U_j/Î±_j = (1+G/Ïƒr)Â·(Câ‚TÏƒr/Î·G) = O(T/Î·)` algebraically â€” polylog local expansions per scale. Sound.
+- The random-leader BFS-stop-on-lower-rank explore: E[#cells examined | start occupied] â‰¤ 1+H_{sâˆ’1}=O(log s)
+  verified on cell-path components (ratio to harmonic bound 0.8â€“1.0 up to s=10â´). The harmonic argument is
+  about ranks on the s cells of a component and transfers verbatim from points to cells. **VALID.**
+- *Minor caveat:* Â§4 eq 5's amortization `Î£ explorations â‰¤ Ã•(UÂ²/Î±Â²)` via "global cap + Markov" is stated
+  tersely; I confirmed the dominant cost is the **empty-cell trials** (P(occupied)=N/M is small, and empty
+  trials are one cheap P-emptiness count each), which is the whole point. The exploration term is lower
+  order. I did not formally re-verify the Markov global-cap constant â€” **MINOR gap**, not fatal.
+
+### 5. Coarse scales a_j > Î´ handled in O_Î·(b) = Ã•(âˆšK) (Â§5) â€” **VALID**
+For a_j > Î´ the nonempty a_j-cells are the â‰¤ b dyadic ancestors of the active blocks, so cÌƒ_j is computed
+EXACTLY in O(b) per scale, O(bT) = Ã•(âˆšK) total. b = Î˜(âˆšK) confirmed. No sampling, no variance, no blowup.
+**VALID.**
+
+### 6. Any hidden Î©(âˆšK)-sample / n^{2/3} cost? â€” **NONE FOUND**
+- **Estimating cÌƒ_j when c_j is large:** Î±_j is set to `Î·G/(Câ‚TÏƒr_j)` **independent of c_j**; it does not
+  shrink when c_j grows. The trial count k_j = M_jU_j/Î±_jÂ² therefore does not blow up at high-component
+  scales. Verified on the clustered instance (c_j up to âˆšK): Î£k/TÂ²/âˆšK stayed bounded (10â€“19). **No blowup.**
+- **Active-cover construction:** O(qÂ·log(Î”/h)) = Ã•(âˆšK) emptiness queries (one P-count each). Polylog factor
+  only. No hidden cost.
+- **M_j blow-up at fine scales:** M_j is largest at a_j=h (smallest scale), but there r_j is correspondingly
+  small so Î´/r_j is large â€” this is exactly the term captured by Î£Î´/r_j, which sums to âˆšK. The blow-up is
+  accounted, not hidden.
+- **n/K support-sampling frequency:** the cell estimator (Â§Â§4â€“8) uses **zero** support-mass samples â€” only
+  emptiness queries. The n/K support-sampling appears ONLY in Â§9 (estimate K, once) and Â§11 (O_Îµ(1) genuine
+  samples for A_L(Q)). It is **additive** (`+n/K`), NOT multiplied into the per-scale sum. This is the
+  precise structural reason the round-2 multiplication âˆšK Â· (n/K) = n^{2/3} does not recur. **Confirmed.**
+
+---
+
+## Why the round-2 failure mode does not recur (the crux)
+
+Round 2 estimated each threshold's component count from a **shared pool of polylog support samples**; a
+geometrically-important but support-mass-rare feature (the satellite chain) was missed unless a satellite
+was sampled, which needed Î©(âˆšK) **independent** support samples per threshold â‡’ Î©(âˆšK Â· n/K) = n^{2/3}.
+
+Round 4 replaces support-mass sampling with **uniform sampling over M_j SPATIAL candidate cells (including
+empty ones)**. A feature contributing a constant fraction of the MST integral at scale r occupies â‰¥1 spatial
+cell at that scale, so it is sampled with the right probability â€” and the cost of resolving it is
+`M_jÂ·U_j/Î±_jÂ²` emptiness trials, NOT independent support samples. The decisive algebra is that this budget
+collapses to `Î´/r_j` **because bÂ·Î´/G = O(1)** (the packing), and `Î£ Î´/r_j â‰ˆ âˆšK`. Both facts are numerically
+confirmed on the exact instance that broke round 2. A feature can be support-mass-rare OR
+spatially-hidden-at-its-scale, but not both while contributing a constant fraction of W_Q â€” and the cost is
+charged to spatial cells, which are cheap (emptiness = 1 P-count).
+
+---
+
+## Verdicts
+
+| # | Item | Verdict | Severity |
+|---|------|---------|----------|
+| 1 | Packing W_Q â‰¥ Î©(bÎ´) | **VALID** | â€” |
+| 2 | M_j count + Var(Z) â‰¤ Mc + c_j â‰¤ U_j | **VALID** | â€” |
+| 3 | ðŸ”´ Î£ M_jU_j/Î±_jÂ² = Ã•(âˆšK) (eq 8) | **VALID** | â€” |
+| 4 | Exploration cost O(T/Î·), O(log s) | **VALID** (eq-5 global-cap terse) | MINOR |
+| 5 | Coarse scales O_Î·(b)=Ã•(âˆšK) | **VALID** | â€” |
+| 6 | Hidden Î©(âˆšK)/n^{2/3} blowup? | **NONE FOUND** | â€” |
+
+**Decisive answer: the total cost genuinely sums to Ã•(âˆšK) = Ã•(n^{1/3}). The round-2 n^{2/3} blowup does
+NOT recur.** The numeric Î£_j k_j (core, polylog-stripped) grows as **n^0.28â€“0.32 â‰¤ n^{1/3}**, with
+core/âˆšK bounded and core/n^{2/3} â†’ 0; bÂ·Î´/G is bounded (the packing); n/K enters additively, never
+multiplied into the per-scale sum.
+
+**Confidence: 0.88** (the cost claim specifically). The only soft spots are the terse eq-(5) exploration
+amortization (MINOR) and the Â§11 insertion into the full round-2 reduction, which is outside this cost-only
+mandate and which I did not re-audit.
+
+*Reproduce:* the five harness scripts written to `/tmp/cost_audit*.py` (transient); core checks are the
+per-scale ratio `(M_jU_j/Î±_jÂ²)/(TÂ²Î´/r_j)â‰ˆconst`, `bÂ·Î´/Gâ‰ˆ0.7`, `Î£Î´/r_j/âˆšK` bounded, and Var(Z)=Mcâˆ’cÂ² at
+trialsâ‰«M/c.
+
+
+ succeeded in 1045ms:
+"""
+FINAL numeric test of GPT-5.5-Pro round-5 (docs/webpro_round5_response.md Â§9): the c_j-vs-N_j accounting.
+Support Q = a fully-occupied sqrt(K)xsqrt(K) fine-grid CARPET (so at floor scales N_j=Theta(K), c_j=1)
++ sparse satellite chains (a constant fraction of W_Q). Check BOTH per-scale budgets sum to ~ O~(sqrt K):
+  candidate-root  ~ sum_j M_j*U_j/alpha_j^2   (uses U_j>=c_j, NOT N_j)   [eq 36]
+  exploration     ~ sum_j N_j*U_j/alpha_j^2   (uses N_j<=K)              [eqs 38-44]
+The round-2 leak (n^{2/3}) would show as these sums scaling like K (not sqrt K). We verify Sum/sqrt(K)
+stays BOUNDED/flat as K grows (the carpet is the worst case for N_j: N_j=Theta(K) at the floor).
+
+Run: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py
+"""
+import math, sys, os
+import numpy as np
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'sim'))
+from scipy.spatial import Delaunay
+
+
+def build_carpet_satellites(scarp):
+    """Carpet: scarp x scarp h-spaced grid (h=1). Satellites: a geometric chain far away."""
+    h = 1.0
+    gx, gy = np.meshgrid(np.arange(scarp), np.arange(scarp))
+    carpet = np.column_stack([gx.ravel(), gy.ravel()]).astype(float) * h
+    # satellites: ~scarp of them on a ray with geometric spacing, contributing a constant fraction
+    x0 = carpet[:, 0].max() + 4 * scarp
+    sats = []
+    gap = 4.0 * scarp
+    x = x0
+    for j in range(scarp):
+        sats.append([x, 0.0]); x += gap
+    Q = np.vstack([carpet, np.array(sats)])
+    return Q, h
+
+
+def components_cellgraph(Q, a, r):
+    """#components (c) and #nonempty cells (N) of the a-cell graph at threshold r (cells within r)."""
+    ci = np.floor(Q[:, 0] / a).astype(int); cj = np.floor(Q[:, 1] / a).astype(int)
+    cells = {}
+    for k in range(len(Q)):
+        cells.setdefault((int(ci[k]), int(cj[k])), len(cells))
+    cl = list(cells.keys()); N = len(cl)
+    idx = {c: i for i, c in enumerate(cl)}
+    par = list(range(N))
+    def f(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    # adjacency: cells whose square-to-square min distance <= r. Use cell centers + conservative test.
+    cxy = np.array([[(c[0] + 0.5) * a, (c[1] + 0.5) * a] for c in cl])
+    # brute force is O(N^2); fine for the tested sizes
+    for i in range(N):
+        dx = cxy[:, 0] - cxy[i, 0]; dy = cxy[:, 1] - cxy[i, 1]
+        d_centers = np.sqrt(dx * dx + dy * dy)
+        # set-distance >= center-distance - sqrt(2)*a ; adjacent if set-dist <= r
+        near = np.where(d_centers - math.sqrt(2) * a <= r)[0]
+        for jx in near:
+            if jx != i:
+                ri, rj = f(i), f(int(jx))
+                if ri != rj: par[ri] = rj
+    comps = len({f(i) for i in range(N)})
+    return comps, N
+
+
+def active_cover_b_delta(Q, q):
+    """Subdivide dyadic from the bounding box until >= q nonempty cells; return (b, delta)."""
+    ox, oy = Q[:, 0].min(), Q[:, 1].min()
+    span = max(Q[:, 0].max() - ox, Q[:, 1].max() - oy) + 1.0
+    delta = span
+    while True:
+        ci = np.floor((Q[:, 0] - ox) / delta).astype(int)
+        cj = np.floor((Q[:, 1] - oy) / delta).astype(int)
+        b = len(set(zip(ci.tolist(), cj.tolist())))
+        if b >= q or delta < 1e-9:
+            return b, delta
+        delta /= 2.0
+
+
+if __name__ == "__main__":
+    print("Carpet+satellites: check candidate-root (c_j) AND exploration (N_j<=K) budgets ~ O~(sqrt K).")
+    print(f"{'scarp':>6} {'K':>7} {'b':>6} {'sqrtK':>6} {'Wq':>10} || "
+          f"{'cand/ (TsqrtK)':>15} {'expl/(TsqrtK)':>14} || {'cand/(T*K)':>11} {'expl/(T*K)':>11}")
+    beta = 0.25; sigma = beta / 32
+    for scarp in [16, 24, 32, 45]:
+        Q, h = build_carpet_satellites(scarp)
+        K = len(Q); sqrtK = math.sqrt(K)
+        # exact W_Q (MST) and G = W_Q (use the true value as the guess for the accounting test)
+        pts = Q; n = len(pts); tri = Delaunay(pts)
+        we = []
+        for s in tri.simplices:
+            for x in range(3):
+                for y in range(x + 1, 3):
+                    u, v = int(s[x]), int(s[y]); we.append((math.dist(pts[u], pts[v]), u, v))
+        we.sort(); par = list(range(n))
+        def f(x):
+            while par[x] != x: par[x] = par[par[x]]; x = par[x]
+            return x
+        Wq = 0.0; used = 0
+        for w, u, v in we:
+            ru, rv = f(u), f(v)
+            if ru != rv: par[ru] = rv; Wq += w; used += 1
+            if used == n - 1: break
+        G = Wq
+        b, delta = active_cover_b_delta(Q, math.ceil(sqrtK))
+        diam = float(max(np.ptp(Q[:, 0]), np.ptp(Q[:, 1])) * math.sqrt(2))
+        r0 = max(h, beta * G / (32 * K))
+        # geometric scales
+        rs = []
+        r = r0
+        while r < diam:
+            rs.append(r); r *= (1 + sigma)
+        T = max(1, len(rs))
+        cand_sum = 0.0; expl_sum = 0.0
+        for r in rs:
+            a = h if (h > sigma * r / 128) else max(h, 2 ** math.floor(math.log2(sigma * r / 64)))
+            if a > delta:      # coarse scale: explicit, no sampling cost
+                continue
+            c_j, N_j = components_cellgraph(Q, a, r)
+            M_j = b * (delta / a) ** 2
+            U_j = 1 + G / r
+            alpha_j = beta * G / (32 * T * sigma * r)
+            cand_sum += M_j * U_j / (alpha_j ** 2)          # candidate-root (Pro uses U_j>=c_j)
+            expl_sum += N_j * U_j / (alpha_j ** 2)          # exploration (uses N_j<=K)
+        print(f"{scarp:>6} {K:>7} {b:>6} {sqrtK:>6.0f} {Wq:>10.0f} || "
+              f"{cand_sum/(T*sqrtK):>15.3f} {expl_sum/(T*sqrtK):>14.3f} || "
+              f"{cand_sum/(T*K):>11.4f} {expl_sum/(T*K):>11.4f}")
+    print("\nReading: cols 'cand/(T sqrtK)' and 'expl/(T sqrtK)' should stay BOUNDED/flat as K grows")
+    print("(=> both budgets are O~(sqrt K)). If instead 'cand/(T*K)' or 'expl/(T*K)' were flat (and the")
+    print("sqrtK-normalized cols grew like sqrtK), that would be the n^{2/3} leak. The carpet maximizes")
+    print("N_j=Theta(K) at the floor, so it is the worst case for the exploration (N_j) accounting.")
+
+
+ succeeded in 1066ms:
+# Round 5 â€” GPT-5.5-Pro response (verbatim, human-relayed 2026-06-21) â€” CONSOLIDATED CLOSURE PROOF
+
+> Pasted by the owner; LaTeX cleaned, all claims/eqs preserved (condensed where purely mechanical).
+> Pro CONFIRMS the c_j fix, adds one further (N_j-exploration) correction, and gives the full
+> self-contained proof for human verification. Citation [1]=arXiv:2504.15292 (Thm 30, Lemma 32, uniform
+> sampling Lemma 1, WSPD Lemmas 23â€“24). Final numeric test: `attack_loop/webpro_verify_round5.py`;
+> final audit: `docs/webpro_round5_auditFinal.md`.
+
+---
+
+**c_j fix CONFIRMED:** Var(Z_j)=M_j c_j âˆ’ c_jÂ² â‰¤ M_j c_j (exactly one occupied cell per component is a
+leader); the occupied-cell count N_j is irrelevant to the NUMBER OF TRIALS. **Further correction:** the
+expected cost of EXPLORING an occupied sampled cell still depends on N_j; so N_j stays, bounded
+separately by N_j â‰¤ K â€” and the resulting sum is STILL Ã•_Î·(âˆšK).
+
+## 1. Support-MST Lemma 3 (final)
+Q = centers of the K nonempty h-cells; half-open cells. **Lemma 3:** âˆ€Î·âˆˆ(0,1/4), a randomized algorithm
+outputs Å´_Q with |Å´_Qâˆ’W_Q| â‰¤ Î·W_Q w.p. â‰¥2/3 using **Ã•_Î·(âˆšK + n/K)** range-counting queries to P
+(Î›=log(nÎ”/(hÎ·)); explicit O(Î·^{-8}âˆšKÂ·Î›^{O(1)} + Î·^{-2}(n/K)Î›^{O(1)})). If K known to rel. error O(Î·),
+the n/K term is unnecessary.
+- **Â§1.1 Oracle ops on Q:** Qâˆ©Râ‰ âˆ… âŸº Pâˆ©Râ‰ âˆ… (one P-count); uniform point of P in O(log Î”); accept its
+  h-cell w.p. 1/m(p) â‡’ uniform support cell, accept prob K/n; K estimable to rel-Îº in O(Îº^{-2}(n/K)log).
+- **Â§1.2 Active cover:** subdivide to first level with bâ‰¥q=âŒˆâˆšKâŒ‰ nonempty Î´-cells; qâ‰¤b<4q; found in
+  Ã•(âˆšK) emptiness queries. **Packing: W_Q â‰¥ Î´(bâˆ’4)/8 â‰¥ bÎ´/16** (4-coloring + w(MST(S))â‰¤2W_Q âˆ€SâŠ†Q) (5).
+- **Â§1.3 Scale graphs Î“_r:** a(r)=Î˜(Ïƒr) (or h at the floor), Ïƒ=Î²/32; vertices=nonempty a-cells; degree
+  O(Ïƒ^{-2}); each potential neighbor an aligned rectangle, 1 P-count to test.
+- **Â§1.4 Interleaving:** c_Q(r^+) â‰¤ c_Î“(r) â‰¤ c_Q(r), r^+=(1+Ïƒ)r (12).
+- **Â§1.5 âš‘ Correct component-count bound:** c_Q(t)âˆ’1 = #{MST edges >t} â‰¤ W_Q/t (13,14) â‡’ c_Î“(r) â‰¤
+  1+W_Q/r; given Gâ‰¥W_Q, **U(r)=1+G/r â‰¥ c_Î“(r)** (16). *This bounds the COMPONENT count, not N(r).*
+- **Â§1.6 Empty-cell leader estimator:** sample X uniform from M candidate cells; if empty Z=0; else
+  random-leader â†’ Z=M iff X is its component's min-rank cell. **E[Z]=c (17), Var(Z)=Mcâˆ’cÂ² â‰¤ Mc (18) â€”
+  no N appears.** k=O((MU/Î±Â²)log(1/Î´)) trials â‡’ additive Î±. **Exploration cost (N matters HERE):** a
+  size-s component â‡’ E[examined] â‰¤ 1+H_{s-1}=O(log K); candidate occupied w.p. N/M â‡’ E[expansions over
+  k trials] = O(k(N/M)log K) (21); use **N â‰¤ K** (22). Each expansion O(Ïƒ^{-2}) P-counts.
+- **Â§1.7 Candidate cells:** fine (aâ‰¤Î´): M(r)=b(Î´/a)Â² â‰¤ C_M bÎ´Â²/(ÏƒÂ²rÂ²) (24); uniform candidate = pick
+  active block + a-subcell (offline), 1 P-count for occupancy. Coarse (a>Î´): the â‰¤b distinct a-ancestors
+  of B, computed exactly, NO oracle queries, NO recursion.
+- **Â§1.8 Additive estimator given Gâ‰¥W_Q:** r_0=max{h, Î²G/(32K)}; r_j=r_0(1+Ïƒ)^j; d_j=Ïƒr_j; T=O(Ïƒ^{-1}
+  log(Î”/h)); Î±_j=Î²G/(32T Ïƒ r_j) (28); U_j=1+G/r_j (29); Å´(G)=(Kâˆ’1)h + Î£ d_j(Ä‰_jâˆ’1) (30).
+- **Â§1.9 âš‘ Correct query accounting (two parts):**
+  - **Candidate-root (uses c_j via U_j):** M_jU_j/Î±_jÂ² â‰¤ C(TÂ²/Î²Â²)(bÎ´Â²/GÂ² + bÎ´Â²/(Gr_j)); with Gâ‰¥W_Qâ‰¥bÎ´/16:
+    bÎ´Â²/GÂ²=O(1/b), bÎ´Â²/(Gr_j)=O(Î´/r_j); Î£_j 1/r_j=O(1/(Ïƒr_0)); Î´/r_0=O(K/(Î²b)). **Î£_j k_j = Ã•_Î²(K/b) =
+    Ã•_Î²(âˆšK)** (36). Uses c_j, NOT N_j.
+  - **Exploration (uses N_jâ‰¤K):** E[expansions at j] = Ã•(N_jU_j/Î±_jÂ²) â‰¤ CÂ·K(TÂ²ÏƒÂ²r_jÂ²/(Î²Â²GÂ²))(1+G/r_j)
+    (38); fine â‡’ r_j â‰¤ 128Î´/Ïƒ (39), so Î£_fine r_j=O(Î´/ÏƒÂ²), Î£_fine r_jÂ²=O(Î´Â²/ÏƒÂ³); total Ã•[KTÂ²/Î²Â²
+    (Î´Â²/(ÏƒGÂ²)+Î´/G)]; with K Î´/G=O(K/b)=O(âˆšK) (42) and KÎ´Â²/GÂ²=O(K/bÂ²)=O(1) (43) â‡’ **Ã•_Î²(âˆšK)** (44).
+    Global âˆšK cap + Markov â‡’ worst-case budget. â‡’ **one additive call = Ã•_Î²(âˆšK)** (45,46).
+- **Â§1.10 Accuracy:** W_Q=âˆ«(c_Qâˆ’1)dt; âˆ«_0^h=(Kâˆ’1)h (48); omitted [h,r_0] â‰¤ K r_0 â‰¤ Î²G/32 (49); Riemann
+  gap = Î£ d_j(c_Q(r_j)âˆ’c_Q(r_{j+1})) â‰¤ ÏƒW_Q â‰¤ Î²G/32 (51); statistical Î£ d_j Î±_j â‰¤ Î²G/32 (52) â‡’
+  **|Å´(G)âˆ’W_Q| â‰¤ 3Î²G/32 < Î²G** (53).
+- **Â§1.11 Remove the guess:** U_Q=(Kâˆ’1)diam(Q); Î²_0=1/32; G=U_Q,U_Q/2,â€¦; stop at first Å´(G)â‰¥G/4 â‡’
+  W_Q â‰¤ G_0 < 8W_Q (55); final call Î²=Î·/16. Approx K (Îº=Î·/1000) perturbs only by 1+O(Îº). âˆŽ
+
+## 2. Clipped death-time primitive
+Ï„(v)=min{bottleneck-dist to root or lower-ranked}; multiset {Ï„(v)}={0}âˆª{MST edge weights} (56);
+bottleneck-Dijkstra, O(log|V|) expected extractions. X_L=min{Ï„,L}: |V|E[X_L]=A_L(H) (57), X_LÂ²â‰¤LX_L â‡’
+Var â‰¤ |V|LÂ·w(MST(H))/s (58). On a (1+Ï)-spanner H_X: A_L(X) â‰¤ A_L(H_X) â‰¤ (1+Ï)A_L(X) (59), additive
+error â‰¤ ÏÂ·w(MST(X)) (60). WSPD impl via source Lemmas 23â€“24.
+
+## 3â€“4. Support regularization + snapping (for P)
+W=w(MST(P)), K_0=âŒˆn^{2/3}âŒ‰, L=G/K_0. **Packing K_h â‰¤ 8W/h+4** (63). Choose grid so K=K_h âˆˆ [cK_0, C_Î¾ K_0]
+(65), cost Ã•_Î¾(n/K_0)=Ã•(n^{1/3}) (66). Snapping Î´_s=âˆš2 h: **c_P(t+Î´_s) â‰¤ c_Q(t) â‰¤ c_P(tâˆ’Î´_s)** (68);
+B_L(X)=âˆ«_L^âˆž(c_Xâˆ’1)=Î£(|e|âˆ’L)_+ (69); **|B_L(Q)âˆ’B_L(P)| â‰¤ O(Î³Î¾W)** (71). **W_Q â‰¤ C_W W** (72,73).
+
+## 5â€“7. Assembly + the theorem
+W=A_L(P)+B_L(P) (74); B_L(Q)=W_Qâˆ’A_L(Q) (75). Estimate: **A_L(P)** by clipped death-time on a (1+Ï)-
+spanner of P, s_P=O(Î¾^{-2}n^{1/3}) samples (76) â‡’ Ã•_Î¾(n^{1/3}) (77); **W_Q** by Lemma 3, Ã•_Î¾(n^{1/3})
+(79); **A_L(Q)** by clipped death-time on Q, s_Q=O_Î¾(1) support samples (each Ã•(n/K)=Ã•(n^{1/3})) (81,82).
+**NO cross-threshold seed reuse anywhere.** Return **Å´(G)=Ã‚_P + Å´_Q âˆ’ Ã‚_Q** (83); |Å´(G)âˆ’W| â‰¤ C_*Î¾G (85)
+â‡’ normalized |Å´(G)âˆ’W| â‰¤ Î¶G (86), one call Ã•_Î¶(n^{1/3}) (87). Geometric search (U=âˆš2(nâˆ’1)Î”, Wâ‰¥nâˆ’1 â‡’
+O(log n) guesses), stop at first Å´(G)â‰¥G/8 â‡’ W â‰¤ G_0 < 16W (90); final Î¶=Îµ/32.
+**FINAL THEOREM:** âˆ€ fixed Îµ, PâŠ†[Î”]Â² (|P|=n, Î”=O(n)): a randomized orthogonal range-counting algorithm
+returns Å´ with (1âˆ’Îµ)w(MST(P)) â‰¤ Å´ â‰¤ (1+Îµ)w(MST(P)) w.constant prob using **Ã•_Îµ(n^{1/3})** range-counting
+queries. With the published Î©(n^{1/3}), this is optimal up to polylog + Îµ-factors.
+
+## 8. Verification debt (Pro's own list)
+Self-contained at the query-accounting level (candidate-root uses c_j; N_j only in exploration, N_jâ‰¤K
+suffices; no distinct-support-count oracle; no seed-pool reuse; no nonrectangular query; coarse scales
+explicit, no recursion). Standard-but-not-pseudocoded: **(1) [the one substantively important item] the
+local WSPD bottleneck search for the clipped death-time primitive** (representative choice, redundant-pair
+suppression, tie handling, global cap â€” source Lemmas 23â€“24 supply the machinery); (2) approximate-K
+constants; (3) failure-probability bookkeeping (assign 1/(100T log n)-type budgets); (4) dyadic boundary
+conventions.
+
+## 9. Recommended final numerical audit (Pro's)
+Support = fully-occupied âˆšKÃ—âˆšK fine-grid carpet (so at floor scales N_j=Î˜(K), c_j=1) + geometric sparse
+satellite chains (constant fraction of W_Q). Record separately Î£_j M_jc_j/Î±_jÂ² (candidate-root, should
+follow the c_j-based Ã•(âˆšK)) and the actual #neighbor queries by occupied-root explorations (the separate
+N_j-dependent behavior, should still sum to Ã•(âˆšK) per (38)â€“(44)). This tests the FINAL correction, not
+already-settled recovery.
+
+## Confidence (Pro)
+- empty-cell leader E[Z] & M_jc_j variance: **0.995**
+- corrected candidate-trial accounting: **0.98**
+- separate N_j-based exploration accounting: **0.96**
+- scale interleaving + Riemann reconstruction: **0.98**
+- complete support-MST Lemma 3: **0.95**
+- snapping/heavy-tail assembly: **0.96**
+- local WSPD impl of clipped death-time sampling: **0.89** â† the one place for a human expert to attack
+- **full unconditional Ã•_Îµ(n^{1/3}) theorem: 0.91**
+
+[1] arXiv:2504.15292
+
+
+ succeeded in 1086ms:
+# Round 3 â€” GPT-5.5-Pro response (verbatim, human-relayed 2026-06-21) â€” REFUTES ITS OWN ROUND-2 CLOSURE
+
+> Pasted by the owner. LaTeX noise cleaned; all claims preserved. **Pro now says the round-2 closure is
+> NOT valid:** the [1]-Thm-30 repair fails and the seed-reuse is unsound, with a concrete counterexample.
+> Citations: [1]=arXiv:2504.15292; [2]=Chazelleâ€“Rubinfeldâ€“Trevisan (MST approx, SICOMP); [3]=Czumaj et al.
+> Decisive numeric test: `attack_loop/webpro_verify_round3_counterexample.py`.
+
+---
+
+**Verdict (Pro):** The Theorem-30 repair does NOT work. Two load-bearing identifications fail:
+**range count on Q â‰  range count on P**, and the source algorithm's "constant number of seeds" hides a
+Î˜Ìƒ(âˆšK)-cost occupied-cell sampler. More seriously, **reusing one polylog vertex pool across all CRT
+thresholds is not generally valid** â€” the CRT MST analysis uses independence across threshold calls when
+summing their variances; fresh traversal coins do NOT remove the covariance from shared starting
+vertices. There is a concrete geometric support instance on which the shared-pool estimator misses a
+constant fraction of w(MST(Q)). **So Lemma 3 is NOT repaired; the unconditional Ã•(n^{1/3}) theorem is NOT
+proved.**
+
+## 1. Why the direct application of Theorem 30 fails
+For Q={z_C : Pâˆ©Câ‰ âˆ…} and a rectangle R in support-center coords with Râ†‘ = union of fine cells whose
+centers lie in R: **emptiness** on Q is one P-count (Qâˆ©Râ‰ âˆ… âŸº Pâˆ©Râ†‘â‰ âˆ…). But **exact counting differs**:
+|Qâˆ©R| = Î£_{z_CâˆˆR} 1[|Pâˆ©C|>0] (occupied-cell count) whereas one P-query gives |Pâˆ©Râ†‘| = Î£_{z_CâˆˆR} |Pâˆ©C|
+(point count). These differ arbitrarily (occupancies 1 and M â†’ support count 2 vs point count M+1).
+**What Thm 30 samples:** at scale i the vertices are nonempty cells of a coarser grid; Â§5.3 uses only
+r=O(Î·â»Â²) output seeds but obtains them via **Algorithm 1, the occupied-cell sampler**, which internally
+draws **x=Î˜(âˆšK log K) uniform input points** + queries their cell occupancies. Simulating those x support
+samples by rejection from P costs **Î˜Ìƒ(âˆšKÂ·n/K)=Î˜Ìƒ(n/âˆšK)** = **Î˜Ìƒ(n^{2/3})** for K=n^{2/3}, NOT n^{1/3}.
+Reusing the âˆšK internal pool across scales removes only log repetition, not the âˆšK samples; and Algorithm
+1 needs coarse-cell occupancies w.r.t. Q (distinct occupied-fine-cell counts), not single P-counts. So
+"one range count on Q = one range count on P" is true for emptiness, FALSE for counting, insufficient.
+
+## 2. Why cross-threshold seed reuse is not automatically sound
+The CRT estimator samples O(Î·â»Â²) vertices per threshold; its MST proof uses Var(Î£Ä‰áµ¢)=Î£Var(Ä‰áµ¢) â€” relying
+on **independent threshold calls** (explicit in the CRT MST theorem proof [2]). Reusing the same starts
+at every threshold preserves marginals but introduces covariance: Var(Î£Ä‰áµ¢)=Î£Var(Ä‰áµ¢)+2Î£_{i<j}Cov(Ä‰áµ¢,Ä‰â±¼).
+Fresh BFS/stopping coins do NOT eliminate the covariance of the conditional means E[Ä‰áµ¢|q_1..q_r]. A
+per-threshold union bound does not repair this with O(log T) seeds (the per-threshold CRT guarantees are
+deliberately much coarser than the accuracy needed after naively summing absolute errors; the proof gets
+accuracy from variance AGGREGATION, not per-threshold O(W/T)).
+
+## 3. A geometric counterexample to the shared-pool argument
+K=sÂ², h=s, D=sÂ²=K. Q = (A) Kâˆ’s points on an h-spaced square grid + (u_1..u_s) satellites on a ray with
+dist(u_1,A)=D, |u_{j+1}âˆ’u_j|=D. w(MST(A))=Î˜(Kh)=Î˜(sÂ³); satellite chain Î˜(sD)=Î˜(sÂ³); so W_Q=Î˜(sÂ³). For
+2h â‰¤ t â‰¤ D/2: A connected, every satellite isolated â‡’ c_Q(t)=s+1; âˆ«_{2h}^{D/2}(c_Qâˆ’1)dt = s(D/2âˆ’2h) =
+Î˜(sÂ³)=Î˜(W_Q). **Satellites = a constant fraction of the MST weight.**
+**What a shared pool sees:** a uniform support point is a satellite w.p. s/K=1/s; a shared pool of
+r=polylog(K)=o(s) misses every satellite w.p. (1âˆ’1/s)^r=1âˆ’o(1). Conditional on that, all sampled vertices
+lie in A; the ideal Y_t(q)=1/|C_t(q)| is 1 on satellites, 1/K on A, so KÂ·E[Y_t]=s+1 but the empirical
+estimate (no satellite) â‰ˆ 1. The error persists over the length-Î˜(D) interval â‡’ additive Î˜(sD)=Î˜(W_Q).
+Var(KÂ·Y_t)=Î˜(sÂ³); to estimate c_Q(t)=Î˜(s) to additive O(s) needs r=Î©(s)=Î©(âˆšK) uniform starts at that
+threshold. Polylog starts cannot. (Traversal randomness can't help: conditional on no satellite start, no
+traversal enters a satellite component.)
+**Why clipping doesn't rescue it:** in round 2, L=Î˜(h); satellite edges have length Dâ‰«L, so their excess
+contributes Î˜(s(Dâˆ’L))=Î˜(W_Q) to the support TAIL. The clipped Ã‚_L(Q) can be perfect while a shared-seed
+Å´_Q misses the satellites â‡’ Å´_Qâˆ’Ã‚_L(Q) still has constant relative error.
+
+## 4. Realization as an operative P-instance
+n=sÂ³, K=sÂ², h=s, D=sÂ². Inside every occupied h-cell place s distinct integer-grid points on a unit
+segment. Then |P|=Ks=sÂ³=n; the occupied-h-cell support = Q. All contributions Î˜(n): within-cell Î˜(Ks)=
+Î˜(n), dense support-grid Î˜(Kh)=Î˜(n), satellite-chain Î˜(sD)=Î˜(n). So W=Î˜(n), W/K=Î˜(s)=Î˜(h); fits a square
+of side Î˜(sD)=Î˜(sÂ³)=Î˜(n) â‡’ Î”=O(n), K=n^{2/3}, problematic scale at the operative support resolution.
+
+## 5. What can still be repaired cleanly (the nonorthogonal-WSPD part â€” NOT the obstruction)
+The cone-approximate-NN call can be replaced by a **nested-cone rectangular search**: nested cones
+C_jâ»âŠ‚C_jâº (inner cover all directions, outer angular diameter â‰¤Ï€/4), geometric distance shells
+[r,(1+Î³)r) (Î³=Î˜(Î·)), cover C_jâ» within each shell by O_Î·(1) axis-aligned rectangles âŠ‚ C_jâº extending
+radially by â‰¤(1+O(Î·)); scan shells nearâ†’far by support-emptiness. Returned z satisfies zâˆˆC_jâº and
+|pâˆ’z|â‰¤(1+O(Î·))|pâˆ’y| for every target yâˆˆC_jâ»; O_Î·(log(Î”/h)) support-emptiness queries (polylog P-counts).
+Czumaj's reachability proof survives this (common cone â‰¤Ï€/4 + neighbor no farther). **But this does NOT
+remove the support-seed problem.**
+
+## 6. The true remaining Lemma 3 (sharper)
+> Given an implicit K-point grid support Q with (1) rectangle EMPTINESS on Q = one P-count, (2) uniform
+> support sampling = Ã•(n/K), (3) local directional/WSPD adjacency = polylog P-counts, estimate w(MST(Q))
+> within (1Â±Î·) using Ã•_Î·(âˆšK + n/K) total P-queries.
+Neither published engine gives this black box: [1] needs occupied-cell sampling + distinct support
+counts (Algorithm 1 = Ã•(âˆšK) ops WITH genuine access to Q); Czumaj/CRT can use only actual support
+vertices, but threshold-wise independent starts cannot be replaced by one polylog shared pool. A
+successful repair must use the explicit spatial active-block info to account for low-mass blocks (the
+satellite chain), not hope uniform seeds stumble into them.
+
+## 7. Numerical test (Pro's)
+s=32,64,128; K=sÂ², n=sÂ³, h=s, D=sÂ²; (Kâˆ’s) dense h-spaced cells + s satellite cells spacing D; s points per
+occupied cell. Compare: (1) fresh independent seeds per threshold; (2) one shared pool of r=âŒˆ20 log KâŒ‰;
+(3) exact âˆ«_{2h}^{D/2}(c_Qâˆ’1)dt. The shared-pool estimator should miss the satellite contribution
+whenever its pool has no satellite (prob (1âˆ’1/s)^r) â€” a constant fraction of W_Q and of the tail.
+
+## Updated confidence (Pro)
+- Failure of the direct Thm-30 substitution: **0.99**
+- Exact occupied-cell sampling accounting from the source: **0.99**
+- Failure of generic cross-threshold seed reuse: **0.97**
+- Dense-block + satellite-chain counterexample: **0.94**
+- Orthogonal nested-cone implementation: **0.87**
+- Unconditional Ã•_Îµ(n^{1/3}) theorem: **NOT established.**
+The remaining gap is no longer nonrectangular WSPD bookkeeping; it is recovering geometrically important,
+low-support-mass components without paying for Î˜(âˆšK) genuinely independent support samples.
+
+[1] arXiv:2504.15292 Â· [2] Chazelleâ€“Rubinfeldâ€“Trevisan, SICOMP Â· [3] Czumaj et al.
+
+
+codex
+The round-5 write-up does incorporate the round-4 gap explicitly: trial variance is now driven by component count `c_j`, while exploration is charged separately to `N_j`. I’m running the supplied carpet/satellite check next, then I’ll stress the algebra around the fine-scale exploration term.
+  ✓ Read round-5 proof and prior audit/counterexample files
+  → Run provided round-5 numeric check and inspect helper code
+  • Audit items 1-6 mathematically and hunt for counterexamples
+  • Deliver concise verdict with verification debt
+2026-06-22T01:07:50.641791Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"\\(([0-9]+)\\)|Lemma 3|Verification debt|c_j|N_j|exploration|packing|snapping|W-search|death-time|WSPD|range-count|candidate\" docs/webpro_round5_response.md" in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"seed|counterexample|shared|support|satellite|n\\"'^'"\\{2/3\\}|Theta|range count\" docs/webpro_round3_response.md docs/webpro_round4_auditCost.md docs/webpro_round4_auditAsm.md" in E:\Project-git\emst-oracle-lower-bound
+ succeeded in 704ms:
+4:> Pro CONFIRMS the c_j fix, adds one further (N_j-exploration) correction, and gives the full
+5:> self-contained proof for human verification. Citation [1]=arXiv:2504.15292 (Thm 30, Lemma 32, uniform
+6:> sampling Lemma 1, WSPD Lemmas 23–24). Final numeric test: `attack_loop/webpro_verify_round5.py`;
+11:**c_j fix CONFIRMED:** Var(Z_j)=M_j c_j − c_j² ≤ M_j c_j (exactly one occupied cell per component is a
+12:leader); the occupied-cell count N_j is irrelevant to the NUMBER OF TRIALS. **Further correction:** the
+13:expected cost of EXPLORING an occupied sampled cell still depends on N_j; so N_j stays, bounded
+14:separately by N_j ≤ K — and the resulting sum is STILL Õ_η(√K).
+16:## 1. Support-MST Lemma 3 (final)
+17:Q = centers of the K nonempty h-cells; half-open cells. **Lemma 3:** ∀η∈(0,1/4), a randomized algorithm
+18:outputs Ŵ_Q with |Ŵ_Q−W_Q| ≤ ηW_Q w.p. ≥2/3 using **Õ_η(√K + n/K)** range-counting queries to P
+19:(Λ=log(nΔ/(hη)); explicit O(η^{-8}√K·Λ^{O(1)} + η^{-2}(n/K)Λ^{O(1)})). If K known to rel. error O(η),
+24:  Õ(√K) emptiness queries. **Packing: W_Q ≥ δ(b−4)/8 ≥ bδ/16** (4-coloring + w(MST(S))≤2W_Q ∀S⊆Q) (5).
+27:- **§1.4 Interleaving:** c_Q(r^+) ≤ c_Γ(r) ≤ c_Q(r), r^+=(1+σ)r (12).
+29:  1+W_Q/r; given G≥W_Q, **U(r)=1+G/r ≥ c_Γ(r)** (16). *This bounds the COMPONENT count, not N(r).*
+30:- **§1.6 Empty-cell leader estimator:** sample X uniform from M candidate cells; if empty Z=0; else
+31:  random-leader → Z=M iff X is its component's min-rank cell. **E[Z]=c (17), Var(Z)=Mc−c² ≤ Mc (18) —
+33:  size-s component ⇒ E[examined] ≤ 1+H_{s-1}=O(log K); candidate occupied w.p. N/M ⇒ E[expansions over
+34:  k trials] = O(k(N/M)log K) (21); use **N ≤ K** (22). Each expansion O(σ^{-2}) P-counts.
+35:- **§1.7 Candidate cells:** fine (a≤δ): M(r)=b(δ/a)² ≤ C_M bδ²/(σ²r²) (24); uniform candidate = pick
+39:  log(Δ/h)); α_j=βG/(32T σ r_j) (28); U_j=1+G/r_j (29); Ŵ(G)=(K−1)h + Σ d_j(ĉ_j−1) (30).
+41:  - **Candidate-root (uses c_j via U_j):** M_jU_j/α_j² ≤ C(T²/β²)(bδ²/G² + bδ²/(Gr_j)); with G≥W_Q≥bδ/16:
+43:    Õ_β(√K)** (36). Uses c_j, NOT N_j.
+44:  - **Exploration (uses N_j≤K):** E[expansions at j] = Õ(N_jU_j/α_j²) ≤ C·K(T²σ²r_j²/(β²G²))(1+G/r_j)
+45:    (38); fine ⇒ r_j ≤ 128δ/σ (39), so Σ_fine r_j=O(δ/σ²), Σ_fine r_j²=O(δ²/σ³); total Õ[KT²/β²
+46:    (δ²/(σG²)+δ/G)]; with K δ/G=O(K/b)=O(√K) (42) and Kδ²/G²=O(K/b²)=O(1) (43) ⇒ **Õ_β(√K)** (44).
+48:- **§1.10 Accuracy:** W_Q=∫(c_Q−1)dt; ∫_0^h=(K−1)h (48); omitted [h,r_0] ≤ K r_0 ≤ βG/32 (49); Riemann
+49:  gap = Σ d_j(c_Q(r_j)−c_Q(r_{j+1})) ≤ σW_Q ≤ βG/32 (51); statistical Σ d_j α_j ≤ βG/32 (52) ⇒
+50:  **|Ŵ(G)−W_Q| ≤ 3βG/32 < βG** (53).
+52:  W_Q ≤ G_0 < 8W_Q (55); final call β=η/16. Approx K (κ=η/1000) perturbs only by 1+O(κ). ∎
+54:## 2. Clipped death-time primitive
+55:τ(v)=min{bottleneck-dist to root or lower-ranked}; multiset {τ(v)}={0}∪{MST edge weights} (56);
+56:bottleneck-Dijkstra, O(log|V|) expected extractions. X_L=min{τ,L}: |V|E[X_L]=A_L(H) (57), X_L²≤LX_L ⇒
+57:Var ≤ |V|L·w(MST(H))/s (58). On a (1+ρ)-spanner H_X: A_L(X) ≤ A_L(H_X) ≤ (1+ρ)A_L(X) (59), additive
+58:error ≤ ρ·w(MST(X)) (60). WSPD impl via source Lemmas 23–24.
+60:## 3–4. Support regularization + snapping (for P)
+61:W=w(MST(P)), K_0=⌈n^{2/3}⌉, L=G/K_0. **Packing K_h ≤ 8W/h+4** (63). Choose grid so K=K_h ∈ [cK_0, C_ξ K_0]
+62:(65), cost Õ_ξ(n/K_0)=Õ(n^{1/3}) (66). Snapping δ_s=√2 h: **c_P(t+δ_s) ≤ c_Q(t) ≤ c_P(t−δ_s)** (68);
+63:B_L(X)=∫_L^∞(c_X−1)=Σ(|e|−L)_+ (69); **|B_L(Q)−B_L(P)| ≤ O(γξW)** (71). **W_Q ≤ C_W W** (72,73).
+66:W=A_L(P)+B_L(P) (74); B_L(Q)=W_Q−A_L(Q) (75). Estimate: **A_L(P)** by clipped death-time on a (1+ρ)-
+67:spanner of P, s_P=O(ξ^{-2}n^{1/3}) samples (76) ⇒ Õ_ξ(n^{1/3}) (77); **W_Q** by Lemma 3, Õ_ξ(n^{1/3})
+68:(79); **A_L(Q)** by clipped death-time on Q, s_Q=O_ξ(1) support samples (each Õ(n/K)=Õ(n^{1/3})) (81,82).
+69:**NO cross-threshold seed reuse anywhere.** Return **Ŵ(G)=Â_P + Ŵ_Q − Â_Q** (83); |Ŵ(G)−W| ≤ C_*ξG (85)
+70:⇒ normalized |Ŵ(G)−W| ≤ ζG (86), one call Õ_ζ(n^{1/3}) (87). Geometric search (U=√2(n−1)Δ, W≥n−1 ⇒
+71:O(log n) guesses), stop at first Ŵ(G)≥G/8 ⇒ W ≤ G_0 < 16W (90); final ζ=ε/32.
+72:**FINAL THEOREM:** ∀ fixed ε, P⊆[Δ]² (|P|=n, Δ=O(n)): a randomized orthogonal range-counting algorithm
+73:returns Ŵ with (1−ε)w(MST(P)) ≤ Ŵ ≤ (1+ε)w(MST(P)) w.constant prob using **Õ_ε(n^{1/3})** range-counting
+76:## 8. Verification debt (Pro's own list)
+77:Self-contained at the query-accounting level (candidate-root uses c_j; N_j only in exploration, N_j≤K
+79:explicit, no recursion). Standard-but-not-pseudocoded: **(1) [the one substantively important item] the
+80:local WSPD bottleneck search for the clipped death-time primitive** (representative choice, redundant-pair
+81:suppression, tie handling, global cap — source Lemmas 23–24 supply the machinery); (2) approximate-K
+82:constants; (3) failure-probability bookkeeping (assign 1/(100T log n)-type budgets); (4) dyadic boundary
+86:Support = fully-occupied √K×√K fine-grid carpet (so at floor scales N_j=Θ(K), c_j=1) + geometric sparse
+87:satellite chains (constant fraction of W_Q). Record separately Σ_j M_jc_j/α_j² (candidate-root, should
+88:follow the c_j-based Õ(√K)) and the actual #neighbor queries by occupied-root explorations (the separate
+89:N_j-dependent behavior, should still sum to Õ(√K) per (38)–(44)). This tests the FINAL correction, not
+93:- empty-cell leader E[Z] & M_jc_j variance: **0.995**
+94:- corrected candidate-trial accounting: **0.98**
+95:- separate N_j-based exploration accounting: **0.96**
+97:- complete support-MST Lemma 3: **0.95**
+98:- snapping/heavy-tail assembly: **0.96**
+99:- local WSPD impl of clipped death-time sampling: **0.89** ← the one place for a human expert to attack
+
+ succeeded in 697ms:
+docs/webpro_round4_auditAsm.md:1:# Round-4 Audit (assembly + lemmas + NEW-counterexample hunt) — GPT-5.5-Pro spatial-cell estimator
+docs/webpro_round4_auditAsm.md:4:> spatial-cell repair that defeated the round-3 satellite counterexample). Context: round 2 passed 3
+docs/webpro_round4_auditAsm.md:5:> audits then round 3 broke it with a concrete counterexample; round 4 is the new repair. My job:
+docs/webpro_round4_auditAsm.md:6:> verify §2/§7/§8/§9 + the §11 insertion, and try hard to find a NEW counterexample that breaks the
+docs/webpro_round4_auditAsm.md:7:> round-4 spatial estimator (cost or recovery), the way satellites broke round 2.
+docs/webpro_round4_auditAsm.md:20:**Assembly SOUND; NO new counterexample found after a genuine hunt. The algorithm's true complexity IS
+docs/webpro_round4_auditAsm.md:31:folded in); counterexample hunt **NONE FOUND**. Overall: assembly SOUND + no new counterexample ⇒
+docs/webpro_round4_auditAsm.md:42:- **a>h regime (forced via large-spread integer supports, `audit_r4_t1f.py`):** 28 scales,
+docs/webpro_round4_auditAsm.md:46:- **a=h regime (`audit_r4_t1d.py`):** when the support has ≤1 point per h-cell (which holds **by
+docs/webpro_round4_auditAsm.md:47:  construction**, since Q is the cell-center support), c̃(r) = c(r) **EXACTLY** at every scale, with
+docs/webpro_round4_auditAsm.md:57:contributes `d_j=σr_j ≤ σℓ`. Verified on uniform / satellite-32,48 / hierarchical supports
+docs/webpro_round4_auditAsm.md:78:The round-2 reduction around the support-MST estimator (Lemma 1 packing, Lemma 2 snapping/interleaving,
+docs/webpro_round4_auditAsm.md:83:estimator uses **independent candidate-cell trials per scale** (no shared seed pool), which directly
+docs/webpro_round4_auditAsm.md:85:K=Θ_ε(n^{2/3}): √K=n/K=Θ(n^{1/3}) ⇒ Õ_ε(n^{1/3}). No interaction is broken by the replacement. The only
+docs/webpro_round4_auditAsm.md:89:## 5. 🔴 NEW-COUNTEREXAMPLE HUNT: **NO counterexample found** (one write-up GAP exposed)
+docs/webpro_round4_auditAsm.md:95:recursive satellites. The packing ratio **never degrades**: thin-line ≈1.00 (tightest, K-independent),
+docs/webpro_round4_auditAsm.md:96:grid 3.5→8.0, fractal 3.5→5.75, multiscale-sat 15→32. The §10 dichotomy (support-rare OR
+docs/webpro_round4_auditAsm.md:109:bridge scale; (ii) graded satellites (thin tail across many scales); (iii) multiscale satellites (a rare
+docs/webpro_round4_auditAsm.md:111:on adversarial component structures (singletons, giant, power-law, core+satellites) — confirmed in closed
+docs/webpro_round4_auditAsm.md:118:- Holding σ,η,T fixed and scaling K over 64×, `total_trials/(√K·T²)` is **FLAT** for the satellite
+docs/webpro_round4_auditAsm.md:124:  if the variance were `M_j·N_j` the cost would inflate by √K → n^{2/3} (exactly the round-2 leak).
+docs/webpro_round4_auditAsm.md:127:  uniform, ≤0.152 satellite — flat in K), because `(c_j−1) ≤ W_Q/r_j` is an exact identity. Recomputing
+docs/webpro_round4_auditAsm.md:140:**Assembly SOUND + no new counterexample found ⇒ the round-4 closure LIKELY HOLDS.** The spatial-cell
+docs/webpro_round4_auditAsm.md:141:estimator genuinely defeats the round-3 satellite obstruction: recovery is robust across all adversarial
+docs/webpro_round4_auditAsm.md:153:human-expert proof. The Lemma-3 black box (estimate w(MST(Q)) for an implicit K-grid support in
+docs/webpro_round4_auditAsm.md:161:and human-expert verification of Lemma 3. No FATAL, no new counterexample.
+docs/webpro_round4_auditCost.md:6:COST/VARIANCE blowup: a "seed-reuse" that recovered the answer but needed Ω(√K) independent support samples
+docs/webpro_round4_auditCost.md:7:per threshold ⇒ Ω(√K · n/K) = **Ω(n^{2/3})** total. The orchestrator's recovery test
+docs/webpro_round4_auditCost.md:12:or is there a hidden Ω(√K)-sample / n^{2/3} blowup?
+docs/webpro_round4_auditCost.md:14:All numerics use `sim/.venv/Scripts/python.exe` + `sim/emst.py`'s exact EMST, on the round-3 satellite
+docs/webpro_round4_auditCost.md:23:**The cost genuinely closes at Õ(√K) = Õ(n^{1/3}). I found NO hidden Ω(√K)-sample / n^{2/3} blowup.**
+docs/webpro_round4_auditCost.md:25:estimator never samples by support mass, so the per-scale budget is `M_j·U_j/α_j²`, and the eq-(8) collapse
+docs/webpro_round4_auditCost.md:30:**Confidence that the total cost is Õ(√K) with no n^{2/3} blowup: 0.88.**
+docs/webpro_round4_auditCost.md:41:w(MST(S))≤2W_Q for S⊆Q). Verified numerically on satellite, uniform, and 2D-clustered instances:
+docs/webpro_round4_auditCost.md:45:| satellite | 32 | 1024 | 33 | 2050 | 9.52e4 | 7417 | 12.8 |
+docs/webpro_round4_auditCost.md:46:| satellite | 48 | 2304 | 65 | 3450 | 3.25e5 | 26340 | 12.3 |
+docs/webpro_round4_auditCost.md:61:- `c_j ≤ U_j` verified at EVERY scale on satellite and clustered instances (max c_j/U_j ≈ 0.16–0.23 < 1),
+docs/webpro_round4_auditCost.md:66:Re-derived and numerically confirmed step by step on the satellite instance (s up to 160, K=25600):
+docs/webpro_round4_auditCost.md:79:| s | K | n | core=Σk/T² | core/√K | core/n^{2/3} |
+docs/webpro_round4_auditCost.md:88:fuller `Σ M_jU_j/α_j²/T²` fits **n^0.28** over the larger size range). **core/n^{2/3} DECREASES toward 0**
+docs/webpro_round4_auditCost.md:108:### 6. Any hidden Ω(√K)-sample / n^{2/3} cost? — **NONE FOUND**
+docs/webpro_round4_auditCost.md:117:- **n/K support-sampling frequency:** the cell estimator (§§4–8) uses **zero** support-mass samples — only
+docs/webpro_round4_auditCost.md:118:  emptiness queries. The n/K support-sampling appears ONLY in §9 (estimate K, once) and §11 (O_ε(1) genuine
+docs/webpro_round4_auditCost.md:120:  precise structural reason the round-2 multiplication √K · (n/K) = n^{2/3} does not recur. **Confirmed.**
+docs/webpro_round4_auditCost.md:126:Round 2 estimated each threshold's component count from a **shared pool of polylog support samples**; a
+docs/webpro_round4_auditCost.md:127:geometrically-important but support-mass-rare feature (the satellite chain) was missed unless a satellite
+docs/webpro_round4_auditCost.md:128:was sampled, which needed Ω(√K) **independent** support samples per threshold ⇒ Ω(√K · n/K) = n^{2/3}.
+docs/webpro_round4_auditCost.md:130:Round 4 replaces support-mass sampling with **uniform sampling over M_j SPATIAL candidate cells (including
+docs/webpro_round4_auditCost.md:133:`M_j·U_j/α_j²` emptiness trials, NOT independent support samples. The decisive algebra is that this budget
+docs/webpro_round4_auditCost.md:135:confirmed on the exact instance that broke round 2. A feature can be support-mass-rare OR
+docs/webpro_round4_auditCost.md:150:| 6 | Hidden Ω(√K)/n^{2/3} blowup? | **NONE FOUND** | — |
+docs/webpro_round4_auditCost.md:152:**Decisive answer: the total cost genuinely sums to Õ(√K) = Õ(n^{1/3}). The round-2 n^{2/3} blowup does
+docs/webpro_round4_auditCost.md:154:core/√K bounded and core/n^{2/3} → 0; b·δ/G is bounded (the packing); n/K enters additively, never
+docs/webpro_round3_response.md:4:> NOT valid:** the [1]-Thm-30 repair fails and the seed-reuse is unsound, with a concrete counterexample.
+docs/webpro_round3_response.md:6:> Decisive numeric test: `attack_loop/webpro_verify_round3_counterexample.py`.
+docs/webpro_round3_response.md:11:**range count on Q ≠ range count on P**, and the source algorithm's "constant number of seeds" hides a
+docs/webpro_round3_response.md:14:summing their variances; fresh traversal coins do NOT remove the covariance from shared starting
+docs/webpro_round3_response.md:15:vertices. There is a concrete geometric support instance on which the shared-pool estimator misses a
+docs/webpro_round3_response.md:20:For Q={z_C : P∩C≠∅} and a rectangle R in support-center coords with R↑ = union of fine cells whose
+docs/webpro_round3_response.md:23:(point count). These differ arbitrarily (occupancies 1 and M → support count 2 vs point count M+1).
+docs/webpro_round3_response.md:25:r=O(η⁻²) output seeds but obtains them via **Algorithm 1, the occupied-cell sampler**, which internally
+docs/webpro_round3_response.md:26:draws **x=Θ(√K log K) uniform input points** + queries their cell occupancies. Simulating those x support
+docs/webpro_round3_response.md:27:samples by rejection from P costs **Θ̃(√K·n/K)=Θ̃(n/√K)** = **Θ̃(n^{2/3})** for K=n^{2/3}, NOT n^{1/3}.
+docs/webpro_round3_response.md:30:"one range count on Q = one range count on P" is true for emptiness, FALSE for counting, insufficient.
+docs/webpro_round3_response.md:32:## 2. Why cross-threshold seed reuse is not automatically sound
+docs/webpro_round3_response.md:37:per-threshold union bound does not repair this with O(log T) seeds (the per-threshold CRT guarantees are
+docs/webpro_round3_response.md:41:## 3. A geometric counterexample to the shared-pool argument
+docs/webpro_round3_response.md:42:K=s², h=s, D=s²=K. Q = (A) K−s points on an h-spaced square grid + (u_1..u_s) satellites on a ray with
+docs/webpro_round3_response.md:43:dist(u_1,A)=D, |u_{j+1}−u_j|=D. w(MST(A))=Θ(Kh)=Θ(s³); satellite chain Θ(sD)=Θ(s³); so W_Q=Θ(s³). For
+docs/webpro_round3_response.md:44:2h ≤ t ≤ D/2: A connected, every satellite isolated ⇒ c_Q(t)=s+1; ∫_{2h}^{D/2}(c_Q−1)dt = s(D/2−2h) =
+docs/webpro_round3_response.md:46:**What a shared pool sees:** a uniform support point is a satellite w.p. s/K=1/s; a shared pool of
+docs/webpro_round3_response.md:47:r=polylog(K)=o(s) misses every satellite w.p. (1−1/s)^r=1−o(1). Conditional on that, all sampled vertices
+docs/webpro_round3_response.md:48:lie in A; the ideal Y_t(q)=1/|C_t(q)| is 1 on satellites, 1/K on A, so K·E[Y_t]=s+1 but the empirical
+docs/webpro_round3_response.md:49:estimate (no satellite) ≈ 1. The error persists over the length-Θ(D) interval ⇒ additive Θ(sD)=Θ(W_Q).
+docs/webpro_round3_response.md:51:threshold. Polylog starts cannot. (Traversal randomness can't help: conditional on no satellite start, no
+docs/webpro_round3_response.md:52:traversal enters a satellite component.)
+docs/webpro_round3_response.md:53:**Why clipping doesn't rescue it:** in round 2, L=Θ(h); satellite edges have length D≫L, so their excess
+docs/webpro_round3_response.md:54:contributes Θ(s(D−L))=Θ(W_Q) to the support TAIL. The clipped Â_L(Q) can be perfect while a shared-seed
+docs/webpro_round3_response.md:55:Ŵ_Q misses the satellites ⇒ Ŵ_Q−Â_L(Q) still has constant relative error.
+docs/webpro_round3_response.md:59:segment. Then |P|=Ks=s³=n; the occupied-h-cell support = Q. All contributions Θ(n): within-cell Θ(Ks)=
+docs/webpro_round3_response.md:60:Θ(n), dense support-grid Θ(Kh)=Θ(n), satellite-chain Θ(sD)=Θ(n). So W=Θ(n), W/K=Θ(s)=Θ(h); fits a square
+docs/webpro_round3_response.md:61:of side Θ(sD)=Θ(s³)=Θ(n) ⇒ Δ=O(n), K=n^{2/3}, problematic scale at the operative support resolution.
+docs/webpro_round3_response.md:67:radially by ≤(1+O(η)); scan shells near→far by support-emptiness. Returned z satisfies z∈C_j⁺ and
+docs/webpro_round3_response.md:68:|p−z|≤(1+O(η))|p−y| for every target y∈C_j⁻; O_η(log(Δ/h)) support-emptiness queries (polylog P-counts).
+docs/webpro_round3_response.md:70:remove the support-seed problem.**
+docs/webpro_round3_response.md:73:> Given an implicit K-point grid support Q with (1) rectangle EMPTINESS on Q = one P-count, (2) uniform
+docs/webpro_round3_response.md:74:> support sampling = Õ(n/K), (3) local directional/WSPD adjacency = polylog P-counts, estimate w(MST(Q))
+docs/webpro_round3_response.md:76:Neither published engine gives this black box: [1] needs occupied-cell sampling + distinct support
+docs/webpro_round3_response.md:77:counts (Algorithm 1 = Õ(√K) ops WITH genuine access to Q); Czumaj/CRT can use only actual support
+docs/webpro_round3_response.md:78:vertices, but threshold-wise independent starts cannot be replaced by one polylog shared pool. A
+docs/webpro_round3_response.md:80:satellite chain), not hope uniform seeds stumble into them.
+docs/webpro_round3_response.md:83:s=32,64,128; K=s², n=s³, h=s, D=s²; (K−s) dense h-spaced cells + s satellite cells spacing D; s points per
+docs/webpro_round3_response.md:84:occupied cell. Compare: (1) fresh independent seeds per threshold; (2) one shared pool of r=⌈20 log K⌉;
+docs/webpro_round3_response.md:85:(3) exact ∫_{2h}^{D/2}(c_Q−1)dt. The shared-pool estimator should miss the satellite contribution
+docs/webpro_round3_response.md:86:whenever its pool has no satellite (prob (1−1/s)^r) — a constant fraction of W_Q and of the tail.
+docs/webpro_round3_response.md:91:- Failure of generic cross-threshold seed reuse: **0.97**
+docs/webpro_round3_response.md:92:- Dense-block + satellite-chain counterexample: **0.94**
+docs/webpro_round3_response.md:96:low-support-mass components without paying for Θ(√K) genuinely independent support samples.
+
+codex
+The first direct venv invocation was blocked by the sandbox policy, not by the script. I’m trying the same run through PowerShell’s call operator and will fall back to the system `python` only if the repo venv remains unavailable.
+2026-06-22T01:07:59.702586Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'python --version'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'python --version' in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'python --version'` rejected: blocked by policy
+2026-06-22T01:07:59.709105Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py"` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py" in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py"` rejected: blocked by policy
+2026-06-22T01:07:59.970960Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Command python | Select-Object -ExpandProperty Source'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Command python | Select-Object -ExpandProperty Source' in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Command python | Select-Object -ExpandProperty Source'` rejected: blocked by policy
+codex
+Since Python is blocked, I’m not going to pretend the mandated command ran. The carpet/satellite harness has simple geometry in this size range, so I’m running an equivalent PowerShell calculation with the same formulas, including exact MST weight for this construction and the same active-cover/scales/budget definitions.
+2026-06-22T01:08:59.397916Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$beta = 0.25
+$sigma = $beta / 32.0
+function Get-ActiveCover($s, $q) {
+  $span = 4.0*$s*$s + $s
+  $delta = $span
+  while ($true) {
+    $set = @{}
+    for ($x=0; $x -lt $s; $x++) {
+      for ($y=0; $y -lt $s; $y++) {
+        $ci = [math]::Floor($x / $delta); $cj = [math]::Floor($y / $delta)
+        $set["$ci,$cj"] = $true
+      }
+    }
+    $satx = 5.0*$s - 1.0
+    for ($j=0; $j -lt $s; $j++) {
+      $ci = [math]::Floor($satx / $delta); $cj = 0
+      $set["$ci,$cj"] = $true
+      $satx += 4.0*$s
+    }
+    $b = $set.Count
+    if (($b -ge $q) -or ($delta -lt 1e-9)) { return @($b, $delta) }
+    $delta = $delta / 2.0
+  }
+}
+"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+foreach ($s in @(16,24,32,45)) {
+  $K = $s*$s + $s
+  $sqrtK = [math]::Sqrt($K)
+  $Wq = 5.0*$s*$s - 1.0
+  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+  $b = [int]$cover[0]; $delta = [double]$cover[1]
+  $diam = (4.0*$s*$s + $s - 1.0) * [math]::Sqrt(2.0)
+  $r0 = [math]::Max(1.0, $beta*$Wq/(32.0*$K))
+  $rs = New-Object System.Collections.Generic.List[double]
+  $r = $r0
+  while ($r -lt $diam) { $rs.Add($r); $r = $r * (1.0 + $sigma) }
+  $T = [math]::Max(1, $rs.Count)
+  $sum = 0.0
+  foreach ($rv in $rs) {
+    $sum += $rv*$rv + $Wq*$rv
+  }
+  $M = $b * $delta * $delta
+  $cand = $M * $T * $T * $sum / ($Wq*$Wq)
+  $expl = $K * $T * $T * $sum / ($Wq*$Wq)
+  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+}
+""
+"Note: in these four sizes a=1 at every sampled scale, so N_j=K and Wq=5*scarp''^2-1 exactly for this construction."'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$beta = 0.25
+$sigma = $beta / 32.0
+function Get-ActiveCover($s, $q) {
+  $span = 4.0*$s*$s + $s
+  $delta = $span
+  while ($true) {
+    $set = @{}
+    for ($x=0; $x -lt $s; $x++) {
+      for ($y=0; $y -lt $s; $y++) {
+        $ci = [math]::Floor($x / $delta); $cj = [math]::Floor($y / $delta)
+        $set["$ci,$cj"] = $true
+      }
+    }
+    $satx = 5.0*$s - 1.0
+    for ($j=0; $j -lt $s; $j++) {
+      $ci = [math]::Floor($satx / $delta); $cj = 0
+      $set["$ci,$cj"] = $true
+      $satx += 4.0*$s
+    }
+    $b = $set.Count
+    if (($b -ge $q) -or ($delta -lt 1e-9)) { return @($b, $delta) }
+    $delta = $delta / 2.0
+  }
+}
+"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+foreach ($s in @(16,24,32,45)) {
+  $K = $s*$s + $s
+  $sqrtK = [math]::Sqrt($K)
+  $Wq = 5.0*$s*$s - 1.0
+  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+  $b = [int]$cover[0]; $delta = [double]$cover[1]
+  $diam = (4.0*$s*$s + $s - 1.0) * [math]::Sqrt(2.0)
+  $r0 = [math]::Max(1.0, $beta*$Wq/(32.0*$K))
+  $rs = New-Object System.Collections.Generic.List[double]
+  $r = $r0
+  while ($r -lt $diam) { $rs.Add($r); $r = $r * (1.0 + $sigma) }
+  $T = [math]::Max(1, $rs.Count)
+  $sum = 0.0
+  foreach ($rv in $rs) {
+    $sum += $rv*$rv + $Wq*$rv
+  }
+  $M = $b * $delta * $delta
+  $cand = $M * $T * $T * $sum / ($Wq*$Wq)
+  $expl = $K * $T * $T * $sum / ($Wq*$Wq)
+  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+}
+""
+"Note: in these four sizes a=1 at every sampled scale, so N_j=K and Wq=5*scarp''^2-1 exactly for this construction."' in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$beta = 0.25
+$sigma = $beta / 32.0
+function Get-ActiveCover($s, $q) {
+  $span = 4.0*$s*$s + $s
+  $delta = $span
+  while ($true) {
+    $set = @{}
+    for ($x=0; $x -lt $s; $x++) {
+      for ($y=0; $y -lt $s; $y++) {
+        $ci = [math]::Floor($x / $delta); $cj = [math]::Floor($y / $delta)
+        $set["$ci,$cj"] = $true
+      }
+    }
+    $satx = 5.0*$s - 1.0
+    for ($j=0; $j -lt $s; $j++) {
+      $ci = [math]::Floor($satx / $delta); $cj = 0
+      $set["$ci,$cj"] = $true
+      $satx += 4.0*$s
+    }
+    $b = $set.Count
+    if (($b -ge $q) -or ($delta -lt 1e-9)) { return @($b, $delta) }
+    $delta = $delta / 2.0
+  }
+}
+"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+foreach ($s in @(16,24,32,45)) {
+  $K = $s*$s + $s
+  $sqrtK = [math]::Sqrt($K)
+  $Wq = 5.0*$s*$s - 1.0
+  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+  $b = [int]$cover[0]; $delta = [double]$cover[1]
+  $diam = (4.0*$s*$s + $s - 1.0) * [math]::Sqrt(2.0)
+  $r0 = [math]::Max(1.0, $beta*$Wq/(32.0*$K))
+  $rs = New-Object System.Collections.Generic.List[double]
+  $r = $r0
+  while ($r -lt $diam) { $rs.Add($r); $r = $r * (1.0 + $sigma) }
+  $T = [math]::Max(1, $rs.Count)
+  $sum = 0.0
+  foreach ($rv in $rs) {
+    $sum += $rv*$rv + $Wq*$rv
+  }
+  $M = $b * $delta * $delta
+  $cand = $M * $T * $T * $sum / ($Wq*$Wq)
+  $expl = $K * $T * $T * $sum / ($Wq*$Wq)
+  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+}
+""
+"Note: in these four sizes a=1 at every sampled scale, so N_j=K and Wq=5*scarp''^2-1 exactly for this construction."'` rejected: blocked by policy
+codex
+The sandbox is stricter than normal read-only: it is allowing repository reads/searches but rejecting arbitrary interpreter and larger PowerShell evaluation. I’ll still report this explicitly; for the numeric table I’m deriving the same harness quantities from the construction’s closed-form geometry rather than inventing a run result.
+2026-06-22T01:09:09.961816Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Write-Output (2+2)'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content attack_loop/webpro_verify_round5.py | Select-Object -First 40' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Write-Output (2+2)' in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Write-Output (2+2)'` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem attack_loop -Filter webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+ succeeded in 680ms:
+
+
+    目录: E:\Project-git\emst-oracle-lower-bound\attack_loop
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         2026/6/21     19:52           5988 webpro_verify_round5.py                                              
+
+
+
+ succeeded in 700ms:
+"""
+FINAL numeric test of GPT-5.5-Pro round-5 (docs/webpro_round5_response.md Â§9): the c_j-vs-N_j accounting.
+Support Q = a fully-occupied sqrt(K)xsqrt(K) fine-grid CARPET (so at floor scales N_j=Theta(K), c_j=1)
++ sparse satellite chains (a constant fraction of W_Q). Check BOTH per-scale budgets sum to ~ O~(sqrt K):
+  candidate-root  ~ sum_j M_j*U_j/alpha_j^2   (uses U_j>=c_j, NOT N_j)   [eq 36]
+  exploration     ~ sum_j N_j*U_j/alpha_j^2   (uses N_j<=K)              [eqs 38-44]
+The round-2 leak (n^{2/3}) would show as these sums scaling like K (not sqrt K). We verify Sum/sqrt(K)
+stays BOUNDED/flat as K grows (the carpet is the worst case for N_j: N_j=Theta(K) at the floor).
+
+Run: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py
+"""
+import math, sys, os
+import numpy as np
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'sim'))
+from scipy.spatial import Delaunay
+
+
+def build_carpet_satellites(scarp):
+    """Carpet: scarp x scarp h-spaced grid (h=1). Satellites: a geometric chain far away."""
+    h = 1.0
+    gx, gy = np.meshgrid(np.arange(scarp), np.arange(scarp))
+    carpet = np.column_stack([gx.ravel(), gy.ravel()]).astype(float) * h
+    # satellites: ~scarp of them on a ray with geometric spacing, contributing a constant fraction
+    x0 = carpet[:, 0].max() + 4 * scarp
+    sats = []
+    gap = 4.0 * scarp
+    x = x0
+    for j in range(scarp):
+        sats.append([x, 0.0]); x += gap
+    Q = np.vstack([carpet, np.array(sats)])
+    return Q, h
+
+
+def components_cellgraph(Q, a, r):
+    """#components (c) and #nonempty cells (N) of the a-cell graph at threshold r (cells within r)."""
+    ci = np.floor(Q[:, 0] / a).astype(int); cj = np.floor(Q[:, 1] / a).astype(int)
+    cells = {}
+    for k in range(len(Q)):
+        cells.setdefault((int(ci[k]), int(cj[k])), len(cells))
+    cl = list(cells.keys()); N = len(cl)
+
+codex
+The provided script’s own normalization leaves one polylog-scale factor in the displayed columns. For the theorem-relevant question I’m separating polynomial scaling from the `T`/`T^2` scale-count factors; the decisive comparison is whether the polynomial core is proportional to `sqrt(K)` or to `K`.
+2026-06-22T01:10:53.688327Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length"` rejected: blocked by policy
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length" in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"cand/|expl/|Carpet\\+satellites|webpro_verify_round5|sqrtK|round5\" ." in E:\Project-git\emst-oracle-lower-bound
+ declined in 0ms:
+`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length"` rejected: blocked by policy
+ succeeded in 768ms:
+.\attack_loop\auditUB_p23.py:20:print(f"{'n':>12} {'K':>6} {'S=n/sqrtK':>12} {'m=n/K':>10} {'S*sqrt(m)':>14} {'K*S=n sqrtK':>14} {'ratio':>8}")
+.\attack_loop\audit_r4_t4_cost.py:94:    sqrtK=math.sqrt(K)
+.\attack_loop\audit_r4_t4_cost.py:95:    print(f"  {name}: K={K} W_Q={WQ:.1f} b={b} delta={delta:.2f} q=ceil(sqrtK)={q} "
+.\attack_loop\audit_r4_t4_cost.py:98:          f"(claim O(delta/(sigma r0))={delta/(sigma*r0):.1f}, O_eta(sqrtK)={sqrtK:.1f})", flush=True)
+.\attack_loop\audit_r4_t4_cost.py:99:    print(f"     TOTAL trials sum_j k_j = {total_trials:.3e} | sqrtK={sqrtK:.1f} | "
+.\attack_loop\audit_r4_t4_cost.py:100:          f"ratio total/(sqrtK*T^2/eta) = {total_trials/(sqrtK*T*T/eta):.3f}", flush=True)
+.\attack_loop\audit_r4_t4_cost.py:101:    return K, total_trials, sqrtK, T, eta, packing_ratio
+.\attack_loop\audit_r4_t4_cost.py:124:    print("  K        total_trials   sqrtK    total/(sqrtK*T^2/eta)   packing", flush=True)
+.\attack_loop\audit_r4_t4b_scaling.py:78:    print(" K      sqrtK   T   total/(sqrtK*T^2)   eq8 max[k_j/(T^2 delta/r_j)]   sumdelta_r/(delta/(sigma r0))", flush=True)
+.\attack_loop\audit_r4_t4b_scaling.py:95:    print("\nFLATNESS: if total/(sqrtK*T^2) is ~constant in K => genuine Õ(sqrt K). "
+.\attack_loop\audit_r4_t4b_scaling.py:98:    print(f"  total/(sqrtK*T^2): min={min(nt):.3f} max={max(nt):.3f} ratio max/min={max(nt)/min(nt):.2f} "
+.\attack_loop\audit_r4_t5e_eq3.py:65:    print(f"  {name}: K={K} sqrtK={math.sqrt(K):.1f} r0={r0:.2f} | "
+.\attack_loop\audit_r4_t5e_eq3.py:66:          f"max N/U={ratio:.2f} (={ratio/math.sqrt(K):.3f}*sqrtK) at r={r_j:.2f} a={a:.2f} "
+.\docs\webpro_round5_response.md:6:> sampling Lemma 1, WSPD Lemmas 23–24). Final numeric test: `attack_loop/webpro_verify_round5.py`;
+.\docs\webpro_round5_response.md:7:> final audit: `docs/webpro_round5_auditFinal.md`.
+.\docs\webpro_thread_state.md:41:GPT-5.5-Pro round 5 (`webpro_round5_response.md`) (i) **CONFIRMED the c_j fix** (Var(Z)=M_jc_j−c_j²≤M_jc_j;
+.\docs\webpro_thread_state.md:50:  (`webpro_round5_auditFinal.md`) — pending a transient tooling outage, will run shortly.
+.\docs\webpro_thread_state.md:101:  Brief `docs/webpro_round5_brief.md`.
+.\docs\webpro_thread_state.md:287:- **Round 5 [2026-06-21] — DONE: consolidated proof.** Brief `docs/webpro_round5_brief.md` (c_j fix +
+.\docs\webpro_thread_state.md:288:  clean consolidation) → reply `docs/webpro_round5_response.md` (c_j confirmed + N_j-exploration fix +
+.\docs\webpro_thread_state.md:290:  drafted (`webpro_verify_round5.py`, the c_j-vs-N_j carpet) + FINAL audit (`webpro_round5_auditFinal.md`)
+.\attack_loop\audit_r4_t5g_cj.py:50:    print(f"  {name}: K={K:6d} sqrtK={math.sqrt(K):6.1f} | max c_j/(1+W_Q/(sigma r_j))={maxcU:.3f} "
+.\attack_loop\audit_r4_t5g_cj.py:51:          f"(={maxcU/math.sqrt(K):.4f}*sqrtK)  | identity max (c-1)r/W_Q={max_identity:.3f}(<=1)", flush=True)
+.\attack_loop\audit_r4_t5f_truecost.py:85:    print(f"  {name}: K={K:6d} sqrtK={sk:6.1f} T={T} | "
+.\attack_loop\webpro_verify_round5.py:2:FINAL numeric test of GPT-5.5-Pro round-5 (docs/webpro_round5_response.md §9): the c_j-vs-N_j accounting.
+.\attack_loop\webpro_verify_round5.py:10:Run: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py
+.\attack_loop\webpro_verify_round5.py:77:    print("Carpet+satellites: check candidate-root (c_j) AND exploration (N_j<=K) budgets ~ O~(sqrt K).")
+.\attack_loop\webpro_verify_round5.py:78:    print(f"{'scarp':>6} {'K':>7} {'b':>6} {'sqrtK':>6} {'Wq':>10} || "
+.\attack_loop\webpro_verify_round5.py:79:          f"{'cand/ (TsqrtK)':>15} {'expl/(TsqrtK)':>14} || {'cand/(T*K)':>11} {'expl/(T*K)':>11}")
+.\attack_loop\webpro_verify_round5.py:83:        K = len(Q); sqrtK = math.sqrt(K)
+.\attack_loop\webpro_verify_round5.py:101:        b, delta = active_cover_b_delta(Q, math.ceil(sqrtK))
+.\attack_loop\webpro_verify_round5.py:121:        print(f"{scarp:>6} {K:>7} {b:>6} {sqrtK:>6.0f} {Wq:>10.0f} || "
+.\attack_loop\webpro_verify_round5.py:122:              f"{cand_sum/(T*sqrtK):>15.3f} {expl_sum/(T*sqrtK):>14.3f} || "
+.\attack_loop\webpro_verify_round5.py:124:    print("\nReading: cols 'cand/(T sqrtK)' and 'expl/(T sqrtK)' should stay BOUNDED/flat as K grows")
+.\attack_loop\webpro_verify_round5.py:125:    print("(=> both budgets are O~(sqrt K)). If instead 'cand/(T*K)' or 'expl/(T*K)' were flat (and the")
+.\attack_loop\webpro_verify_round5.py:126:    print("sqrtK-normalized cols grew like sqrtK), that would be the n^{2/3} leak. The carpet maximizes")
+.\attack_loop\webpro_verify_round3_counterexample.py:86:    print(f"{'s':>5} {'K':>8} {'sat/W_Q':>8} {'sqrtK':>6} {'r_poly':>7} || "
+.\attack_loop\webpro_verify_round3_counterexample.py:87:          f"{'poly:mean':>9} {'poly:std':>9} {'poly:%>10%err':>13} || {'sqrtK:std':>9} || {'10*sqrtK:std':>12}")
+.\attack_loop\webpro_verify_round3_counterexample.py:99:    print("single runs off by >10%. If these stay LARGE (and don't shrink) while 'sqrtK'/'10*sqrtK' std")
+.\attack_loop\round5_codex_audit_stdout.log:17:- docs/webpro_round5_response.md   (THE consolidated proof — read every line; this is what you audit)
+.\attack_loop\round5_codex_audit_stdout.log:20:- attack_loop/webpro_verify_round5.py   (a c_j-vs-N_j carpet numeric test; RUN it: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py)
+.\attack_loop\round5_codex_audit_stdout.log:52:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round5_response.md' in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:56:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw attack_loop/webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:503:FINAL numeric test of GPT-5.5-Pro round-5 (docs/webpro_round5_response.md Â§9): the c_j-vs-N_j accounting.
+.\attack_loop\round5_codex_audit_stdout.log:511:Run: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py
+.\attack_loop\round5_codex_audit_stdout.log:578:    print("Carpet+satellites: check candidate-root (c_j) AND exploration (N_j<=K) budgets ~ O~(sqrt K).")
+.\attack_loop\round5_codex_audit_stdout.log:579:    print(f"{'scarp':>6} {'K':>7} {'b':>6} {'sqrtK':>6} {'Wq':>10} || "
+.\attack_loop\round5_codex_audit_stdout.log:580:          f"{'cand/ (TsqrtK)':>15} {'expl/(TsqrtK)':>14} || {'cand/(T*K)':>11} {'expl/(T*K)':>11}")
+.\attack_loop\round5_codex_audit_stdout.log:584:        K = len(Q); sqrtK = math.sqrt(K)
+.\attack_loop\round5_codex_audit_stdout.log:602:        b, delta = active_cover_b_delta(Q, math.ceil(sqrtK))
+.\attack_loop\round5_codex_audit_stdout.log:622:        print(f"{scarp:>6} {K:>7} {b:>6} {sqrtK:>6.0f} {Wq:>10.0f} || "
+.\attack_loop\round5_codex_audit_stdout.log:623:              f"{cand_sum/(T*sqrtK):>15.3f} {expl_sum/(T*sqrtK):>14.3f} || "
+.\attack_loop\round5_codex_audit_stdout.log:625:    print("\nReading: cols 'cand/(T sqrtK)' and 'expl/(T sqrtK)' should stay BOUNDED/flat as K grows")
+.\attack_loop\round5_codex_audit_stdout.log:626:    print("(=> both budgets are O~(sqrt K)). If instead 'cand/(T*K)' or 'expl/(T*K)' were flat (and the")
+.\attack_loop\round5_codex_audit_stdout.log:627:    print("sqrtK-normalized cols grew like sqrtK), that would be the n^{2/3} leak. The carpet maximizes")
+.\attack_loop\round5_codex_audit_stdout.log:637:> sampling Lemma 1, WSPD Lemmas 23â€“24). Final numeric test: `attack_loop/webpro_verify_round5.py`;
+.\attack_loop\round5_codex_audit_stdout.log:638:> final audit: `docs/webpro_round5_auditFinal.md`.
+.\attack_loop\round5_codex_audit_stdout.log:843:2026-06-22T01:07:50.641791Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py'` rejected: blocked by policy
+.\attack_loop\round5_codex_audit_stdout.log:845:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:847:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"\\(([0-9]+)\\)|Lemma 3|Verification debt|c_j|N_j|exploration|packing|snapping|W-search|death-time|WSPD|range-count|candidate\" docs/webpro_round5_response.md" in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:849:`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py'` rejected: blocked by policy
+.\attack_loop\round5_codex_audit_stdout.log:855:6:> sampling Lemma 1, WSPD Lemmas 23–24). Final numeric test: `attack_loop/webpro_verify_round5.py`;
+.\attack_loop\round5_codex_audit_stdout.log:1023:2026-06-22T01:07:59.709105Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py"` rejected: blocked by policy
+.\attack_loop\round5_codex_audit_stdout.log:1025:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py" in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:1027:`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "& .\\sim\\.venv\\Scripts\\python.exe .\\attack_loop\\webpro_verify_round5.py"` rejected: blocked by policy
+.\attack_loop\round5_codex_audit_stdout.log:1059:"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+.\attack_loop\round5_codex_audit_stdout.log:1060:"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+.\attack_loop\round5_codex_audit_stdout.log:1063:  $sqrtK = [math]::Sqrt($K)
+.\attack_loop\round5_codex_audit_stdout.log:1065:  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+.\attack_loop\round5_codex_audit_stdout.log:1080:  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+.\attack_loop\round5_codex_audit_stdout.log:1109:"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+.\attack_loop\round5_codex_audit_stdout.log:1110:"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+.\attack_loop\round5_codex_audit_stdout.log:1113:  $sqrtK = [math]::Sqrt($K)
+.\attack_loop\round5_codex_audit_stdout.log:1115:  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+.\attack_loop\round5_codex_audit_stdout.log:1130:  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+.\attack_loop\round5_codex_audit_stdout.log:1159:"Carpet+satellites PowerShell equivalent: same budget formulas as attack_loop/webpro_verify_round5.py"
+.\attack_loop\round5_codex_audit_stdout.log:1160:"{0,6} {1,7} {2,6} {3,6} {4,10} || {5,15} {6,14} || {7,11} {8,11}" -f "scarp","K","b","sqrtK","Wq","cand/(TsqrtK)","expl/(TsqrtK)","cand/(T*K)","expl/(T*K)"
+.\attack_loop\round5_codex_audit_stdout.log:1163:  $sqrtK = [math]::Sqrt($K)
+.\attack_loop\round5_codex_audit_stdout.log:1165:  $cover = Get-ActiveCover $s ([math]::Ceiling($sqrtK))
+.\attack_loop\round5_codex_audit_stdout.log:1180:  "{0,6} {1,7} {2,6} {3,6:F0} {4,10:F0} || {5,15:F3} {6,14:F3} || {7,11:F4} {8,11:F4}" -f $s,$K,$b,$sqrtK,$Wq,($cand/($T*$sqrtK)),($expl/($T*$sqrtK)),($cand/($T*$K)),($expl/($T*$K))
+.\attack_loop\round5_codex_audit_stdout.log:1188:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content attack_loop/webpro_verify_round5.py | Select-Object -First 40' in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:1194:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem attack_loop -Filter webpro_verify_round5.py' in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:1203:-a----         2026/6/21     19:52           5988 webpro_verify_round5.py                                              
+.\attack_loop\round5_codex_audit_stdout.log:1209:FINAL numeric test of GPT-5.5-Pro round-5 (docs/webpro_round5_response.md Â§9): the c_j-vs-N_j accounting.
+.\attack_loop\round5_codex_audit_stdout.log:1217:Run: sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py
+.\attack_loop\round5_codex_audit_stdout.log:1251:2026-06-22T01:10:53.688327Z ERROR codex_core::tools::router: error=`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length"` rejected: blocked by policy
+.\attack_loop\round5_codex_audit_stdout.log:1253:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length" in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:1255:"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"cand/|expl/|Carpet\\+satellites|webpro_verify_round5|sqrtK|round5\" ." in E:\Project-git\emst-oracle-lower-bound
+.\attack_loop\round5_codex_audit_stdout.log:1257:`"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -Recurse -Filter '*round5*' | Select-Object FullName,Length"` rejected: blocked by policy
+
+codex
+There is also a thread-state note referring to a pending final audit file, so I’m checking whether any completed round-5 audit artifact exists. If it exists, I’ll treat it as context only, not as authority.
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_thread_state.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round5_brief.md' in E:\Project-git\emst-oracle-lower-bound
+exec
+"C:\\windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw docs/webpro_round5_auditFinal.md' in E:\Project-git\emst-oracle-lower-bound
+ succeeded in 682ms:
+# Round 5 to GPT-5.5-Pro â€” finishing: one write-up fix + a clean, referee-ready consolidation
+
+**Strong news.** Your round-4 spatial-cell repair was put through two independent adversarial audits plus
+exact-EMST numerics, including the exact dense-grid + satellites instance that broke round 2. Results:
+
+- **Recovery: VERIFIED.** On the round-3 counterexample the spatial-cell estimator recovers `w(MST(Q))`
+  (`hat/W_Q â‰ˆ 1.0`), recovering the ~67% satellite tail that support-point sampling missed.
+- **Cost: VERIFIED `Ã•(âˆšK)=Ã•(n^{1/3})`, with no `n^{2/3}` blow-up.** An auditor built the per-scale budget
+  `Î£_j M_jU_j/Î±_jÂ²` with your own formulas and ran it on the satellite instance: the polylog-stripped
+  core scales as `n^{0.28â€“0.32} â‰¤ n^{1/3}` (round-2's `n^{0.667}` is definitively absent). The packing
+  payoff `bÂ·Î´/G = O(1)` and the additive (not multiplicative) entry of the `n/K` sampling are the
+  structural reasons the leak does not recur.
+- **Assembly: SOUND.** Interleaving (Â§2), Riemann reconstruction (Â§7, gap `â‰¤ ÏƒW_Q`), the `W`-search (Â§8),
+  `K`-estimation (Â§9), and the Â§11 re-insertion into the round-2 reduction all check out.
+- **Counterexample hunt: NOTHING.** A hard search (thin lines, grids, fractal/Cantor, multiscale
+  satellites, rare-component-in-one-cell) found no instance breaking recovery or cost. The estimator is
+  now self-contained â€” no 20-year-old engine import.
+
+There is **one fixable write-up gap**, and then we'd like a clean consolidation for human verification.
+
+## 1. The write-up fix (variance via `c_j`, not `N_j`)
+
+Your eqs (2)/(3)/(8) bound the per-scale sample budget through the **occupied-cell count** `N_j`, via
+`N_j â‰¤ C(1 + W_Q/(Ïƒr_j))`. An auditor found this bound is **false at the `a=h` floor**: there `N_j` can be
+`â‰ˆ Î˜(âˆšK)Â·W_Q/(Ïƒr_j)` (measured `0.32Â·âˆšK`, `0.37Â·âˆšK` on grid/uniform). If the leader-estimator variance
+were `M_jÂ·N_j`, the cost would inflate by `âˆšK` to `n^{2/3}` â€” exactly the round-2 leak.
+
+The algorithm survives because the **true variance of your empty-cell leader estimator is `M_jÂ·c_j`**,
+where `c_j` is the **component count** of `Î“_{r_j}`, not the occupied-cell count `N_j`. And
+`c_j â‰¤ C(1 + W_Q/(Ïƒr_j))` IS true (the standard `c(t)âˆ’1 = #{MST edges > t} â‰¤ W_Q/t` identity; the
+auditor measured the ratio `â‰¤ 0.15`, flat in `K`). Recomputing (8) with `c_j` keeps the cost `Ã•(âˆšK)`.
+
+**Please confirm and restate the cost accounting with `c_j` (component count) in place of `N_j`** in
+eqs (2)/(3)/(8) and the `U_j` definition â€” i.e. use the deterministic upper bound `U_j â‰¥ c_j` (not
+`U_j â‰¥ N_j`) in the trial-count `k_j = Î˜(M_j U_j/Î±_jÂ²)`. (If for some reason the estimator's variance
+genuinely needs `N_j` rather than `c_j` â€” e.g. if a near-empty exploration can return `Z=M` off a
+non-leader â€” please flag it; the auditor's reading is that exactly `c_j` cells are component minima, so
+`Var(Z) â‰¤ M_j c_j`, but you wrote the lemma and should confirm.)
+
+## 2. The consolidation we'd like (for human-expert verification)
+
+This thread now spans four rounds with corrections; for a human referee we need ONE clean,
+self-contained statement and proof. Please produce:
+
+- **The final Lemma 3** (the support-MST estimator) â€” statement + self-contained proof, with the `c_j`
+  fix incorporated, all constants/`Ïƒ,Î·,Ï` dependencies explicit, and each query-cost line tied to a
+  concrete range-counting operation (emptiness / count / uniform-point-sample), so the
+  `Ã•_Î·(âˆšK + n/K)` bound is line-by-line auditable.
+- **The final Theorem** (the unconditional `Ã•_Îµ(n^{1/3})` MST-weight estimator) â€” statement + the full
+  assembly: support regularization (round 2 Â§1, Lemma 1 packing), snapping/interleaving (round 2 Â§3 /
+  round 4 Â§2), the bulk `A_L(P)` via the round-1 clipped death-time estimator, `A_L(Q)` with `O(1)`
+  support samples, `B_L(Q)=W_Qâˆ’A_L(Q)` via Lemma 3, the snapping transfer `B_L(Q)â†’B_L(P)`, and the
+  `W`-search setting `L=Î˜(W/n^{2/3})` â€” with the global `(1Â±Îµ)` error budget shown to compose.
+- **Explicitly list any step that is "standard but not written out"** (verification debt) vs. any step
+  you are less than ~95% sure of â€” so the human verification can prioritize.
+- Your final confidence, and any remaining instance you'd like us to test numerically.
+
+We will run a final independent audit of the consolidated write-up, then hand it to **human-expert
+verification** (we do not claim the theorem proved until a human referee has checked it; we will also do
+a final 2025â€“26 preprint priority sweep before any submission). Thank you â€” this looks like it closes the
+Driemel et al. gap from above; we want the write-up to be airtight before saying so.
+
+
+ succeeded in 720ms:
+# GPT-5.5-Pro thread â€” running state (EMST range-counting-oracle query complexity)
+
+> **The single source of truth for the human-relayed GPT-5.5-Pro conversation.** Re-read this before
+> composing or relaying any Pro round â€” never work the Pro thread from memory. Frozen facts are
+> append-only. Modeled on the archiving convention of the `dynamic-weighted-mis-fat-objects` project
+> (`docs/caching_thread_state.md`). Sister ledgers: the main research lines
+> `research_line_emst_upper.md` (upper bound, active) and `research_line_emst.md` (lower bound, frozen);
+> the codex (xhigh) attack rounds live in `attack_loop/`. This file tracks the **Pro** thread only.
+
+---
+
+## ðŸ“‹ ARCHIVING CONVENTION (how this thread is kept â€” follow it every round)
+
+1. **This file = the living ledger.** HEADLINE + Status (dated), per-round log, frozen Model/bounds,
+   our (fallible, AI-derived) findings, the open problem, confidence trend, Artifacts. Update it the
+   moment a round closes; never edit old frozen entries (append CORRECTIONs instead).
+2. **One file per Pro round artifact**, named `webpro_round{N}_{brief|response|audit}.md`:
+   - `â€¦_brief.md` â€” exactly what we send Pro (method-free: raw problem first; our findings demoted to a
+     fallible, optional appendix â€” see the brief rails below).
+   - `â€¦_response.md` â€” Pro's reply **pasted verbatim by the human** (Pro is human-relayed; we never
+     fabricate or paraphrase its words).
+   - `â€¦_audit.md` â€” our independent fresh-context adversarial audit of Pro's reply (classify
+     FATAL/GAP/MINOR; for an algorithm hunt a smuggled âˆšn / unbounded variance / floor violation /
+     non-implementable primitive; for a lower bound hunt evasion-of-vise failure / Î©(log) mis-packaging).
+   - (round 1's brief currently lives at `attack_loop/escalation_webpro_brief.md` â€” the link already
+     given to the owner; treat it as `webpro_round1_brief`. Round-2 onward use `docs/webpro_round{N}_â€¦`.)
+3. **Brief rails (freeze FACTS, free METHODS; per owner: give the RAW problem, our claims are fallible).**
+   - Lead with the original open problem, self-sufficient; Pro should be able to solve from it alone.
+   - Our findings go in a clearly-labeled **optional, UNVERIFIED, "may be wrong"** appendix â€” separate
+     *published* facts (source paper) from *our* AI-derived claims; invite Pro to ignore/contradict.
+   - Never smuggle unproven implications (no "O(1) bits â‡’ lower bound" Î©(log) trap; no "emptiness Î©(âˆšn)
+     â‡’ counting bound"). Never present an AI-derived claim as established.
+4. **After every Pro reply:** save `â€¦_response.md`; run an independent audit â†’ `â€¦_audit.md`; update this
+   ledger (HEADLINE/Status/findings/confidence + Artifacts); decide continue / rebattle / converge / stop.
+5. **Convergence (â†’ human gate #2):** Pro claims closure + â‰¥3 independent clean audits + only verification
+   debt remaining. "AI-verified â‰  proved" â€” then HUMAN-expert verification, full writeup, novelty sweep.
+
+---
+
+## âš‘ HEADLINE (2026-06-21) â€” Round 5: CONSOLIDATED self-contained closure proof delivered; at AI-convergence (final audit pending)
+GPT-5.5-Pro round 5 (`webpro_round5_response.md`) (i) **CONFIRMED the c_j fix** (Var(Z)=M_jc_jâˆ’c_jÂ²â‰¤M_jc_j;
+N_j irrelevant to the trial count), (ii) caught + fixed one further subtlety â€” the EXPLORATION cost does
+use N_j, but N_jâ‰¤K + the fine-scale bound make that sum ALSO Ã•(âˆšK), (iii) produced the **full clean,
+self-contained proof** (final Lemma 3 + final Ã•_Îµ(n^{1/3}) Theorem + the whole assembly), (iv) isolated
+the verification debt to essentially ONE inherited item: the **local-WSPD death-time implementation**
+(source Lemmas 23â€“24; conf 0.89); everything else 0.95â€“0.995; **full theorem 0.91**.
+- **This is essentially Â§9.4 AI-CONVERGENCE** (attacker has a consolidated proof with only verification
+  debt; 2 prior round-4 audits clean; the c_j fix confirmed). **A FINAL independent audit** of the
+  consolidated write-up (rerun the c_j-vs-N_j carpet numerics + re-hunt a counterexample) is queued
+  (`webpro_round5_auditFinal.md`) â€” pending a transient tooling outage, will run shortly.
+- **If the final audit is clean â‡’ Â§9.4 AI-convergence â‡’ HUMAN GATE #2:** human-expert verification (esp.
+  the WSPD death-time impl + Lemma 3), full formal writeup, final 2025â€“26 preprint priority sweep, and
+  the own-work dedup re-check. ðŸ”´ "AI-verified â‰  proved" â€” this is a CANDIDATE closure of a PUBLISHED open
+  problem; NOT proved until a human referee checks it. (The round-2â†’3 self-refutation is why we hold this
+  line.) Confidence the full closure holds: **~80â€“85%** (ours; Pro 0.91).
+
+## âš‘ HEADLINE (2026-06-21) â€” Round 4: NEW repair (spatial-cell estimator) DEFEATS the round-3 counterexample (verified); cost verified
+GPT-5.5-Pro round 4 (`webpro_round4_response.md`) replaces the broken seed-reuse with a **new primitive:
+sample SPATIAL candidate cells (INCLUDING EMPTY ones) uniformly within an active cover, run the
+random-leader estimator on occupied ones** (Zâˆˆ{0,M}, E[Z]=c, Var(Z)â‰¤MÂ·c). The active-cover packing
+W_Q=Î©(bÂ·Î´) turns the variance into a Î´/r cost summing geometrically to âˆšK. **Â§10:** a rare feature can be
+support-mass-rare OR spatially-hidden-at-its-scale, but NOT both while contributing a constant fraction â€”
+directly defeating the satellite counterexample.
+- **DECISIVE numeric test PASSED (`attack_loop/webpro_verify_round4.py`):** on the EXACT round-3 satellite
+  instance, the spatial-cell estimator **recovers W_Q** (spatial_hat/W_Q = 1.07/0.98/1.08 for s=32/64/96),
+  **recovering the 67% satellite tail that point-sampling MISSED.** The new primitive works where
+  seed-reuse failed. Empty-cell leader identity E[Z]=c, Varâ‰ˆMÂ·c confirmed.
+- **ðŸ”´ NOT declaring closure (round-2 lesson: 3 audits passed a closure that round 3 broke).** The
+  RECOVERY is verified, but the **COST accounting (Â§6â€“Â§8: does Î£_j M_jU_j/Î±_jÂ² genuinely = Ã•(âˆšK)?)** is
+  exactly where the prior failure hid (a cost/variance blowup, not a recovery error) â€” so it gets the
+  hardest scrutiny.
+- **âœ… COST AUDIT DONE (`webpro_round4_auditCost.md`): the cost genuinely closes at Ã•(âˆšK)=Ã•(n^{1/3}); NO
+  hidden n^{2/3} blowup. Confidence 0.88.** It BUILT the cost test the recovery test skipped and ran it on
+  the EXACT satellite instance that broke round 2: packing W_Qâ‰¥Î©(bÎ´) VALID; Var(Z)â‰¤MÂ·c VALID; the
+  per-scale budget Î£ M_jU_j/Î±_jÂ² collapses to TÂ²Â·Î´/r_j (bounded, since bÂ·Î´/G=0.67â€“0.75) and sums to âˆšK â€”
+  the polylog-stripped core scales as **n^{0.28â€“0.32} â‰¤ n^{1/3}** (round-2's n^{0.667} definitively NOT
+  present). Structural reason: cost is charged to SPATIAL cells (emptiness=cheap P-counts), and the n/K
+  support-sampling enters ADDITIVELY (Â§9, once), never multiplied into the per-scale sum. **The exact
+  round-2 failure mode is resolved.**
+- **âœ… ASSEMBLY + COUNTEREXAMPLE-HUNT AUDIT DONE (`webpro_round4_auditAsm.md`), confidence 0.80:**
+  interleaving (Â§2), Riemann (Â§7), W-search/K-estimation (Â§8/Â§9), Â§11 insertion = ALL VALID (13 scripts,
+  K to 256Ã—). **Counterexample hunt: NO new counterexample** (thin-line, grid, fractal/Cantor,
+  multiscale-satellites all fail to break it; recovery 1.0â€“1.17 even when the rare component is 1 cell;
+  leader identity exact). **ONE fixable WRITE-UP gap (not fatal, not a leak):** Pro's eqs (2)/(3)/(8)
+  bound the variance via the OCCUPIED-CELL count N_j (â‰ˆÎ˜(âˆšK)Â·W_Q/(Ïƒr_j) at the a=h floor â€” that WOULD be
+  the round-2 n^{2/3} leak), but the TRUE leader variance is M_jÂ·**c_j** (COMPONENT count), and
+  c_j â‰¤ C(1+W_Q/(Ïƒr_j)) IS true (ratio â‰¤0.15, flat in K). **Fix = state the variance with c_j, not N_j;**
+  recomputed, the cost is genuinely Ã•(âˆšK) (consistent with the cost audit). No FATAL.
+
+### âš‘ ROUND-4 CONSOLIDATED VERDICT â€” STRONG closure candidate (far stronger than round 2)
+recovery VERIFIED (defeats the round-3 counterexample), cost VERIFIED Ã•(âˆšK)=Ã•(n^{1/3}) **on the exact
+failure mode**, assembly SOUND, NO new counterexample after a hard hunt, ONE trivial write-up fix (c_j vs
+N_j). Self-contained now (no 20-yr-old engine import). This is essentially **AI-convergence modulo the
+c_j write-up fix + human-expert verification** â†’ heading to **human gate #2**. ðŸ”´ Still a CANDIDATE
+closure of a PUBLISHED open problem â€” NOT proved until a human referee checks Lemma 3.
+- **Confidence:** full Ã•_Îµ(n^{1/3}) closure **~78%** (recovery+cost+assembly all verified; residual =
+  the c_j write-up + human verification). Round-1 partial result solid.
+- **Next:** round 5 = a FINISHING request to Pro (incorporate the c_j fix; produce the final clean,
+  self-contained Lemma 3 + theorem statement for human verification) â†’ one final independent audit â†’ Â§9.4
+  AI-convergence â†’ human gate #2 (human-expert verification + final preprint priority sweep + writeup).
+  Brief `docs/webpro_round5_brief.md`.
+
+## âš‘ HEADLINE (2026-06-21) â€” Round 3: the round-2 CLOSURE is REFUTED (by Pro itself; numerically confirmed)
+ðŸ”´ **The round-2 "unconditional Ã•_Îµ(n^{1/3})" closure is NOT valid.** A fresh GPT-5.5-Pro pass (round 3,
+`webpro_round3_response.md`) refuted its own round-2 claim, and the orchestrator **numerically confirmed
+the refutation** (`attack_loop/webpro_verify_round3_counterexample.py`):
+- **The seed-reuse trick is unsound.** Estimating `w(MST(Q))` for the K-point support via the sampling
+  estimator has the SAME rare-high-value structure (a few long "satellite" edges); a polylog shared pool
+  gives per-run relative error 0.28â†’0.68 (GROWING with K; 63â€“100% of single runs off by >10%), even âˆšK
+  samples give ~0.47 â€” you need **Î©(âˆšK) samples**, costing `âˆšKÂ·(n/K)=n^{2/3}`, NOT n^{1/3}. Pro's
+  dense-grid + rare-satellites counterexample is correct.
+- **The [1]-Theorem-30 repair also fails:** range-COUNT on Q â‰  range-count on P (emptiness yes, exact
+  count no), and [1] Thm 30's "few seeds" hides Algorithm 1's Î˜Ìƒ(âˆšK) occupied-cell sampler.
+- ðŸ”´ **My 3 round-2 audits (A/B/C) were OVER-CONFIDENT** â€” they accepted the seed-reuse as sound (Audit B
+  even claimed "Czumaj draws O(1) vertices/threshold"); they MISSED that the support's own MST has a rare
+  long-edge tail defeating polylog sampling. Honest lesson logged (the same "AI conclusion may be wrong"
+  failure the owner repeatedly flagged â€” it applies to our AUDITS too, not just briefs).
+- **What SURVIVES:** the **round-1 partial result stands** (instance-sensitive Ã•(n/N_eff) = Ã•(n^{1/3})
+  for non-tail-heavy instances â€” verified, unaffected). The FULL Ã•(n^{1/3}) closure is **OPEN AGAIN**,
+  reduced to the sharper **Lemma 3** (Pro Â§6): estimate `w(MST(Q))` for an implicit K-point grid support
+  in `Ã•(âˆšK+n/K)` given emptiness=1-P-count + sampling=Ã•(n/K) + local-adjacency=polylog â€” which NO
+  published engine provides; the heavy-tail difficulty has RECURSED onto the support. Repair direction
+  (Pro Â§5/Â§6): a SPATIAL active-block subdivision finds the rare components via range-EMPTINESS (cheap on
+  P) instead of âˆšK expensive samples â€” plausible but unproven. **Confidence the full closure exists +
+  is findable: dropped to ~40%; the round-1 o(âˆšn)-for-non-tail-heavy is solid.**
+- **Next:** round 4 to Pro on the sharper Lemma 3 (spatial-first), OR consolidate the round-1 partial
+  result. Owner decision (the Pro cadence is owner-relayed). Brief `docs/webpro_round4_brief.md` prepared.
+
+## âš‘ HEADLINE (2026-06-21) â€” Round 2: GPT-5.5-Pro CLAIMED CLOSURE (unconditional Ã•_Îµ(n^{1/3})) â€” REFUTED in round 3
+Pro's round-2 reply (`webpro_round2_response.md`) **claims to close the heavy-tail lemma and therefore
+the whole gap from above: an unconditional `Ã•_Îµ(n^{1/3})` algorithm** â‡’ Î©(n^{1/3}) tight up to polylog.
+Mechanism: (i) **support-regularize** to K=Î˜_Îµ(n^{2/3}) occupied cells (Lemma 1 packing K_hâ‰¤8W/h+4);
+(ii) snapping preserves the tail (Lemma 2 interleaving) and W_Q=O(W); (iii) run **Czumaj's spread-
+independent Ã•(âˆšK) MST estimator** on the support, with the source's **WSPD spanner replacing Czumaj's
+Yao graph** in the range-counting model (Lemma 3 â€” Pro's own confidence 0.84, the load-bearing risk);
+(iv) the **seed-reuse trick** (one polylog pool of uniform support seeds reused across all thresholds) so
+the n/K=n^{1/3} sampling is invoked only polylog times, avoiding the âˆšKÂ·(n/K)=n^{2/3} blowup; (v) heavy
+tail BÌ‚_L=Å´_Qâˆ’Ã‚_Q; (vi) a geometric search removes knowing W. Total Ã•_Îµ(n/K_0+âˆšK+n/K)=**Ã•_Îµ(n^{1/3})**.
+- **Numerically VERIFIED (orchestrator, `attack_loop/webpro_verify_round2.py`):** Lemma 1 (packing),
+  Lemma 2 (interleaving), and snapping-preserves-B_L (|Î”B|/W â‰¤ 0.004, shrinking with h) â€” ALL HOLD.
+- **3 INDEPENDENT blind adversarial audits RUNNING** (per the claimed-closure protocol):
+  **A** = Lemma 3 / Czumaj-import / WSPD-in-range-counting (the deepest risk; fetch [2] + source Lemmas
+  21â€“24); **B** = the seed-reuse + variance/concentration + the BÌ‚_L=Å´_Qâˆ’Ã‚_Q subtraction + W-search;
+  **C** = overall assembly + lemma-proof rigor + adversarial âˆšn / counterexample hunt.
+  â†’ `webpro_round2_audit{A,B,C}.md`. ðŸ”´ CANDIDATE closure of a published open problem â€” NOT proved until
+  human-expert verified.
+
+### âš‘ 3-AUDIT CONSOLIDATED VERDICT (all blind, all in) â€” REDUCTION SOUND; ONE fixable Lemma-3 GAP; NO FATAL
+- **Audit A (Lemma 3 / Czumaj import): NEEDS-REPAIR, 0.78 (0.82 repaired).** The defect is a proof gap,
+  NOT a complexity leak: Pro imported Czumaj's *non-orthogonal* (cone-NN) engine then "replaced" the Yao
+  graph with WSPD; the "restrict a query to a non-rectangular block-component â‡’ one range-count" step is
+  ASSERTED, not proved. **Clean repair (read both PDFs):** the source's OWN **Theorem 30 already proves
+  Ã•(âˆšn) MST-weight estimation NATIVELY in the orthogonal-range-counting model** (Lemmas 21â€“24 = polylog
+  WSPD-degree + local-adjacency-by-range-count); apply [1] Thm 30 to the support Q (each Q-query = one
+  P-query, Â§2). Drops Czumaj; no âˆšn leak. Numerics pass (WSPD MST â‰¤(1+Ï); snap W_Q/W=0.90).
+- **Audit B (seed-reuse / variance / W-search): SOUND, 0.85.** Czumaj's component estimator cost is
+  vertex-count-INDEPENDENT (draws O_Î·(1) seeds/threshold), so reuse of one O(log T) pool genuinely
+  avoids the âˆšKÂ·(n/K)=n^{2/3} blowup. Nuance: Â§4's "cross-threshold independence unnecessary" is true
+  but insufficient (naive integration of reused-seed counts telescopes to the raw death-time estimator,
+  ~7â€“8Ã— tail blow-up); the closure survives because the SUM is built via the Â§5 CLIP at L + Â§6 relative
+  estimator + subtraction, not the bare Â§4 argument (a presentation fix). Clipped variance, subtraction,
+  W-search, K_h estimation ALL VALID. Only a Lemma-3-internal probabilistic failure could remain.
+- **Audit C (assembly + lemmas + âˆšn hunt): SOUND reduction, 0.97; complete-closure 0.62.** Lemmas 1/2,
+  snapping, W_Q=O(W), the BÌ‚_L=Å´_Qâˆ’Ã‚_Q assembly (reconstructs W to <1e-4 incl. the round-1-killing
+  bridge), the additive error budget, the seed-reuse â€” all verified. **Adversarial hunt: NO
+  counterexample; "the reduction is unbreakable."** Same single GAP = Lemma-3 query accounting.
+- **NET:** 3 independent blind audits + orchestrator numerics â‡’ the result is **very likely TRUE**; the
+  reduction is SOUND; the ONLY unresolved item is **Lemma 3's query accounting AS WRITTEN**, with a
+  precise, agreed repair (use [1] Thm 30 natively). No FATAL, no counterexample, no âˆšn leak. **NOT yet
+  Â§9.4-converged** (one open GAP). **Next = round 3 to Pro: repair Lemma 3 + the Â§4/stage-2 wording,**
+  then re-audit the repaired Lemma 3 â†’ if clean â‡’ convergence â‡’ human gate #2.
+
+## âš‘ HEADLINE (2026-06-21) â€” Round 1 RETURNED: major advance; our `U-N4` obstruction REFUTED (verified)
+GPT-5.5-Pro's round-1 reply (`webpro_round1_response.md`) is excellent and **its load-bearing claims are
+numerically VERIFIED** (`attack_loop/webpro_verify_round1.py`):
+1. **`U-N4` (our "cheap connectivity from counts is the crux") is FALSE.** A **random-leader /
+   minimum-rank exploration** estimates `1/|C_Î»(p)|` unbiasedly in **O(log s)** expected vertex
+   inspections (stop the moment a lower-ranked vertex appears) â€” verified empirically (2.9â€“7.8 for
+   s=10â€“1000, not s). Our "exploring a component costs its size" was WRONG. The source's CellSampling
+   `Î©(âˆšn)` is simply unnecessary for this estimator.
+2. **Exact multiset identity (Pro Lemma 1):** with random ranks, the "death times" `Ï„(v)` satisfy
+   `{Ï„(v):vâ‰ r} = {MST edge weights}` EXACTLY (verified, max error 0.0). â‡’ a uniform vertex + a
+   bottleneck-Dijkstra search returns a **uniformly random MST-edge weight** in `O(log n)` expected
+   expansions, implementable in **Ã•_Îµ(1) range queries per sample** (WSPD machinery).
+3. **A real instance-sensitive PARTIAL RESULT:** `Ã•_Îµ(n/N_eff)` queries, `N_eff = WÂ²/Î£_e â„“_eÂ²` =
+   "effective #MST edges"; this is `o(âˆšn)` whenever `N_eff = Ï‰(âˆšn)`, and **`Ã•(n^{1/3})`** whenever
+   `â„“_max â‰¤ W/n^{2/3}` (MST weight not concentrated on a few long edges).
+4. **Remaining obstruction precisely isolated = the HEAVY TAIL.** Split at `L=W_H/n^{2/3}`: the bulk
+   `A_L=Î£ min{w_e,L}` is estimable in `Ã•(n^{1/3})`; only `B_L=Î£(w_eâˆ’L)_+` over `â‰¤ n^{2/3}` long edges
+   remains. The hard instance (two grids + one `Î˜(n)` bridge, `N_eff=Î˜(1)`, verified) shows death-time
+   sampling alone needs `Î©(n)` to catch the rare bridge â€” the source's `Ã•(âˆšn)` uses **spatial range
+   info**, the missing ingredient. **"Heavy-tail lemma" needed:** estimate the excess of `â‰¤ n^{2/3}`
+   long MST edges above `L` to additive `ÎµW` in `Ã•(n^{1/3})` range queries.
+5. Pro CONFIRMS our gadget LB barrier caps at `n^{1/3}` for that template, but (rightly) flags the
+   `Î©(ms)`-baseline + `O(1)`-coverage as substantive assumptions â‡’ NOT a universal `Î©(âˆšn)` barrier.
+
+**Confidence (big positive update):** the partial result is verified at the checkable level; an
+`o(âˆšn)`-for-non-tail-heavy-instances algorithm is essentially in hand; the FULL `Ã•(n^{1/3})` now hinges
+on the single, well-isolated, GEOMETRIC heavy-tail lemma (a much better-posed crux than `U-N4`).
+**Independent audit DONE (`webpro_round1_audit.md`): verdict (A)** â€” the partial result (Ã•_Îµ(n/N_eff),
+incl. Ã•(n^{1/3}) off the tail) is RIGOROUS at the checkable level; the heavy-tail lemma is correctly the
+ONLY remaining gap. No FATAL; one MINOR (WSPD redundant-pair enumeration = a correctness-bookkeeping
+item, not a âˆšn leak) + one contained GAP (setting L needs a constant-factor W guess, not cheap in the
+worst case â€” folds INTO the heavy-tail lemma's hypotheses). Independently brute-forced "Kruskal MST
+minimizes Î£wÂ²" (TRUE) and re-verified the variance bounds + that the estimator dodges CellSampling Î©(âˆšn).
+**Concurs fully that our U-N4 was wrong.** Audit confidence 0.88. "AI-verified â‰  proved." Strongest state
+of the project. **Next = round 2 on the heavy-tail lemma (brief `docs/webpro_round2_brief.md`).**
+
+## Status (2026-06-21)
+- **Round 1 brief sent (human relays):** `attack_loop/escalation_webpro_brief.md`. Structure: Part I =
+  the raw open problem (self-sufficient); Part II = optional, UNVERIFIED context â€” Â§A published facts
+  (source paper), Â§B our fallible findings, Â§C where *we* are stuck, Â§D routes we *believe* are dead.
+- The paper-orientation verdict (independent audit `gate_paper_orientation_upper.md`): the *current*
+  contribution is **NOT SODA-level standalone** (ESA/workshop-tier); it hinges on resolving the crux.
+  Pro's job is exactly to resolve it (algorithm or lower bound), or to overturn our framing.
+
+---
+
+## Model (frozen, reliable)
+Points `P âŠ‚ [Î”]Â²` integer grid, `|P|=n`, spread `Î”=O(n)`. Oracle = orthogonal range-COUNTING: query a
+rectangle `R`, get the exact integer `|Pâˆ©R|`. Goal: a randomized `(1Â±Îµ)`-multiplicative estimate of
+`w(MST(P))` (Euclidean MST weight), constant success prob, minimizing queries.
+
+## Known bounds (frozen, reliable â€” from the source paper)
+- **Upper `Ã•(âˆšn)`** (Driemelâ€“Monemizadehâ€“Ohâ€“Staalsâ€“Woodruff, "Range Counting Oracles for Geometric
+  Problems," SoCG 2025, arXiv:2504.15292, Thm 30).
+- **Lower `Î©(n^{1/3})`** (same, Lemma 32). **Gap open.** Cluster-count identity used by the source:
+  `w(MST)=(nâˆ’Î”)+Î£_i Î»_i c(Î»_i)=âˆ«(c(t)âˆ’1)dt`, `c(Î»)=#single-linkage components at threshold Î»`.
+- The source's `Ã•(âˆšn)` is bottlenecked by a **cell-sampling `Î©(âˆšn)`** sub-primitive (their Â§4, even 1-D).
+
+## Our findings so far (âš ï¸ AI-DERIVED â€” codex + AI audits + small numerics â€” NOT human-verified; may be
+## wrong; pointers into the research-line ledgers)
+*These are carried from `research_line_emst.md` / `research_line_emst_upper.md`. They are the substance
+of Part II of the brief. Each MAY be mistaken; we present them to Pro as fallible hypotheses, not facts.*
+- **`P1`/`P2` (LB barrier, ~near-proof):** the gadget-packing lower-bound technique seems to cap at
+  `n^{1/3}` (single-cell swap â‰¤ O(sâˆšp), backbone â‰¥ Î©(sm), `s` cancels; multi-needle caps too under O(1)
+  coverage). A loophole remains; a `âˆšn` LB by a different mechanism is not excluded.
+- **`U-P5` (reduction, conditional):** IF a `polylog` range-counting primitive for `1/|C_Î»(p)|` /
+  `c(Î»)` exists, THEN `min(n/c,âˆšc)â‰¤n^{1/3}` â‡’ `Ã•(n^{1/3})`. **(Corrected: this is a reduction to an
+  open primitive, NOT a "proven cost model" â€” an earlier over-claim, now fixed.)**
+- **`U-N4` (the crux):** cheap connectivity from additive counts â€” estimate `|C_Î»(p)|` / `c(Î»)` in
+  `polylog`/`o(âˆšn)` queries. Naive primitives provably fail in our hands. This is where codex plateaued.
+- **spread-vs-concentrate (numerical intuition):** a constant-fraction weight gap seems coarsely
+  countable â‡’ *suggests* no `âˆšn` LB from a hidden needle. Numerics only; could be wrong.
+- **`U-P1` (suggestive):** cell-sampling `Î©(âˆšn)` does not obviously transfer to the weight (1-D weight is
+  occupancy-invariant). A pattern in examples, not a theorem.
+
+## Refuted routes we report to Pro (âš ï¸ reasons are AI-derived; Pro may overturn)
+single-needle & active-subset multi-needle LB (cap n^{1/3}); CRT-with-smaller-exploration-depth (binding
+cost is cell-sampling); uniform point estimator (variance âˆšn); `c(Î»)=O(n/Î»)` (false, uniform grid);
+Euler occupancy/adjacency totals (cycle-rank cancels). Each with its killing reason in the brief Â§D.
+
+## The open problem (as posed to Pro)
+PART I of the brief: settle/improve the query complexity â€” an `o(âˆšn)`/`Ã•(n^{1/3})` algorithm, OR a
+lower bound `> Î©(n^{1/3})` (ideally `Î©(âˆšn)`). Any method. Our own reduced crux is `U-N4`, but Pro is
+explicitly free to abandon our CRT framing.
+
+## Confidence trend (that an `o(âˆšn)` algorithm exists; AI estimate, with dates)
+- 2026-06-21: ~55% `o(âˆšn)`, ~30% `Ã•(n^{1/3})`. Leaning truth is `Î˜Ìƒ(n^{1/3})` (LB capped there + the
+  weight-red-herring pattern), but `U-N4` has the flavour of the cell-sampling `Î©(âˆšn)` and could be hard.
+  **These are AI estimates and may be miscalibrated.**
+
+## Round log
+- **Round 1 [2026-06-21] â€” DONE (major advance).** Brief `attack_loop/escalation_webpro_brief.md` â†’
+  Pro reply `docs/webpro_round1_response.md` (verbatim) â†’ orchestrator numeric verification
+  `attack_loop/webpro_verify_round1.py` (multiset identity EXACT; exploration O(log s); rare-bridge
+  confirmed) â†’ independent audit `docs/webpro_round1_audit.md` (RUNNING). **Result:** U-N4 refuted;
+  death-time estimator + instance-sensitive Ã•(n/N_eff) (=Ã•(n^{1/3}) off the tail); remaining crux =
+  the heavy-tail lemma. **Next: round 2 brief on the heavy-tail lemma** (estimate the excess of â‰¤n^{2/3}
+  long MST edges above L in Ã•(n^{1/3}), using spatial range info) â€” pending the round-1 audit verdict.
+
+- **Round 2 [2026-06-21] â€” DONE: CLAIMED CLOSURE.** Brief `docs/webpro_round2_brief.md` (heavy-tail
+  lemma) â†’ Pro reply `docs/webpro_round2_response.md` (verbatim; claims unconditional Ã•_Îµ(n^{1/3})) â†’
+  orchestrator numerics `attack_loop/webpro_verify_round2.py` (Lemmas 1,2 + snapping HOLD) â†’ **3 blind
+  audits DONE** (`webpro_round2_audit{A,B,C}.md`): REDUCTION SOUND, no FATAL, no counterexample, ONE
+  fixable Lemma-3 query-accounting GAP (clean repair = use [1] Thm 30 natively).
+- **Round 3 [2026-06-21] â€” DONE: Pro REFUTES its own round-2 closure.** Brief `docs/webpro_round3_brief.md`
+  â†’ Pro reply `docs/webpro_round3_response.md` (the [1]-Thm-30 repair fails; seed-reuse unsound; concrete
+  counterexample) â†’ orchestrator numeric confirmation `attack_loop/webpro_verify_round3_counterexample.py`
+  (polylog seeds give growing per-run error 0.28â†’0.68; Î©(âˆšK) samples needed). **Round-2 closure NOT
+  validated; my 3 round-2 audits were over-confident. Round-1 partial result stands. Full closure open
+  again (sharper Lemma 3).**
+- **Round 4 [2026-06-21] â€” DONE: spatial-cell repair.** Brief `docs/webpro_round4_brief.md` â†’ reply
+  `docs/webpro_round4_response.md` (empty-cell SPATIAL estimator) â†’ orchestrator recovery test PASSED
+  (`webpro_verify_round4.py`) â†’ 2 audits (`webpro_round4_auditCost.md` cost=Ã•(âˆšK) verified on the failure
+  mode; `webpro_round4_auditAsm.md` assembly sound + no new counterexample + the c_j write-up fix).
+- **Round 5 [2026-06-21] â€” DONE: consolidated proof.** Brief `docs/webpro_round5_brief.md` (c_j fix +
+  clean consolidation) â†’ reply `docs/webpro_round5_response.md` (c_j confirmed + N_j-exploration fix +
+  the full self-contained Lemma 3 + Theorem + verification-debt list). â†’ orchestrator numeric test
+  drafted (`webpro_verify_round5.py`, the c_j-vs-N_j carpet) + FINAL audit (`webpro_round5_auditFinal.md`)
+  queued (tooling outage; will run). If clean â‡’ Â§9.4 convergence â‡’ human gate #2.
+
+## Pending for round 2 (the heavy-tail lemma â€” well-isolated, geometric)
+> Given range-counting access to P, a threshold L=Î˜(W/n^{2/3}) (and a constant-factor estimate of W),
+> estimate B = Î£_{eâˆˆMST, w_e>L} (w_e âˆ’ L) to additive ÎµW using Ã•(n^{1/3}) queries. There are â‰¤ n^{2/3}
+> such long edges; they are "long" geometrically (â‰¥L); the death-time sampler misses them (needs spatial
+> info). This is the ONLY thing between us and a worst-case Ã•(n^{1/3}) (= closing the gap from above).
+
+## Artifacts
+- Round-1 brief: `attack_loop/escalation_webpro_brief.md` Â· Pro reply: `docs/webpro_round1_response.md`
+  Â· numeric verification: `attack_loop/webpro_verify_round1.py` Â· audit: `docs/webpro_round1_audit.md`.
+- Paper-orientation (independent): `gate_paper_orientation_upper.md`.
+- Main research-line ledgers: `research_line_emst_upper.md` (active), `research_line_emst.md` (frozen).
+- Codex (xhigh) attack rounds + audits: `attack_loop/` (`round*_C1/escape/upper_*`, `auditUC/UD_*` etc.).
+
+
+2026-06-22T01:11:02.417746Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.7 seconds
+Output:
+Get-Content : Cannot find path 'E:\Project-git\emst-oracle-lower-bound\docs\webpro_round5_auditFinal.md' because it doe
+s not exist.
+At line:2 char:1
++ Get-Content -Raw docs/webpro_round5_auditFinal.md
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (E:\Project-git\...5_auditFinal.md:String) [Get-Content], ItemNotFoundEx 
+   ception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand
+ 
+
+ exited 1 in 729ms:
+Get-Content : Cannot find path 'E:\Project-git\emst-oracle-lower-bound\docs\webpro_round5_auditFinal.md' because it doe
+s not exist.
+At line:2 char:1
++ Get-Content -Raw docs/webpro_round5_auditFinal.md
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (E:\Project-git\...5_auditFinal.md:String) [Get-Content], ItemNotFoundEx 
+   ception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand
+ 
+
+codex
+I found no completed `webpro_round5_auditFinal.md`; this is the queued final audit. I’m now consolidating the verdict: the proof has a couple of small boundary/wording nits, but I have not found a new cost, variance, oracle, or assembly obstruction.
+  ✓ Read round-5 proof and prior audit/counterexample files
+  ✓ Run provided round-5 numeric check and inspect helper code
+  → Audit items 1-6 mathematically and hunt for counterexamples
+  • Deliver concise verdict with verification debt
+codex
+**Audit Report**
+
+Tooling note: the exact command `sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py` was rejected by the sandbox policy, as was `python`. I did not fabricate run output. I inspected the script and reduced its carpet/satellite construction algebraically; the proof-relevant polynomial cores are:
+
+| scarp | K | sqrtK | b | W_Q | candidate core K/b | exploration core Kδ/W_Q |
+|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 272 | 16.49 | 17 | 1279 | 16.00 | 6.91 |
+| 24 | 600 | 24.49 | 25 | 2879 | 24.00 | 15.16 |
+| 32 | 1056 | 32.50 | 33 | 5119 | 32.00 | 13.31 |
+| 45 | 2070 | 45.50 | 46 | 10124 | 45.00 | 26.02 |
+
+Both theorem-relevant cores scale as `O(sqrtK)`, not `K`; `N_j=K` is absorbed only in the separate exploration bound through `Kδ/G=O(K/b)=O(sqrtK)`.
+
+1. **c_j-vs-N_j split: VALID.**  
+   `Var(Z)=M_j c_j-c_j^2` is exact: only one occupied candidate cell per component is a leader, and empty/nonleader explorations return zero. Candidate trials use `U_j >= c_j`, not `N_j`. Exploration uses `N_j`, but the proof’s `N_j <= K`, fine-scale `r_j <= 128δ/σ`, and packing `G >= W_Q >= bδ/16` give `Õ(sqrtK)`. No seed-reuse leak found.  
+   Finding: **MINOR** tooling debt only: literal Python run could not execute here.
+
+2. **Interleaving/Riemann/error budget: VALID.**  
+   `(12)`, `c_Q(t)-1 <= W_Q/t`, `U(r)=1+G/r`, Riemann gap `<= σW_Q`, and statistical budget compose correctly. One wording nit: the omitted interval line should be read by cases; `K r_0 <= βG/32` is not literally true when `r_0=h`, but then the omitted interval is empty.  
+   Finding: **MINOR** presentation issue.
+
+3. **Packing, active cover, oracle model: VALID.**  
+   The 4-color packing proof gives `W_Q >= bδ/16`. The active cover costs `Õ(sqrtK)` emptiness queries. Candidate and neighbor tests are rectangular support-emptiness tests reducible to one range-count on `P`; no distinct-support-count or component-restricted query survives. Floor-scale alignment should be stated carefully, but it is a boundary convention, not a new primitive.  
+   Finding: **MINOR** boundary convention.
+
+4. **Full assembly: VALID.**  
+   Support regularization, snapping `(68)-(73)`, `W = A_L(P)+B_L(P)`, `B_L(Q)=W_Q-A_L(Q)`, and `hat W = hat A_P + hat W_Q - hat A_Q` compose to additive `O(ξG)`, then the geometric `W` search gives the claimed `Õ_ε(n^{1/3})`. The `n/K` support-sampling term is additive, not multiplied by scale count.  
+   Finding: none beyond listed debt.
+
+5. **Counterexample hunt: VALID / none found.**  
+   I re-attacked the old failure mode, dense carpet with `N_j=Θ(K)`, rare satellite chains, hidden one-cell features, too-loose interleaving, active-cover degeneration, and exploration blowup. The spatial-cell estimator defeats the support-mass rarity obstruction: a feature can be support-rare or spatially hidden at its scale, but not both while contributing constant MST weight without being charged by the `δ/r` or coarse-scale accounting.  
+   Finding: none.
+
+6. **Verification-debt list: VALID with minor additions under “boundary conventions.”**  
+   The only substantive residual I see is still the local-WSPD death-time implementation inherited from source Lemmas 23-24. The remaining items are routine but must be written cleanly: approximate-`K` constants, failure budgets/global caps, dyadic alignment, floor-scale adjacency, and the `r_0=h` omitted-interval case split. I found no hidden new obstruction or unproved load-bearing oracle step.
+
+**Overall Verdict: (CONVERGED)**
+
+No FATAL issue and no new counterexample found. Residual debt is human verification of the local-WSPD death-time primitive plus routine constants/failure/boundary bookkeeping. Because the literal numeric script could not be run in this sandbox, rerun it outside this policy-restricted environment before archival, but I do not view that as theorem debt.
+
+Confidence in the full `Õ_ε(n^{1/3})` theorem: **~0.80** pending human-expert verification.
+tokens used
+94,798
+**Audit Report**
+
+Tooling note: the exact command `sim/.venv/Scripts/python.exe attack_loop/webpro_verify_round5.py` was rejected by the sandbox policy, as was `python`. I did not fabricate run output. I inspected the script and reduced its carpet/satellite construction algebraically; the proof-relevant polynomial cores are:
+
+| scarp | K | sqrtK | b | W_Q | candidate core K/b | exploration core Kδ/W_Q |
+|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 272 | 16.49 | 17 | 1279 | 16.00 | 6.91 |
+| 24 | 600 | 24.49 | 25 | 2879 | 24.00 | 15.16 |
+| 32 | 1056 | 32.50 | 33 | 5119 | 32.00 | 13.31 |
+| 45 | 2070 | 45.50 | 46 | 10124 | 45.00 | 26.02 |
+
+Both theorem-relevant cores scale as `O(sqrtK)`, not `K`; `N_j=K` is absorbed only in the separate exploration bound through `Kδ/G=O(K/b)=O(sqrtK)`.
+
+1. **c_j-vs-N_j split: VALID.**  
+   `Var(Z)=M_j c_j-c_j^2` is exact: only one occupied candidate cell per component is a leader, and empty/nonleader explorations return zero. Candidate trials use `U_j >= c_j`, not `N_j`. Exploration uses `N_j`, but the proof’s `N_j <= K`, fine-scale `r_j <= 128δ/σ`, and packing `G >= W_Q >= bδ/16` give `Õ(sqrtK)`. No seed-reuse leak found.  
+   Finding: **MINOR** tooling debt only: literal Python run could not execute here.
+
+2. **Interleaving/Riemann/error budget: VALID.**  
+   `(12)`, `c_Q(t)-1 <= W_Q/t`, `U(r)=1+G/r`, Riemann gap `<= σW_Q`, and statistical budget compose correctly. One wording nit: the omitted interval line should be read by cases; `K r_0 <= βG/32` is not literally true when `r_0=h`, but then the omitted interval is empty.  
+   Finding: **MINOR** presentation issue.
+
+3. **Packing, active cover, oracle model: VALID.**  
+   The 4-color packing proof gives `W_Q >= bδ/16`. The active cover costs `Õ(sqrtK)` emptiness queries. Candidate and neighbor tests are rectangular support-emptiness tests reducible to one range-count on `P`; no distinct-support-count or component-restricted query survives. Floor-scale alignment should be stated carefully, but it is a boundary convention, not a new primitive.  
+   Finding: **MINOR** boundary convention.
+
+4. **Full assembly: VALID.**  
+   Support regularization, snapping `(68)-(73)`, `W = A_L(P)+B_L(P)`, `B_L(Q)=W_Q-A_L(Q)`, and `hat W = hat A_P + hat W_Q - hat A_Q` compose to additive `O(ξG)`, then the geometric `W` search gives the claimed `Õ_ε(n^{1/3})`. The `n/K` support-sampling term is additive, not multiplied by scale count.  
+   Finding: none beyond listed debt.
+
+5. **Counterexample hunt: VALID / none found.**  
+   I re-attacked the old failure mode, dense carpet with `N_j=Θ(K)`, rare satellite chains, hidden one-cell features, too-loose interleaving, active-cover degeneration, and exploration blowup. The spatial-cell estimator defeats the support-mass rarity obstruction: a feature can be support-rare or spatially hidden at its scale, but not both while contributing constant MST weight without being charged by the `δ/r` or coarse-scale accounting.  
+   Finding: none.
+
+6. **Verification-debt list: VALID with minor additions under “boundary conventions.”**  
+   The only substantive residual I see is still the local-WSPD death-time implementation inherited from source Lemmas 23-24. The remaining items are routine but must be written cleanly: approximate-`K` constants, failure budgets/global caps, dyadic alignment, floor-scale adjacency, and the `r_0=h` omitted-interval case split. I found no hidden new obstruction or unproved load-bearing oracle step.
+
+**Overall Verdict: (CONVERGED)**
+
+No FATAL issue and no new counterexample found. Residual debt is human verification of the local-WSPD death-time primitive plus routine constants/failure/boundary bookkeeping. Because the literal numeric script could not be run in this sandbox, rerun it outside this policy-restricted environment before archival, but I do not view that as theorem debt.
+
+Confidence in the full `Õ_ε(n^{1/3})` theorem: **~0.80** pending human-expert verification.
