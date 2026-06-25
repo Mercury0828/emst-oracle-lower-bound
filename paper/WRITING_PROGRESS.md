@@ -3,6 +3,16 @@
 > Update after EVERY section. On long context, re-read THIS + `COMPONENT_MAPPING.md` + the frozen proof
 > (`docs/webpro_round5_response.md`) before continuing — never write from memory. Venue = SODA = THEORY.
 
+## Status (2026-06-25, 40pp-push per owner override): 37pp → targeting 40. Owner INSISTED on physical 40pp.
+TRANSPARENCY (owner asked to mark length-driven vs genuine, so they can trim before submission):
+- GENUINE (keep): §2.7 "What is new" source comparison; §7 EMD program; §7 "Why n^{1/3}" reading (hedged,
+  not claiming Driemel's exact gadget); rem:time running-time; lem:wspd-prelim; K-estimation derivation;
+  full proof expansions (packing/accounting/accuracy/spanner/snapping/CRT); Fig.snap, Fig.wspd, Fig.dtsearch.
+- LENGTH-DRIVEN (trim candidates if reverting toward 30pp): §6.3 worked example; App.C "Tracking the
+  constants"; rem:k0; some abstract/overview verbosity. None are false; all are defensible but optional.
+Honest standing note: independent Codex referee judged 28pp "appropriate, not padded"; 32pp was the
+natural full-rigor length. 37-40pp exists because owner overrode. New content under Codex regression check.
+
 ## Status (2026-06-25, expanded): 32pp, 43 refs, 0 undefined. Proofs PROMOTED TO BODY (only WSPD in App.).
 Owner asked to push toward 40pp via non-padding route. Added: §2 Technical Overview, 3 figures (leader /
 cluster-staircase / death-time), 3 algorithm boxes (leader trial / bottleneck death-time / top-level +

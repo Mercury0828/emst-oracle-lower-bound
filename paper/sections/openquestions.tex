@@ -2,8 +2,10 @@
 
 \paragraph{Earth Mover's Distance.}
 The Earth Mover's Distance (EMD) between two planar point sets sits in the same range-counting framework of
-Driemel et al.~\cite{DMOSW25} as MST weight, and there too a polynomial gap separates the known upper
-bound from the lower bound. Sublinear and sketching algorithms for EMD have a long
+Driemel et al.~\cite{DMOSW25} as MST weight. Their EMD results give an $O(\log\Delta)$ multiplicative
+approximation with an additive-error trade-off that is tight in its own regime; whether a near-$(1\pm\eps)$
+estimate of planar EMD is achievable under a pure range-counting oracle, and at what query rate, is open.
+Sublinear and sketching algorithms for EMD have a long
 history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02}, as do near-linear geometric matching
 algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19}, but none operates under a pure
 range-counting oracle.
@@ -21,17 +23,19 @@ the cluster-count curve is thus the imbalance profile across scales, and the ana
 $c_S(t)$ at a scale is estimating the number of cells with nonzero imbalance, or more precisely the total
 imbalance, at that scale.
 
-Two ingredients would need EMD analogues. First, a \emph{spatial estimator} for the per-scale imbalance:
-the leader estimator counts components, while EMD needs a (signed) mass functional, so one would draw a
-candidate cell uniformly and return its red-minus-blue count scaled by the universe size, an unbiased
-estimator whose variance is again controlled by a spatial, not mass-proportional, sample; the heavy-tail
-difficulty (a few cells carrying most of the imbalance) is exactly the one the empty-cell view was built
-for. Second, a \emph{packing inequality} relating the number of imbalanced cells at a scale to the EMD
-itself, playing the role of $\Wq\ge b\delta/16$ and collapsing the geometric sum of per-scale costs.
-Establishing these two and balancing the resulting $\sqrt K+n/K$ trade-off would, we expect, bring planar
-EMD to the same $\Otil(n^{1/3})$ rate, matching the lower bound of~\cite{DMOSW25} up to the unavoidable
-$\log\Delta$ transport-approximation factor. Whether the spatial-sampling idea extends to the full
-matching cost, and not only to its dyadic approximation, is the deeper question.
+Two ingredients would need EMD analogues, which we state as open problems, not claims. First, a
+\emph{spatial estimator} for the per-scale \emph{absolute} imbalance $\sum_{\text{cells}}\abs{\text{red}-
+\text{blue}}$ (the quantity the dyadic transport sum charges; the signed differences cancel over a level
+and are not what one wants). One would draw a candidate cell uniformly and return $\abs{\text{red}-
+\text{blue}}$ for that cell scaled by the universe size, an unbiased estimator of the level's absolute
+imbalance whose variance is governed by a spatial, not mass-proportional, sample; whether its variance and
+a packing control can be made to behave as well as the leader estimator's $Mc$ bound is the open point.
+Second, a \emph{packing inequality} relating the imbalance profile across scales to the EMD itself, playing
+the role of $\Wq\ge b\delta/16$ and collapsing the geometric sum of per-scale costs. We conjecture that
+establishing these and balancing the resulting $\sqrt K+n/K$ trade-off would give an $\Otil(n^{1/3})$-query
+estimate of the dyadic transport approximation of planar EMD, hence an $O(\log\Delta)$-approximation of EMD
+at that rate; whether the spatial-sampling idea reaches the true matching cost, and what the right
+range-counting lower bound for EMD is, are the deeper questions.
 
 \paragraph{Higher dimensions.}
 For $P\subseteq[\Delta]^d$ with $d\ge3$ the WSPD spanner and the cluster-count integral both go through,

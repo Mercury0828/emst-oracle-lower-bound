@@ -119,33 +119,41 @@ Although \cref{thm:main} counts oracle queries, the algorithm is also efficient 
 step between queries is bookkeeping on cells and ranks: the cover construction, the offline candidate
 generation, the leader explorations, the WSPD partner enumeration, and the bottleneck priority queue each
 do work proportional to the number of cells touched, which is within a polylogarithmic factor of the query
-count. On a word RAM with $O(\log n)$-bit words, where a quadtree cell, a representative's coordinates, and
-a rank fit in $O(1)$ words, the total running time is therefore $\Otil_\eps(n^{1/3})$ as well, dominated by
-the queries up to polylogarithmic factors. No geometric predicate beyond comparing coordinates and cell
-side lengths is used, so the algorithm runs in the standard real-RAM-free integer model.
+count. On a word RAM with $O(\log n)$-bit words, where a quadtree cell, a representative's integer coordinates,
+and a rank fit in $O(1)$ words, the total running time is therefore $\Otil_\eps(n^{1/3})$ as well,
+dominated by the queries up to polylogarithmic factors. The only numeric operations are comparisons and
+additions of edge lengths in the bottleneck search and the integration: edge-length comparisons are done
+on \emph{squared} Euclidean distances, which are exact integers, and the clipped-weight sums need each
+length only to relative precision $\poly(\eps/\log n)$, supplied by $O(\log(n/\eps))$-bit approximations of
+the square roots. So no exact irrational arithmetic is required, and the algorithm runs in the standard
+integer word-RAM model.
 \end{remark}
 
 \subsection{The algorithm on a concrete instance}\label{sec:main-example}
 
-To see the pieces act in concert, follow them on the hard shape of \cref{sec:overview}: a fully occupied
-$m\times m$ background carpet of unit-spaced points ($m=\Theta(\sqrt n)$, so $n=\Theta(m^2)$) together with
-$s=\Theta(n^{2/3})$ ``satellite'' points placed far out along a geometric chain, the $i$-th at distance
-$\Theta(2^i)$ from the carpet. The true MST spends $\Theta(n)$ weight knitting the carpet (each of its
-$\Theta(n)$ points joins a neighbor at distance $\Theta(1)$) and a further $\Theta(\sum_i 2^i)=\Theta(2^s)$
-on the satellite chain, so the heavy tail dominates: $W=\Theta(2^s)$.
+To see the pieces act in concert, follow them on the hard shape of \cref{sec:overview}, with parameters
+that stay inside the model $\Delta=O(n)$. The input is a unit-spaced background carpet of $n-s$ points
+filling a $\Theta(\sqrt n)\times\Theta(\sqrt n)$ region, together with only $s=\Theta(\log n)$
+\emph{satellite} points placed so that the MST links them by a chain of geometrically growing edges of
+lengths $2^1,2^2,\dots,2^s$, the longest reaching $2^s=\Theta(\Delta)=\Theta(n)$. The carpet contributes
+$\Theta(n)$ to the MST weight (each point joins a neighbor at distance $\Theta(1)$) and the chain
+contributes $\Theta(\sum_{i\le s}2^i)=\Theta(2^s)=\Theta(n)$, so $W=\Theta(n)$, with a constant fraction of
+it living in the few long satellite edges.
 
-The geometric search calibrates a guess $G_0\in[W,16W)$, fixing $L=G_0/K_0$ with $K_0=\Theta(n^{2/3})$.
-Regularization (\cref{lem:kwindow}) chooses a grid side $h=\Theta(\xi L)$ at which the carpet collapses to
-$\Theta(K_0)$ occupied cells and each satellite still occupies its own cell. Now the three estimators
-split the work cleanly. The \emph{bulk death-time sampler on $P$} sees almost only the carpet: a uniform
-seed lands in the carpet with probability $1-o(1)$, its death time is $\Theta(1)$, and $s_P=O(\xi^{-2}
-n^{1/3})$ seeds pin down $A_L(P)=\Theta(n)$. The \emph{support estimator} (\cref{lem:support}) is where the
-satellites are caught: a mass sample of the support would miss the $s$ satellites among $\Theta(K_0)$
-cells, but the empty-cell leader estimator samples cells, so each satellite cell is hit with probability
-$\Theta(1/K_0)$ and its contribution to $\Wq$ is recovered; the active-cover packing bound makes the whole
-support weight $\Wq=\Theta(2^s)$ readable in $\Otil(\sqrt{K_0})=\Otil(n^{1/3})$ queries. The
-\emph{support bulk $A_L(Q)$} again sees mostly the carpet and is $\Theta(n)$. Assembling, $\widehat W
-=\widehat A_P+\widehat\Wq-\widehat A_Q$ keeps the satellite tail (carried by $\widehat\Wq$) and cancels the
-duplicated carpet bulk, returning $\Theta(2^s)=\Theta(W)$. A purely mass-sampling algorithm would, at the
-same query budget, miss the satellites and report $\Theta(n)\ll W$; the spatial leader estimator is exactly
-what averts that failure.
+The geometric search calibrates a guess $G_0\in[W,16W)$, fixing $L=G_0/K_0=\Theta(n^{1/3})$ with
+$K_0=\Theta(n^{2/3})$. Regularization (\cref{lem:kwindow}) starts at scale $\Theta(\xi L)$ and halves to
+the first scale with $\Theta(K_0)$ occupied cells; for this carpet that scale is $\Theta(n^{1/6})$, at
+which the carpet collapses to $\Theta(K_0)$ cells and each of the $s$ far-apart satellites still occupies
+its own cell. The point of the instance is the contrast at the support: the satellites are a vanishing
+fraction $s/K_0=\Theta(\log n/n^{2/3})$ of the support cells, so a sample of $\poly\log$ \emph{support
+points} would miss them, yet the long satellite edges carry a constant fraction of $\Wq$. The empty-cell
+leader estimator samples cells, hitting each satellite cell with probability $\Theta(1/K_0)$, so it reads
+the full $\Wq=\Theta(n)$, heavy tail included, in $\Otil(\sqrt{K_0})=\Otil(n^{1/3})$ queries.
+
+The three estimators then combine through $W=A_L(P)+B_L(P)$ with $B_L(P)\approx B_L(Q)=\Wq-A_L(Q)$. The
+death-time samplers estimate the two clipped bulks $A_L(P)$ and $A_L(Q)$ directly (each dominated by the
+short edges its set carries), and $\widehat\Wq$ supplies the heavy tail; in the assembly $\widehat W=
+\widehat A_P+\widehat\Wq-\widehat A_Q$ the support's own bulk $A_L(Q)$ is subtracted off and the satellite
+tail survives, returning $\Theta(n)=\Theta(W)$. A purely point-mass algorithm at the same budget never
+samples a satellite and reports only the carpet weight, missing the constant-fraction tail; the spatial
+leader estimator is exactly what averts that failure.
