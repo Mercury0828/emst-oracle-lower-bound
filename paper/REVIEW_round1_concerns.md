@@ -58,6 +58,11 @@ n^{1/3}·poly(1/ε) note (25).
   is not a range-counting competitor. FIX (ACCEPT-FIX) — also nudges 41→~46.
 - item 5 (proof-presence certifications) — no action, confirms App.B/App.C back the body claims.
 
+## App.A review trajectory (Codex gpt-5.5 xhigh, all archived docs/reviews/)
+- R1 FLAWED (8 BLOCKER) → R2 FLAWED (B1,B4 fixed) → R3 FLAWED, 0 BLOCKER (Dijkstra/FAIL/kwindow/ranks
+  certified) → R4 FLAWED, 0 BLOCKER, 2 MAJOR (separation param + membership predicate) → **R5
+  SOUND-WITH-FIXES, no BLOCKER/MAJOR** (2 presentational MINOR fixed). App.A (residual-debt item) CLEARED.
+
 ## Convergence-gate status after round 1 (pre-fix)
 (a) proofs complete — NO (App.A flawed; §4 K-window proof missing). (b) length 21pp — under 45-60 target
 but appendices grow with fixes. (c) refs 41 — under 50-70, +3 strand refs pending. (d) readability — GREEN

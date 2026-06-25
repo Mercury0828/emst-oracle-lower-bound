@@ -56,10 +56,10 @@ A pair of cells $(c,c')$ is \emph{well-separated} if $\max\{r(c),r(c')\}\le\rho\
 $d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
 recursion~\cite{CK95} on $\mathcal T$. We never materialize $\mathcal W$; two facts let us use it locally.
 \begin{enumerate}
-\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. Following the Callahan--Kosaraju
-recursion (\cite{CK95}; Algorithm~2 of \cite{DMOSW25}), orient the pair so that $r(c)\le r(c')$, breaking
-a tie $r(c)=r(c')$ by the $z$-order of the cell centers; the recursion always subdivides the larger cell
-$c'$. Then $(c,c')\in\mathcal W$ exactly when both cells are nonempty, the pair is well-separated
+\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. We use a deterministic tie-broken
+variant of the Callahan--Kosaraju recursion (\cite{CK95}; Algorithm~2 of \cite{DMOSW25}, which swaps only
+under strict size inequality): orient the pair so that $r(c)\le r(c')$, breaking a tie $r(c)=r(c')$ by the
+$z$-order of the cell centers; the recursion always subdivides the larger cell $c'$. Then $(c,c')\in\mathcal W$ exactly when both cells are nonempty, the pair is well-separated
 ($r(c')\le\rho\,d(c,c')$), and its \emph{predecessor} $(c,p(c'))$ -- obtained by replacing the larger cell
 $c'$ with its quadtree parent $p(c')$ -- is \emph{not} well-separated ($r(p(c'))>\rho\,d(c,p(c'))$). Both
 conditions are geometric except the two emptiness tests, which are $O(1)$ counts; the predecessor is
@@ -186,8 +186,10 @@ expected query cost
 Fix a deterministic budget $B=C\overline Q$ for an absolute constant $C$ and abort the call, returning
 \textsc{fail}, the moment the running count exceeds $B$. By Markov's inequality the call exceeds $B$ with
 probability at most $1/C$, a small constant, and \textsc{fail} is treated by the geometric $W$-search of
-\cref{sec:main-combine} as a non-stopping outcome inside its constant-probability amplification. A call
-that does not abort returns the unbiased clipped death-time averages of \cref{sec:dt-sampler}. The cost is
+\cref{sec:main-combine} as a bad run inside its median amplification. The uncapped sample average is the
+exact clipped death-time average of \cref{sec:dt-sampler} and is unbiased; a run is counted bad if it
+aborts or is inaccurate, and \cref{sec:main-combine} union-bounds the bad probability rather than
+conditioning on non-abort. The cost is
 $B=\Otil_\eps(n^{1/3})$ deterministically, and the displayed $\poly(1/\eps)$ factors in
 \eqref{eq:appA-totalcost} are hidden by $\Otil_\eps$ for fixed $\eps$; for variable $\eps$ the bound reads
 $n^{1/3}\poly(1/\eps)\poly\log(n,\Delta)$.
