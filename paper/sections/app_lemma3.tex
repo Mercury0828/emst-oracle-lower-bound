@@ -1,6 +1,6 @@
 \section{Full proof of the support-MST estimator}\label{sec:app-lemma3}
 
-This appendix completes the proof of \cref{lem:support}: the active-cover packing bound
+This section completes the proof of \cref{lem:support}: the active-cover packing bound
 (\cref{sec:app-packing}), the interleaving inequality (\cref{sec:app-interleave}), the two-part query
 accounting that is the crux of the $\Otil(\sqrt K)$ bound (\cref{sec:app-accounting}), the accuracy of one
 additive call (\cref{sec:app-accuracy}), and the guess-removal and approximate-$K$ steps
@@ -10,22 +10,40 @@ current guess.
 \subsection{The packing bound (\texorpdfstring{\cref{lem:packing}}{packing})}\label{sec:app-packing}
 
 \begin{proof}[Proof of \cref{lem:packing}]
-For each block of the active cover $\mathcal B$ pick one support point of $Q$ inside it, and color the
-blocks by the parities $(\,i\bmod 2,\,j\bmod 2)$ of their grid indices, a four-coloring. Two selected
-points from distinct blocks of the same color sit in $\delta$-cells whose indices differ by at least two
-in some coordinate, so they are at distance at least $\delta$. Some color class $S$ has $\abs S\ge b/4$
-selected points, pairwise at distance $\ge\delta$; hence every spanning tree of $S$, in particular
-$\MST(S)$, has weight at least $\delta(\abs S-1)\ge\delta(b/4-1)$.
+The bound has a lower half (spread points force MST weight up) and an upper half (no subset of $Q$ has MST
+weight much above $\Wq$), and we combine them.
 
-We bound $\wt(\MST(S))$ from above by $\Wq$. For any $S\subseteq Q$, take the minimal subtree $T$ of
-$\MST(Q)$ spanning $S$, double its edges to get an Eulerian multigraph, take an Euler tour, and shortcut
-it (in the Euclidean metric, by the triangle inequality) to a Hamiltonian cycle on $S$; deleting one edge
-gives a spanning path of $S$ of weight at most $2\,\wt(T)\le 2\Wq$. Therefore
+\emph{A spread subset.} The active cover $\mathcal B$ consists of $b$ pairwise-disjoint $\delta$-cells,
+each nonempty in $Q$; index a cell by its integer grid coordinates $(i,j)$, so cell $(i,j)$ is the square
+$[i\delta,(i{+}1)\delta)\times[j\delta,(j{+}1)\delta)$. Pick one support point of $Q$ from each block, and
+color the block $(i,j)$ by $(i\bmod 2,\,j\bmod 2)\in\{0,1\}^2$, a four-coloring. If two blocks share a
+color then their indices agree in parity, so they differ by at least $2$ in whichever coordinate they
+differ; hence the two chosen points, lying in those cells, differ by at least $2\delta-\delta=\delta$ in
+that coordinate and are at Euclidean distance $\ge\delta$. By pigeonhole some color class $S$ contains at
+least $b/4$ of the chosen points, and they are pairwise at distance $\ge\delta$.
+
+\emph{Spread points have heavy MST.} For a point set whose pairwise distances are all $\ge\delta$, every
+spanning tree has each of its $\abs S-1$ edges of length $\ge\delta$, so $\wt(\MST(S))\ge\delta(\abs S-1)
+\ge\delta(b/4-1)$.
+
+\emph{The upper half.} We claim that for \emph{every} $S\subseteq Q$,
 \begin{equation}\label{eq:doubling}
-  \wt(\MST(S))\le 2\Wq\qquad\text{for every }S\subseteq Q.
+  \wt(\MST(S))\le 2\,\Wq .
 \end{equation}
-Combining, $2\Wq\ge\wt(\MST(S))\ge\delta(b/4-1)$, i.e.\ $\Wq\ge\delta(b-4)/8$. For $b\ge 8$ this is at
-least $b\delta/16$. If $b<8$ then $K=O(1)$ and $\Wq$ is computed exactly from $O(1)$ support points.
+Let $T$ be the minimal subtree of $\MST(Q)$ that spans $S$ (the union of the $\MST(Q)$-paths between the
+points of $S$); then $\wt(T)\le\wt(\MST(Q))=\Wq$. Double every edge of $T$ to obtain a connected multigraph
+in which every vertex has even degree; it therefore has an Euler tour, a closed walk of length $2\wt(T)$
+visiting every vertex of $T$ (hence every point of $S$) at least once. Traverse the tour and shortcut past
+already-visited vertices: by the triangle inequality in the Euclidean plane each shortcut does not
+increase the length, so we obtain a closed tour through exactly the points of $S$ of length $\le 2\wt(T)$.
+Deleting its longest edge leaves a spanning path of $S$, and $\MST(S)$ is no heavier than this path, so
+$\wt(\MST(S))\le 2\wt(T)\le 2\Wq$, which is \eqref{eq:doubling}.
+
+\emph{Combining.} Taking $S$ to be the spread color class, $2\Wq\ge\wt(\MST(S))\ge\delta(b/4-1)$, i.e.\
+$\Wq\ge\delta(b-4)/8$. For $b\ge 8$ the right side is at least $\delta(b-b/2)/8=b\delta/16$, which is the
+claim. If $b<8$ then $K=O(1)$: the support has only a constant number of cells, found explicitly by the
+$\Otil(\sqrt K)$ cover construction, and $\Wq$ is then computed exactly from those $O(1)$ points, so the
+inequality is not needed.
 \end{proof}
 
 \subsection{The filtration (\texorpdfstring{\eqref{eq:interleave}}{interleaving})}\label{sec:app-interleave}
@@ -50,18 +68,35 @@ This is the bound on the \emph{component} count used by the leader estimator.
 
 \subsection{Query accounting: both sums are \texorpdfstring{$\Otil(\sqrt K)$}{O(sqrt K)}}\label{sec:app-accounting}
 
-This is the heart of \cref{lem:support}, and the place the round-5 separation of the two cost drivers pays
-off: the number of trials is set by the variance, which sees only the component count, while the work per
-trial sees the occupied-cell count, and the two are summed against different parts of the packing bound so
-that neither alone forces $\Omega(K)$. One additive call runs the leader estimator at each fine scale
-$r_j$ ($a(r_j)\le\delta$) with candidate universe $M_j=M(r_j)$ from \eqref{eq:Msize}, accuracy
-$\alpha_j=\beta G/(32\,T\sigma r_j)$, and bound $U_j=1+G/r_j$. By \cref{lem:leader} and the median-of-means
-guarantee, the trial count at scale $j$ is
+This is the heart of \cref{lem:support}, and the place the separation of the two cost drivers pays off:
+the number of trials is set by the variance, which sees only the component count, while the work per trial
+sees the occupied-cell count, and the two are summed against different parts of the packing bound so that
+neither alone forces $\Omega(K)$.
+
+\paragraph{The cost model.} One additive call runs the leader estimator at each fine scale $r_j$ (those
+with $a(r_j)\le\delta$, $j=0,\dots,T-1$) with candidate universe of size $M_j=M(r_j)$ from
+\eqref{eq:Msize}, target additive accuracy $\alpha_j=\beta G/(32\,T\sigma r_j)$, and a-priori bound
+$U_j=1+G/r_j\ge c_j$ on the component count (from \eqref{eq:U-bound}). Two costs arise at scale $j$.
+
+\emph{Trials.} By \cref{lem:leader} a single trial has variance $\Var(Z)\le M_jc_j\le M_jU_j$. To estimate
+$c_j$ to additive error $\alpha_j$ with failure probability $\delta'=1/(6T)$, the median-of-means recipe
+of \cref{sec:prelim} averages $O(\Var/\alpha_j^2)$ trials per block and takes a median of $O(\log(1/\delta'))
+=O(\Lambda)$ blocks, for a total of
 \begin{equation}\label{eq:kj}
-  k_j=O\!\Bigl(\tfrac{M_jU_j}{\alpha_j^2}\,\Lambda\Bigr),\qquad \Lambda=\log\tfrac{n\Delta}{h\eta},
+  k_j=O\!\Bigl(\frac{M_jU_j}{\alpha_j^2}\,\Lambda\Bigr),\qquad \Lambda=\log\frac{n\Delta}{h\eta}
 \end{equation}
-and the expected number of cell expansions is $O(k_j\,(N_j/M_j)\,\log K)=O((N_jU_j/\alpha_j^2)\,\Lambda\log
-K)$, where $N_j$ is the number of occupied $a(r_j)$-cells. We bound the two sums separately.
+trials. Each trial spends one range count to test the sampled cell for occupancy, so the trials alone
+cost $\sum_j k_j$ range counts.
+
+\emph{Explorations.} A trial does extra work only when its sampled cell is occupied, which happens with
+probability $N_j/M_j$ (where $N_j$ is the number of occupied $a(r_j)$-cells), and an occupied exploration
+examines $O(\log K)$ cells in expectation (the harmonic bound of \cref{sec:support-estimator}), each at
+$O(\sigma^{-2})$ counts to find its neighbors. So the expected exploration cost at scale $j$ is
+$O(k_j\cdot(N_j/M_j)\cdot\log K\cdot\sigma^{-2})=O\bigl((N_jU_j/\alpha_j^2)\,\Lambda\log K\,\sigma^{-2}\bigr)$,
+in which the universe size $M_j$ has cancelled and the occupied-cell count $N_j$ has taken its place.
+
+We bound the two scale-sums $\sum_j M_jU_j/\alpha_j^2$ and $\sum_j N_jU_j/\alpha_j^2$ separately; the
+remaining $\Lambda,\log K,\sigma^{-2}$ factors are polylogarithmic and tracked at the end.
 
 \paragraph{Candidate-root sum (uses $U_j\ge c_j$).}
 Substituting \eqref{eq:Msize} and $\alpha_j=\beta G/(32T\sigma r_j)$,
@@ -71,11 +106,20 @@ Substituting \eqref{eq:Msize} and $\alpha_j=\beta G/(32T\sigma r_j)$,
    = C\,\frac{T^2}{\beta^2}\Bigl(\frac{b\delta^2}{G^2}+\frac{b\delta^2}{G r_j}\Bigr).
    \label{eq:cand-per-scale}
 \end{align}
-By the packing bound $G\ge\Wq\ge b\delta/16$ (\cref{lem:packing}), $b\delta^2/G^2\le 256/b$ and
-$b\delta^2/(Gr_j)\le 16\delta/r_j$. The thresholds are geometric with ratio $1+\sigma$, so
-$\sum_j r_j^{-1}=O(1/(\sigma r_0))$, and since $r_0=\max\{h,\beta G/(32K)\}\ge\beta G/(32K)\ge\beta
-b\delta/(512K)$ we get $\delta/r_0=O(K/(\beta b))$. Summing \eqref{eq:cand-per-scale} over the
-$T=O(\sigma^{-1}\log(\Delta/h))$ scales,
+We now bound the two terms of \eqref{eq:cand-per-scale} using the packing bound $G\ge\Wq\ge b\delta/16$
+(\cref{lem:packing}). For the first term, $b\delta^2/G^2=b(\delta/G)^2\le b(16/b)^2=256/b$ is
+\emph{scale-independent}, so summed over the $T$ scales it contributes $O(T/b)$. For the second term,
+$b\delta^2/(Gr_j)=(b\delta/G)(\delta/r_j)\le 16\,\delta/r_j$, and the thresholds $r_j=r_0(1+\sigma)^j$ form
+a geometric progression, so
+\[
+  \sum_{j\ge0}\frac1{r_j}=\frac1{r_0}\sum_{j\ge0}(1+\sigma)^{-j}=\frac1{r_0}\cdot\frac{1+\sigma}{\sigma}
+   =O\!\Bigl(\frac1{\sigma r_0}\Bigr).
+\]
+Since $r_0=\max\{h,\beta G/(32K)\}\ge\beta G/(32K)\ge\beta(b\delta/16)/(32K)=\beta b\delta/(512K)$, we get
+$\delta/r_0\le 512K/(\beta b)=O(K/(\beta b))$, so the second term sums to $O(\delta/(\sigma r_0))=
+O(K/(\sigma\beta b))$. Adding the two and multiplying by the prefactor $CT^2/\beta^2$ from
+\eqref{eq:cand-per-scale}, and using $T/b=O(K/(\sigma\beta b))$ (as $T=\Otil(1)$ and $K\ge\sigma\beta T$
+for large $K$),
 \begin{equation}\label{eq:cand-total}
   \sum_j \frac{M_jU_j}{\alpha_j^2}
    = O\!\Bigl(\frac{T^2}{\beta^2}\Bigl(\frac{T}{b}+\frac{1}{\sigma}\cdot\frac{\delta}{r_0}\Bigr)\Bigr)
@@ -112,22 +156,49 @@ degree $O(\beta^{-2})$, and the amplification gives the explicit $O(\beta^{-8}\s
 \subsection{Accuracy of one additive call (\texorpdfstring{\cref{lem:additive}}{additive})}\label{sec:app-accuracy}
 
 \begin{proof}[Proof of \cref{lem:additive}]
-By \eqref{eq:cluster-integral}, $\Wq=\int_0^\infty(\cQ(t)-1)\,dt$. Distinct support centers are at
-distance $\ge h$, so $\cQ(t)=K$ for $t<h$ and $\int_0^h(\cQ-1)=(K-1)h$, the first term of
-\eqref{eq:additive-call}. If $r_0>h$ then the omitted interval contributes
-$\int_h^{r_0}(\cQ-1)\le K r_0\le\beta G/32$ by the choice $r_0=\beta G/(32K)$. On $[r_0,\infty)$ the exact
-sum $\sum_j d_j(c_j-1)$ with the true $c_j=\cG(r_j)$ lies between the lower and upper Riemann sums of
-$\int(\cQ-1)$, because \eqref{eq:interleave} gives $\cQ(r_{j+1})\le c_j\le\cQ(r_j)$; their difference is
+By the cluster-count integral \eqref{eq:cluster-integral}, $\Wq=\int_0^\infty(\cQ(t)-1)\,dt$. We compare
+the estimator \eqref{eq:additive-call} to this integral and bound the discrepancy by three terms, each at
+most $\beta G/32$: the part of the integral below $r_0$, the Riemann discretization gap, and the
+statistical error. We then sum them.
+
+\emph{The interval below $r_0$.} Distinct support centers lie at distance $\ge h$, so $\cQ(t)=K$ for $t<h$
+and
+\[
+  \int_0^h(\cQ(t)-1)\,dt=(K-1)h,
+\]
+the leading $(K-1)h$ term of \eqref{eq:additive-call}. If $r_0>h$, the integral over $[h,r_0]$ is omitted
+by the estimator; since $\cQ(t)-1\le K-1<K$ there, it contributes at most $\int_h^{r_0}K\,dt\le Kr_0$, and
+the choice $r_0=\beta G/(32K)$ (when it exceeds $h$) makes this $\le\beta G/32$. If instead $r_0=h$ this
+term is absent.
+
+\emph{The Riemann gap.} On $[r_0,\infty)$ the estimator forms $\sum_j d_j(c_j-1)$ with $d_j=\sigma r_j$ the
+width of the $j$-th step and $c_j=\cG(r_j)$ the true scale-graph component count. By the interleaving
+\eqref{eq:interleave}, $\cQ(r_{j+1})\le c_j\le\cQ(r_j)$, so $d_j(c_j-1)$ lies between the lower and upper
+Riemann rectangles of $\int_{r_j}^{r_{j+1}}(\cQ(t)-1)\,dt$ on that step. Hence $\sum_j d_j(c_j-1)$ and the
+integral differ by at most the total staircase drop,
 \[
   \sum_j d_j\bigl(\cQ(r_j)-\cQ(r_{j+1})\bigr).
 \]
-Each MST edge of $Q$ of length $\ell\in(r_j,r_{j+1}]$ contributes exactly $d_j=\sigma r_j\le\sigma\ell$ to
-this sum, so the Riemann gap is at most $\sigma\sum_e\abs e=\sigma\Wq\le\beta\Wq/32\le\beta G/32$. Finally,
-on the simultaneous-good event the statistical error is $\sum_j d_j\abs{\widehat c_j-c_j}\le\sum_j
-d_j\alpha_j=\beta G/32$. Summing the three contributions,
-$\abs{\widehat W(G)-\Wq}\le 3\beta G/32<\beta G$. The good event holds with probability $\ge5/6$ after
-amplifying each of the $T$ scale-estimates to failure probability $O(1/T)$, which costs an extra
-$\log T=O(\Lambda)$ factor already absorbed above. The cost was bounded in \cref{sec:app-accounting}.
+An MST edge of $Q$ of length $\ell$ lies in a unique band $(r_j,r_{j+1}]$ and there decreases $\cQ$ by one,
+contributing $d_j=\sigma r_j\le\sigma\ell$ to this sum and nothing elsewhere; summing over edges, the gap
+is at most $\sigma\sum_{e\in\MST(Q)}\abs e=\sigma\Wq$. With $\sigma=\beta/32$ this is $\le\beta\Wq/32\le
+\beta G/32$ (using $G\ge\Wq$).
+
+\emph{The statistical error.} The estimator uses $\widehat c_j$ in place of $c_j$, so its deviation from
+the exact discretized sum is $\sum_j d_j\abs{\widehat c_j-c_j}$. On the good event $\abs{\widehat c_j-c_j}
+\le\alpha_j$ for all $j$, and substituting $d_j=\sigma r_j$ and $\alpha_j=\beta G/(32\,T\sigma r_j)$,
+\[
+  \sum_j d_j\abs{\widehat c_j-c_j}\le\sum_{j=0}^{T-1}\sigma r_j\cdot\frac{\beta G}{32\,T\sigma r_j}
+   =\sum_{j=0}^{T-1}\frac{\beta G}{32\,T}=\frac{\beta G}{32},
+\]
+the per-scale accuracies having been chosen precisely so that the widths $d_j$ cancel and the $T$ terms
+sum to $\beta G/32$.
+
+\emph{Summing.} Adding the three contributions, $\abs{\widehat W(G)-\Wq}\le 3\beta G/32<\beta G$, which is
+the accuracy claim. The good event requires all $T$ scale-estimates to be within their $\alpha_j$
+simultaneously; amplifying each to failure probability $\le 1/(6T)$ by a median over $O(\log T)$ blocks
+and union-bounding gives the good event probability $\ge 5/6$, the $O(\log T)=O(\Lambda)$ overhead already
+included in the cost of \cref{sec:app-accounting}.
 \end{proof}
 
 \subsection{Removing the guess and approximate \texorpdfstring{$K$}{K}}\label{sec:app-guess}
