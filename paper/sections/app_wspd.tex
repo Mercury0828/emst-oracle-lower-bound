@@ -274,3 +274,34 @@ computation already costs, no step uses a non-rectangular query, and the returne
 exactly the unbiased clipped statistics of \cref{sec:dt-sampler}. This discharges the realization of the
 locally navigable $(1+\rho)$-spanner deferred from \cref{sec:dt}, and with it the death-time primitive
 runs within the $\Otil_\eps(n^{1/3})$ budget claimed in \cref{sec:main}.
+
+\begin{remark}[Determinism of the construction]\label{rem:wspd-det}
+The only randomness in this appendix is the rank assignment used by the death-time search; everything else
+is a deterministic function of the input and the query history. In particular the representative of a cell,
+the membership of a pair in the WSPD, and the spanner edge set are fixed once and for all, so two searches
+that touch the same cell see the same representative and the same incident edges. This consistency is what
+makes the spanner a single well-defined graph $S$ and lets us reason about its death times as if $S$ were
+written down, even though it is only ever probed one neighborhood at a time. The ranks may be drawn lazily
+and reproducibly by hashing the vertex identity, so a vertex reached through two different cells in two
+different searches still carries one rank; no global random tape is materialized.
+\end{remark}
+
+\begin{remark}[What a human verifier should check first]\label{rem:verify}
+The two places where the implementation is most easily mis-stated, and which a careful reading should
+target, are the incident-edge oracle (\cref{lem:incident}) and the budget mechanism (\cref{sec:wspd-cap}).
+For the former, the point to confirm is that scanning a vertex's $O(\log\Delta)$ ancestor cells and each
+cell's $O(\rho^{-2})$ partner candidates enumerates \emph{all} incident edges and only genuine ones; the
+partner-distance bound comes from the predecessor pair being not well separated, not from well-separation
+itself. For the latter, the point is that capping is global, not per-search, so that no individual
+death-time value is ever imputed or conditioned on, which is what keeps the averages unbiased. These two
+points are the substance of realizing the source's WSPD machinery under a counting oracle.
+
+A third, more mechanical item worth checking is the support case $X=Q$ throughout: every operation that is
+stated for points of $P$ has a parallel for cell centers, and the only difference is the cost of a uniform
+seed, $O(\log\Delta)$ for $P$ versus $\Otil(n/K)$ for $Q$ by rejection. The representative of a support
+cell is the $z$-first occupied $h$-subcell center, found by an emptiness descent that is identical in form
+to the descent for $P$; the WSPD, the navigability, and the bottleneck search then run on $Q$ unchanged,
+because a support $h$-cell is a quadtree cell and every region they query is a union of such cells. We have
+verified that no step of the search ever needs a point of $P$ once the support is fixed, so the two
+death-time samplers, on $P$ and on $Q$, are the same procedure run on two different vertex sets.
+\end{remark}

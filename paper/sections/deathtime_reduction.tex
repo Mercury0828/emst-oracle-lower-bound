@@ -145,11 +145,16 @@ $K_0=\Theta(n^{2/3})$ and whose snapping error is controlled. Choosing the grid 
 search is needed, because the right scale depends on how the (unseen) points are spread.
 
 Fix a guess $G\ge W$, put $K_0=\ceil{n^{2/3}}$ and $L=G/K_0$. We choose a grid scale $h$ whose support
-$Q$ has $K=\Theta(K_0)$ cells. The number $K_h$ of nonempty $h$-cells obeys a packing bound analogous to
-\cref{lem:packing}:
+$Q$ has $K=\Theta(K_0)$ cells. How $K_h$, the number of nonempty $h$-cells, varies with $h$ is governed by
+the same packing principle as the active cover: occupied cells of side $h$ are pairwise $\ge h$ apart in
+each of four color classes, so their count is tied to the MST weight, giving a bound analogous to
+\cref{lem:packing},
 \begin{equation}\label{eq:Kh-packing}
   K_h\le\frac{8W}{h}+4 .
 \end{equation}
+This bound is one-directional ($K_h$ may be much smaller than $8W/h$ if the points cluster), which is
+exactly why a search over $h$ is needed: the packing tells us $K_h$ cannot be too large at a given scale,
+but only by trying scales can we find one where it is large enough, namely $\Theta(K_0)$.
 Starting from a dyadic quadtree scale $h_0=\Theta(\xi L)$ (the largest dyadic side below $\xi L$, so $h_0$
 is within a factor $2$ of $\xi L$) and halving until $K_h$ first reaches a constant multiple of $K_0$
 (which is certified by a fixed batch of rejection trials, since halving $h$ at most quadruples $K_h$, and
@@ -162,12 +167,19 @@ Fix this $h$ and its support $Q$.
 
 \subsection{Snapping}\label{sec:dt-snap}
 
+Snapping replaces $P$ by the multiset $Q$ of its occupied-cell centers, which is what the support estimator
+sees. The price is a small distortion of all distances, and the whole point of choosing $h=O(\xi L)$ is to
+keep that distortion below the clip level so it perturbs only the tail, and only by an $O(\xi)$ fraction.
 Snapping each point of $P$ to its $h$-cell center moves it by at most $\sqrt2\,h/2$ (the half-diagonal of
-an $h$-cell), so any pairwise distance changes by at most $\delta_s=\sqrt2\,h$, and the threshold graphs
-interleave:
+an $h$-cell), so any pairwise distance changes by at most $\delta_s=\sqrt2\,h$. A distance shift of at most
+$\delta_s$ means any two points joined at threshold $t$ before snapping are joined at $t+\delta_s$ after,
+and conversely, so the component counts interleave with a $\delta_s$ shift in the threshold:
 \begin{equation}\label{eq:snap-interleave}
   c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)\qquad(t\ge\delta_s).
 \end{equation}
+At thresholds $t\ge L\ge 2\delta_s$ this shift is a relative $O(\delta_s/L)=O(\xi)$ perturbation, which is
+why the snapping is harmless for the tail (the regime $t\ge L$) while it would be ruinous for the bulk (the
+regime $t=\Theta(1)\ll L$) -- exactly the regime the death-time sampler keeps on $P$, never on $Q$.
 Writing $B_L(X)=\int_L^\infty(c_X(t)-1)\,dt=\sum_{e\in\MST(X)}(\abs e-L)_+$ for the tail weight,
 \eqref{eq:snap-interleave} together with $c_P(t)-1\le W/t$ gives, for $\delta_s\le L/2$,
 \begin{equation}\label{eq:tail-transfer}

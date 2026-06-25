@@ -58,6 +58,18 @@ edges the support handles. Each estimate:
 No sample seed is reused across thresholds or across the three estimators, so the three errors are
 independent.
 
+\begin{remark}[Amplification and failure bookkeeping]\label{rem:amp}
+Every estimate above is correct only with constant probability, and the algorithm makes $\poly\log n$ of
+them (the $T=\Otil(1)$ scales of each support call, the $O(\log n)$ guesses, the two death-time samplers).
+We boost each to failure probability $1/\poly(n)$ by the median trick of \cref{sec:prelim} and union-bound:
+since there are $\poly\log n$ estimates and each fails with probability $n^{-\Omega(1)}$, all hold
+simultaneously with probability $1-n^{-\Omega(1)}$, well inside the constant slack of \cref{thm:main}. Each
+amplification multiplies the relevant cost by $O(\log n)$, absorbed in $\Otil(\cdot)$. The one nonstandard
+point is the global query budget: a call that overruns its deterministic budget returns \textsc{fail},
+which the median over runs treats as one bad sample, so the budget caps the worst-case query count without
+biasing the surviving estimates (\cref{sec:wspd-cap}).
+\end{remark}
+
 \begin{remark}[The choice $K_0=n^{2/3}$]\label{rem:k0}
 The support size $K_0$ is the only free knob, and the three costs above pin it down. The support estimator
 costs $\Otil(\sqrt{K_0}+n/K_0)$; the bulk sampler costs $\Otil(\xi^{-2}n/K_0)$ (more support cells mean a

@@ -43,8 +43,19 @@ but the packing exponent and the balance point $K=\Theta(n^{2/3})$ are tuned to 
 dimension-dependence of the optimal range-counting exponent, and whether it degrades gracefully with $d$,
 is open.
 
+\paragraph{The cost of learning $K$.}
+The support estimator pays $\Otil(\sqrt K+n/K)$, and the additive $n/K$ is purely the cost of estimating
+the support size $K$ by rejection sampling, which is what forces the balance at $K=\Theta(n^{2/3})$. If $K$
+were known, or estimable more cheaply, the support estimator would cost $\Otil(\sqrt K)$ alone, and the
+reduction could in principle use a smaller support. Whether the $n/K$ term is necessary, or whether the
+support size can be learned in $o(n/K)$ queries (perhaps amortized across the geometric search, which
+already touches the support at many scales), is open, and a positive answer might lower the exponent below
+$1/3$ for inputs whose support is easy to count, though never below the worst-case $\Omega(n^{1/3})$.
+
 \paragraph{Polylogarithmic factors and determinism.}
 \Cref{cor:tight} leaves a polylogarithmic and $\eps$-dependent gap. Pinning down the exact dependence on
 $\eps$ and $\log\Delta$, and asking whether a deterministic range-counting algorithm can match the
 $n^{1/3}$ rate or whether randomization is necessary at this oracle, are concrete questions about the
-constant in the exponent's neighborhood.
+constant in the exponent's neighborhood. The empty-cell leader estimator is fundamentally randomized (it
+relies on uniform ranks and spatial sampling), so a deterministic $n^{1/3}$ algorithm, if one exists,
+would likely need a different idea for the component-counting step.

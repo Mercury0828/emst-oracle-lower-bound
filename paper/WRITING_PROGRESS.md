@@ -3,6 +3,10 @@
 > Update after EVERY section. On long context, re-read THIS + `COMPONENT_MAPPING.md` + the frozen proof
 > (`docs/webpro_round5_response.md`) before continuing — never write from memory. Venue = SODA = THEORY.
 
+## Status (2026-06-25, FINAL 40pp): 40pp reached, compiles clean, 0 undefined, 43 refs, 7 figs/algs, 3 tables.
+New content Codex-regression-checked (SOUND-WITH-FIXES, core all CORRECT; 8 findings on worked example +
+EMD overclaims + running-time all FIXED). Style clean. Pushed origin/main.
+
 ## Status (2026-06-25, 40pp-push per owner override): 37pp → targeting 40. Owner INSISTED on physical 40pp.
 TRANSPARENCY (owner asked to mark length-driven vs genuine, so they can trim before submission):
 - GENUINE (keep): §2.7 "What is new" source comparison; §7 EMD program; §7 "Why n^{1/3}" reading (hedged,

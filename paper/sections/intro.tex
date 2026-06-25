@@ -1,10 +1,14 @@
 \section{Introduction}\label{sec:intro}
 
 The weight of a Euclidean minimum spanning tree is one of the oldest statistics of a point set, and
-estimating it without reading the whole input is a recurring sublinear-algorithms question. For $n$ points
-in the plane the tree itself has $n-1$ edges, but its total length is a single number, and a long line of
-work asks how cheaply that number can be approximated. The answer depends entirely on how the algorithm is
-allowed to touch the points. Chazelle, Rubinfeld, and Trevisan~\cite{CRT05} showed that for a graph given
+estimating it without reading the whole input is a recurring sublinear-algorithms question. It is a
+natural proxy for how spread out a point set is, it controls the cost of near-neighbor and clustering
+structures built on the points, and it is the planar instance of a family of geometric cost functionals
+(MST, Steiner tree, matching, transportation) that one would like to estimate from compact summaries of a
+massive spatial dataset. For $n$ points in the plane the tree itself has $n-1$ edges, but its total length
+is a single number, and a long line of work asks how cheaply that number can be approximated. The answer
+depends entirely on how the algorithm is allowed to touch the points: the weaker the access primitive, the
+more the algorithm must infer indirectly, and the more interesting the query complexity becomes. Chazelle, Rubinfeld, and Trevisan~\cite{CRT05} showed that for a graph given
 by adjacency lists the MST weight is $(1\pm\eps)$-estimable in time independent of the number of vertices,
 and Czumaj, Sohler, and coauthors~\cite{Czumaj05,CzumajSohler09} carried the program into geometry, where
 the cost is measured in queries to a geometric oracle.

@@ -122,10 +122,15 @@ learning $K$ itself by rejection sampling.
 
 \subsection{From a grid support back to the point set}\label{sec:ov-reduction}
 
-\Cref{lem:support} estimates a grid support, not the input $P$. Three steps bridge the gap, and they are
-the substance of \cref{sec:dt}. Fix a guess $G\ge W$ and a clip level $L=G/K_0$ with $K_0=\ceil{n^{2/3}}$,
-and split the MST weight at $L$ into a \emph{bulk} $A_L=\sum_e\min\{\abs e,L\}$ and a \emph{tail}
-$B_L=\sum_e(\abs e-L)_+$.
+\Cref{lem:support} estimates a grid support, not the input $P$. Two gaps separate them: the support has
+$K_0=\Theta(n^{2/3})$ cells while $P$ has $n$ points, and the support is a snapped, coarsened version of
+$P$. Bridging the first cheaply is why we cannot simply run the support estimator on $P$ directly (that
+would have $K=n$ and cost $\Otil(\sqrt n)$); bridging the second is why a controlled distortion argument is
+needed. Three steps do it, and they are the substance of \cref{sec:dt}. Fix a guess $G\ge W$ and a clip
+level $L=G/K_0$ with $K_0=\ceil{n^{2/3}}$, and split the MST weight at $L$ into a \emph{bulk} $A_L=\sum_e
+\min\{\abs e,L\}$ (the short edges, of which there are many) and a \emph{tail} $B_L=\sum_e(\abs e-L)_+$
+(the few long ones that carry the heavy structure). The split is chosen so that each part is handled by
+the estimator suited to it.
 
 \emph{The bulk of $P$} is estimated directly by a \emph{clipped death-time sampler}. Assign random ranks
 to the vertices of a graph $H$ and let the death time $\tau(v)$ be the bottleneck (min-over-paths of the
