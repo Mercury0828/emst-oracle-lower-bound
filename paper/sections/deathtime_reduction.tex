@@ -43,10 +43,35 @@ e-L)_+$ (routed through a snapped support).}
 \label{fig:deathtime}
 \end{figure}
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=1.0, every node/.style={font=\footnotesize}, vrt/.style={circle,draw,inner sep=1.4pt,minimum size=12pt}]
+  \node[vrt,fill=blue!15] (v) at (0,0) {$v$};
+  \node[below=1pt of v] {rank $7$};
+  \node[vrt] (a) at (1.3,0.7) {$9$};
+  \node[vrt] (b) at (1.5,-0.7) {$8$};
+  \node[vrt,fill=red!20] (c) at (3.0,0.2) {$3$};
+  \node[below=0pt of c] {first lower rank};
+  \node[vrt] (d) at (3.1,-1.1) {$\,\infty\,$}; \node[below=0pt of d] {root};
+  \draw (v) -- node[above,font=\scriptsize]{$1.0$} (a);
+  \draw (v) -- node[below,font=\scriptsize]{$1.2$} (b);
+  \draw (a) -- node[above,font=\scriptsize]{$2.1$} (c);
+  \draw (b) -- node[below,font=\scriptsize]{$2.4$} (c);
+  \draw (b) -- node[below,font=\scriptsize]{$3.0$} (d);
+  \draw[->,red!70,thick] (v) to[bend left=18] node[above,font=\scriptsize]{$\tau(v)=2.1$} (c);
+\end{tikzpicture}
+\caption{Computing a death time. From seed $v$ (rank $7$) a bottleneck Dijkstra grows the reachable set in
+order of max-edge distance and halts at the first vertex of smaller rank (here rank $3$, reached by the
+path $v$--$a$--$c$ whose heaviest edge is $2.1$), so $\tau(v)=2.1$. The root has rank $-\infty$ and also
+halts the search. In a random ranking only $O(\log\abs V)$ vertices are extracted before a senior one
+appears.}
+\label{fig:dtsearch}
+\end{figure}
+
 Let $H$ be a connected weighted graph on $V$ with a fixed root $r$. Assign independent uniform ranks to
 $V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ as the bottleneck (min--max-edge) distance
 from $v$ to the root or to any lower-ranked vertex: the smallest $b$ such that $v$ can reach the root or a
-lower-ranked vertex by a path of edges all $\le b$. The name is apt: as the threshold $b$ grows from $0$,
+lower-ranked vertex by a path of edges all $\le b$ (\cref{fig:dtsearch}). The name is apt: as the threshold $b$ grows from $0$,
 $v$'s cluster keeps absorbing neighbors until, at $b=\tau(v)$, it first touches someone more senior and
 $v$ ceases to be the leader of its own cluster. The death times recover the MST edge weights as a
 multiset:
@@ -156,7 +181,12 @@ with $K=\Omega(K_0)$ gives $\Wq\le W+\delta_s(K-1)\le C_W W$ for an absolute con
 We can now state precisely which three quantities the algorithm estimates and how they combine. The
 guiding identity is that the MST weight splits as bulk plus tail at the clip level, and that the tail of
 $P$ equals the tail of the snapped support up to the transfer error \eqref{eq:tail-transfer}; the support
-tail in turn is its total weight minus its own bulk, both of which we can estimate.
+tail in turn is its total weight minus its own bulk, both of which we can estimate. The reason for this
+three-way split is that no single one of our two estimators handles both ends of the edge-length spectrum:
+the death-time sampler is accurate only up to the clip $L$ (its variance grows with $L$), and the support
+estimator sees only the snapped support, not $P$. Splitting at $L$ lets each estimator work in its own
+regime and the snapping bridges the gap, at the cost of one extra death-time estimate on the support to
+subtract off the bulk that the support and $P$ have in common.
 
 Write $A_L(X)=\sum_{e\in\MST(X)}\min\{\abs e,L\}$, so $\wt(\MST(X))=A_L(X)+B_L(X)$. We use the bulk of $P$
 and the tail of the snapped support:
