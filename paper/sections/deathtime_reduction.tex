@@ -80,9 +80,10 @@ $Q$ has $K=\Theta(K_0)$ cells. The number $K_h$ of nonempty $h$-cells obeys a pa
 \begin{equation}\label{eq:Kh-packing}
   K_h\le\frac{8W}{h}+4 .
 \end{equation}
-Starting from a scale $h_0=\Theta(\xi L)$ and halving until $K_h$ first reaches a constant multiple of
-$K_0$ (which is certified by a fixed batch of rejection trials, since halving $h$ at most quadruples
-$K_h$) yields a scale with
+Starting from a dyadic quadtree scale $h_0=\Theta(\xi L)$ (the largest dyadic side below $\xi L$, so $h_0$
+is within a factor $2$ of $\xi L$) and halving until $K_h$ first reaches a constant multiple of $K_0$
+(which is certified by a fixed batch of rejection trials, since halving $h$ at most quadruples $K_h$, and
+halving keeps every scale dyadic) yields a scale with
 \begin{equation}\label{eq:K-window}
   cK_0\le K\le C_\xi K_0 ,
 \end{equation}
@@ -91,8 +92,8 @@ Fix this $h$ and its support $Q$.
 
 \subsection{Snapping}\label{sec:dt-snap}
 
-Snapping each point of $P$ to its $h$-cell center moves it by at most $\delta_s=\sqrt2\,h$, so the
-threshold graphs interleave:
+Snapping each point of $P$ to its $h$-cell center moves it by at most $\sqrt2\,h$, so any pairwise
+distance changes by at most $\delta_s=\sqrt2\,h$, and the threshold graphs interleave:
 \begin{equation}\label{eq:snap-interleave}
   c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)\qquad(t\ge\delta_s).
 \end{equation}

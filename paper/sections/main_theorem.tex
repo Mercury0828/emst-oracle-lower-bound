@@ -66,6 +66,8 @@ estimator with $\zeta_0=\tfrac1{64}$ on $G=U,U/2,U/4,\dots$, amplified so that w
 every call with $G\ge W$ is correct, and stop at the first $G$ with $\widehat W(G)\ge G/8$. If $G\ge16W$
 then $\widehat W(G)\le W+G/64\le G/16+G/64<G/8$, so the search does not stop; if $G\in[W,2W)$ then
 $\widehat W(G)\ge W-G/64>G/8$, so it stops while $G\ge W$. Hence the selected $G_0$ satisfies $W\le
-G_0<16W$. A final call with $\zeta=\eps/32$ gives $\abs{\widehat W-W}\le(\eps/32)G_0<(\eps/2)W$, and the
-$O(\log n)$ guesses keep the total cost $\Otil_\eps(n^{1/3})$. This proves \cref{thm:main}; the deferred
-variance, packing, and snapping calculations are completed in \cref{sec:app-assembly}.
+G_0<16W$. A final call on $G_0$ with $\zeta=\eps/32$, amplified by the same median of $O(\log n)$ runs,
+gives $\abs{\widehat W-W}\le(\eps/32)G_0<(\eps/2)W$. Allotting each of the $O(\log n)$ guess calls and the
+final call a failure budget $O(1/\log n)$ keeps the whole procedure correct with probability $\ge 2/3$,
+and the $O(\log n)$ guesses keep the total cost $\Otil_\eps(n^{1/3})$. This proves \cref{thm:main}; the
+deferred variance, packing, and snapping calculations are completed in \cref{sec:app-assembly}.

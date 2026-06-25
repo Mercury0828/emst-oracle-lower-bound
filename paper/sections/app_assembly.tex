@@ -93,9 +93,9 @@ of \cref{sec:main-pieces} remain $\Otil_\xi(n^{1/3})$.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]
-Snapping moves each point by at most $\delta_s=\sqrt2\,h$. If two points are within $t$ before snapping,
-their centers are within $t+\delta_s$; if two centers are within $t$, the original points are within
-$t+\delta_s$. Hence a connected component at threshold $t$ for one set is connected at threshold
+Snapping moves each point by at most $\sqrt2\,h$, so any pairwise distance changes by at most
+$\delta_s=\sqrt2\,h$. If two points are within $t$ before snapping, their centers are within
+$t+\delta_s$; if two centers are within $t$, the original points are within $t+\delta_s$. Hence a connected component at threshold $t$ for one set is connected at threshold
 $t+\delta_s$ for the other, giving $c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)$, which is
 \eqref{eq:snap-interleave}. Integrating over $[L,\infty)$ and using
 $B_L(X)=\int_L^\infty(c_X-1)=\sum_e(\abs e-L)_+$,
@@ -126,8 +126,9 @@ with $s_P=C\xi^{-2}n/K_0$ this is $\tfrac{2}{C}\xi^2G^2$, so Chebyshev gives dev
 \xi G$ with probability $\ge 1-\tfrac1{100}$ for $C$ large. Hence $\abs{\widehat A_P-A_L(P)}\le\tfrac{C_*}
 4\xi G$.
 
-\emph{(ii) Support weight, $\widehat\Wq$.} \Cref{lem:support} with relative accuracy $\eta=\xi/(4C_WC_*^{-1})
-=\Theta(\xi)$ gives $\abs{\widehat\Wq-\Wq}\le\eta\Wq\le\eta C_W G\le\tfrac{C_*}4\xi G$.
+\emph{(ii) Support weight, $\widehat\Wq$.} \Cref{lem:support} with relative accuracy
+$\eta=\dfrac{C_*\xi}{4C_W}=\Theta(\xi)$ gives $\abs{\widehat\Wq-\Wq}\le\eta\Wq\le\eta C_W G=\tfrac{C_*}4\xi
+G$.
 
 \emph{(iii) Bulk of $Q$, $\widehat A_Q$.} Identical to (i) with $\abs V=K=\Theta(K_0)$ and $\wt(\MST(H_Q))
 \le(1+\rho)\Wq=O(G)$: the variance is $O(K L G/s_Q)=O(G^2/s_Q)$, so $s_Q=O(\xi^{-2})$ samples give
