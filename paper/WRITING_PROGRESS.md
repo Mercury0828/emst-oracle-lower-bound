@@ -37,7 +37,7 @@ Macro note: range-count macro is `\rcount` (`\count` is a TeX primitive — do n
 |---|---|---|---|---|---|
 | 1 | Introduction | ☐ | — | ☐ | contribs last; related work folded in |
 | 2 | Preliminaries | ☑ draft | — | ☐ | model + cluster-count integral + WSPD + notation table |
-| 3 | Support-MST estimator (Lemma 3) | ☐ | App. B ☐ | ☐ | the new primitive |
+| 3 | Support-MST estimator (Lemma 3) | ☑ draft | App. B ☑ FULL | ☐ | the new primitive; packing+interleaving+leader+2-part accounting+accuracy+guess all proved |
 | 4 | Death-time + reduction for P | ☐ | App. C ☐ | ☐ | |
 | 5 | Main theorem (assembly) | ☐ | App. C ☐ | ☐ | |
 | 6 | Optimality (tightness) | ☐ | — | ☐ | owner: standalone vs folded |

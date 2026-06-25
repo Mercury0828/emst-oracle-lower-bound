@@ -1,6 +1,146 @@
-\section{Full proof of the support-MST estimator (\texorpdfstring{\cref{lem:support}}{Lemma})}\label{sec:app-lemma3}
+\section{Full proof of the support-MST estimator}\label{sec:app-lemma3}
 
-% Active cover + packing W_Q >= b delta/16; scale graphs + interleaving c_Q(r^+) <= c_Gamma(r) <= c_Q(r);
-% empty-cell leader E[Z]=c, Var=Mc-c^2; the c_j-vs-N_j accounting (candidate-root sum = Otil(sqrt K) using
-% U_j>=c_j, exploration sum = Otil(sqrt K) using N_j<=K); accuracy (Riemann gap <= sigma W_Q); removing
-% the guess; approximate K.  Source: docs/webpro_round5_response.md, sections 1.1--1.11. [TODO]
+This appendix completes the proof of \cref{lem:support}: the active-cover packing bound
+(\cref{sec:app-packing}), the interleaving inequality (\cref{sec:app-interleave}), the two-part query
+accounting that is the crux of the $\Otil(\sqrt K)$ bound (\cref{sec:app-accounting}), the accuracy of one
+additive call (\cref{sec:app-accuracy}), and the guess-removal and approximate-$K$ steps
+(\cref{sec:app-guess}). Throughout, $\beta\in(0,\tfrac1{16})$, $\sigma=\beta/32$, and $G\ge\Wq$ is the
+current guess.
+
+\subsection{The packing bound (\texorpdfstring{\cref{lem:packing}}{packing})}\label{sec:app-packing}
+
+\begin{proof}[Proof of \cref{lem:packing}]
+For each block of the active cover $\mathcal B$ pick one support point of $Q$ inside it, and color the
+blocks by the parities $(\,i\bmod 2,\,j\bmod 2)$ of their grid indices, a four-coloring. Two selected
+points from distinct blocks of the same color sit in $\delta$-cells whose indices differ by at least two
+in some coordinate, so they are at distance at least $\delta$. Some color class $S$ has $\abs S\ge b/4$
+selected points, pairwise at distance $\ge\delta$; hence every spanning tree of $S$, in particular
+$\MST(S)$, has weight at least $\delta(\abs S-1)\ge\delta(b/4-1)$.
+
+We bound $\wt(\MST(S))$ from above by $\Wq$. For any $S\subseteq Q$, take the minimal subtree $T$ of
+$\MST(Q)$ spanning $S$, double its edges to get an Eulerian multigraph, take an Euler tour, and shortcut
+it (in the Euclidean metric, by the triangle inequality) to a Hamiltonian cycle on $S$; deleting one edge
+gives a spanning path of $S$ of weight at most $2\,\wt(T)\le 2\Wq$. Therefore
+\begin{equation}\label{eq:doubling}
+  \wt(\MST(S))\le 2\Wq\qquad\text{for every }S\subseteq Q.
+\end{equation}
+Combining, $2\Wq\ge\wt(\MST(S))\ge\delta(b/4-1)$, i.e.\ $\Wq\ge\delta(b-4)/8$. For $b\ge 8$ this is at
+least $b\delta/16$. If $b<8$ then $K=O(1)$ and $\Wq$ is computed exactly from $O(1)$ support points.
+\end{proof}
+
+\subsection{The filtration (\texorpdfstring{\eqref{eq:interleave}}{interleaving})}\label{sec:app-interleave}
+
+\begin{proof}[Proof of \eqref{eq:interleave}]
+Fix $r$ and write $a=a(r)$. If $a=h$ then $\Gamma_r$ is the Euclidean threshold graph on the support
+points themselves, so $\cG(r)=\cQ(r)$ and both inequalities hold. Assume $a>h$. For the upper bound, every
+edge $\{x,y\}$ of the Euclidean $r$-graph on $Q$ has its endpoints in occupied cells at set-distance
+$\le r$, which are therefore adjacent (or equal) in $\Gamma_r$; contracting each cell to a vertex only
+merges components, so $\cG(r)\le\cQ(r)$. For the lower bound, if two cells are adjacent in $\Gamma_r$ then
+any two points inside them are at distance at most $r+2\sqrt2\,a$, and two points in one cell at most
+$2\sqrt2\,a\le r+2\sqrt2\,a$; since $a\le\sigma r/64$ gives $2\sqrt2\,a<\sigma r$, every $\Gamma_r$-edge
+joins points within $r^+=(1+\sigma)r$, so components of $\Gamma_r$ refine those of the Euclidean
+$r^+$-graph, i.e.\ $\cQ(r^+)\le\cG(r)$.
+\end{proof}
+
+By \eqref{eq:components-edges}, $\cQ(t)-1=\abs{\{e\in\MST(Q):\abs e>t\}}\le\Wq/t$, so by \eqref{eq:interleave}
+\begin{equation}\label{eq:U-bound}
+  \cG(r)\le\cQ(r)\le 1+\Wq/r\le 1+G/r=U(r).
+\end{equation}
+This is the bound on the \emph{component} count used by the leader estimator.
+
+\subsection{Query accounting: both sums are \texorpdfstring{$\Otil(\sqrt K)$}{O(sqrt K)}}\label{sec:app-accounting}
+
+This is the heart of \cref{lem:support}. One additive call runs the leader estimator at each fine scale
+$r_j$ ($a(r_j)\le\delta$) with candidate universe $M_j=M(r_j)$ from \eqref{eq:Msize}, accuracy
+$\alpha_j=\beta G/(32\,T\sigma r_j)$, and bound $U_j=1+G/r_j$. By \cref{lem:leader} and the median-of-means
+guarantee, the trial count at scale $j$ is
+\begin{equation}\label{eq:kj}
+  k_j=O\!\Bigl(\tfrac{M_jU_j}{\alpha_j^2}\,\Lambda\Bigr),\qquad \Lambda=\log\tfrac{n\Delta}{h\eta},
+\end{equation}
+and the expected number of cell expansions is $O(k_j\,(N_j/M_j)\,\log K)=O((N_jU_j/\alpha_j^2)\,\Lambda\log
+K)$, where $N_j$ is the number of occupied $a(r_j)$-cells. We bound the two sums separately.
+
+\paragraph{Candidate-root sum (uses $U_j\ge c_j$).}
+Substituting \eqref{eq:Msize} and $\alpha_j=\beta G/(32T\sigma r_j)$,
+\begin{align}
+  \frac{M_jU_j}{\alpha_j^2}
+   &\le C\,\frac{b\delta^2}{\sigma^2 r_j^2}\Bigl(1+\frac G{r_j}\Bigr)\frac{T^2\sigma^2 r_j^2}{\beta^2G^2}
+   = C\,\frac{T^2}{\beta^2}\Bigl(\frac{b\delta^2}{G^2}+\frac{b\delta^2}{G r_j}\Bigr).
+   \label{eq:cand-per-scale}
+\end{align}
+By the packing bound $G\ge\Wq\ge b\delta/16$ (\cref{lem:packing}), $b\delta^2/G^2\le 256/b$ and
+$b\delta^2/(Gr_j)\le 16\delta/r_j$. The thresholds are geometric with ratio $1+\sigma$, so
+$\sum_j r_j^{-1}=O(1/(\sigma r_0))$, and since $r_0=\max\{h,\beta G/(32K)\}\ge\beta G/(32K)\ge\beta
+b\delta/(512K)$ we get $\delta/r_0=O(K/(\beta b))$. Summing \eqref{eq:cand-per-scale} over the
+$T=O(\sigma^{-1}\log(\Delta/h))$ scales,
+\begin{equation}\label{eq:cand-total}
+  \sum_j \frac{M_jU_j}{\alpha_j^2}
+   = O\!\Bigl(\frac{T^2}{\beta^2}\Bigl(\frac{T}{b}+\frac{1}{\sigma}\cdot\frac{\delta}{r_0}\Bigr)\Bigr)
+   = O\!\Bigl(\frac{T^2}{\beta^2}\cdot\frac{K}{\sigma\beta b}\Bigr)
+   = \Otil_\beta\!\Bigl(\frac Kb\Bigr)=\Otil_\beta(\sqrt K),
+\end{equation}
+using $b=\Theta(\sqrt K)$ from \eqref{eq:cover-size}. Multiplying by $\Lambda$ keeps this
+$\Otil_\beta(\sqrt K)$.
+
+\paragraph{Exploration sum (uses $N_j\le K$).}
+Here the occupied-cell count enters, but only through $N_j\le K$:
+\begin{equation}\label{eq:expl-per-scale}
+  \frac{N_jU_j}{\alpha_j^2}\le K\Bigl(1+\frac G{r_j}\Bigr)\frac{T^2\sigma^2 r_j^2}{\beta^2 G^2}
+   = \frac{KT^2\sigma^2}{\beta^2}\Bigl(\frac{r_j^2}{G^2}+\frac{r_j}{G}\Bigr).
+\end{equation}
+A scale is fine only when $a(r_j)\le\delta$, which by the definition of $a(\cdot)$ forces $r_j\le
+128\delta/\sigma$. Over a $(1+\sigma)$-geometric sequence capped at $R=128\delta/\sigma$ we have
+$\sum_{\text{fine}}r_j=O(R/\sigma)=O(\delta/\sigma^2)$ and $\sum_{\text{fine}}r_j^2=O(R^2/\sigma)=
+O(\delta^2/\sigma^3)$. Hence
+\begin{equation}\label{eq:expl-total}
+  \sum_{\text{fine }j}\frac{N_jU_j}{\alpha_j^2}
+   = O\!\Bigl(\frac{KT^2\sigma^2}{\beta^2}\Bigl(\frac{\delta^2}{\sigma^3 G^2}+\frac{\delta}{\sigma^2 G}\Bigr)\Bigr)
+   = O\!\Bigl(\frac{KT^2}{\beta^2}\Bigl(\frac{\delta^2}{\sigma G^2}+\frac{\delta}{G}\Bigr)\Bigr).
+\end{equation}
+By \cref{lem:packing} and $b=\Theta(\sqrt K)$, $K\delta/G\le 16K/b=O(\sqrt K)$ and $K\delta^2/G^2\le
+256K/b^2=O(1)$, so \eqref{eq:expl-total} is $\Otil_\beta(\sqrt K)$. A predetermined global cap of
+$\Theta(\Lambda\log K)\cdot\Otil_\beta(\sqrt K)$ expansions, enforced by aborting the call (Markov), turns
+this expectation into a worst-case query budget at the cost of $O(1)$ added failure probability.
+
+Adding the two branches and the $\Otil(\sqrt K)$ emptiness queries of the cover, one additive call uses
+$\Otil_\beta(\sqrt K)$ range-counting queries; tracing $\sigma=\beta/32$, $T=O(\beta^{-1}\log(\Delta/h))$,
+degree $O(\beta^{-2})$, and the amplification gives the explicit $O(\beta^{-8}\sqrt K\,\Lambda^{O(1)})$.
+
+\subsection{Accuracy of one additive call (\texorpdfstring{\cref{lem:additive}}{additive})}\label{sec:app-accuracy}
+
+\begin{proof}[Proof of \cref{lem:additive}]
+By \eqref{eq:cluster-integral}, $\Wq=\int_0^\infty(\cQ(t)-1)\,dt$. Distinct support centers are at
+distance $\ge h$, so $\cQ(t)=K$ for $t<h$ and $\int_0^h(\cQ-1)=(K-1)h$, the first term of
+\eqref{eq:additive-call}. If $r_0>h$ then the omitted interval contributes
+$\int_h^{r_0}(\cQ-1)\le K r_0\le\beta G/32$ by the choice $r_0=\beta G/(32K)$. On $[r_0,\infty)$ the exact
+sum $\sum_j d_j(c_j-1)$ with the true $c_j=\cG(r_j)$ lies between the lower and upper Riemann sums of
+$\int(\cQ-1)$, because \eqref{eq:interleave} gives $\cQ(r_{j+1})\le c_j\le\cQ(r_j)$; their difference is
+\[
+  \sum_j d_j\bigl(\cQ(r_j)-\cQ(r_{j+1})\bigr).
+\]
+Each MST edge of $Q$ of length $\ell\in(r_j,r_{j+1}]$ contributes exactly $d_j=\sigma r_j\le\sigma\ell$ to
+this sum, so the Riemann gap is at most $\sigma\sum_e\abs e=\sigma\Wq\le\beta\Wq/32\le\beta G/32$. Finally,
+on the simultaneous-good event the statistical error is $\sum_j d_j\abs{\widehat c_j-c_j}\le\sum_j
+d_j\alpha_j=\beta G/32$. Summing the three contributions,
+$\abs{\widehat W(G)-\Wq}\le 3\beta G/32<\beta G$. The good event holds with probability $\ge5/6$ after
+amplifying each of the $T$ scale-estimates to failure probability $O(1/T)$, which costs an extra
+$\log T=O(\Lambda)$ factor already absorbed above. The cost was bounded in \cref{sec:app-accounting}.
+\end{proof}
+
+\subsection{Removing the guess and approximate \texorpdfstring{$K$}{K}}\label{sec:app-guess}
+
+Run \cref{lem:additive} with $\beta_0=\tfrac1{32}$ on the decreasing guesses $G=U_Q,U_Q/2,\dots$, where
+$U_Q=(K-1)\diam(Q)\ge\Wq$, amplified so that with constant probability every call with $G\ge\Wq$ is
+correct, and stop at the first $G$ with $\widehat W(G)\ge G/4$. If $G\ge8\Wq$ then $\widehat W(G)\le
+\Wq+G/32\le G/8+G/32<G/4$, so no such $G$ stops the search; if $G\in[\Wq,2\Wq)$ then $\widehat W(G)\ge
+\Wq-G/32>G/4$, so the search stops while $G\ge\Wq$. Hence the selected $G_0$ obeys $\Wq\le G_0<8\Wq$. A
+final call with $\beta=\eta/16$ then gives $\abs{\widehat\Wq-\Wq}\le(\eta/16)G_0<(\eta/2)\Wq$. There are
+$O(\log(\Delta/h))$ guesses, so the total cost is $\Otil_\eta(\sqrt K)$.
+
+It remains to replace the exact $K$ by $\widehat K=(1\pm\kappa)K$ with $\kappa=\eta/1000$
+(\cref{sec:support-oracle}). Then $q=\ceil{\smash{\sqrt{\widehat K}}}$ still gives $b=\Theta(\sqrt K)$; the
+baseline term $(K-1)h$ changes by at most $\kappa K h\le\kappa\Wq$ (since $\Wq\ge(K-1)h$ by
+\eqref{eq:cluster-integral}); $r_0$ changes by a $1+O(\kappa)$ factor; and every bound in
+\cref{sec:app-accounting}--\cref{sec:app-accuracy} changes by a constant factor. The final error is thus
+at most $\eta\Wq$. Estimating $K$ costs $\Otil_\eta(n/K)$ queries, the only place the $n/K$ term arises.
+This completes the proof of \cref{lem:support}.\qed

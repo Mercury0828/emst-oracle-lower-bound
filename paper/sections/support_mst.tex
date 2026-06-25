@@ -1,15 +1,13 @@
 \section{The support-MST estimator}\label{sec:support}
 
-% 3.1 overview + intuition  ->  3.2 the empty-cell leader estimator  ->  3.3 additive call + remove guess.
-% Core estimator inline; full proof in App.~\ref{sec:app-lemma3}.  [DRAFT IN PROGRESS]
-
-This section proves the technical core: estimating the MST weight of an implicitly defined grid
-\emph{support} under the range-counting oracle. Let $\mathcal G_h$ be an aligned grid of side $h$ on
-$[\Delta]^2$, and let
+The technical core of the algorithm estimates the MST weight of an implicitly defined grid \emph{support}.
+Fix an aligned grid $\mathcal G_h$ of side $h$ on $[\Delta]^2$ (cells half-open) and let
 \[
   Q=\set{z_C : C\in\mathcal G_h,\ P\cap C\ne\varnothing},\qquad K=\abs Q,
 \]
-where $z_C$ is the center of cell $C$ (cells half-open). We estimate $\Wq=\wt(\MST(Q))$.
+where $z_C$ is the center of cell $C$. The support $Q$ is never written down: the oracle sees $P$, and a
+rectangle is nonempty in $Q$ exactly when it is nonempty in $P$ (\cref{sec:support-oracle}). We estimate
+$\Wq=\wt(\MST(Q))$ in a number of queries sublinear in $K$.
 
 \begin{lemma}[Support-MST estimator]\label{lem:support}
 For every $\eta\in(0,\tfrac14)$ there is a randomized algorithm that, with probability at least $2/3$,
@@ -18,7 +16,161 @@ $\Otil_\eta\!\bigl(\sqrt K+\tfrac nK\bigr)$ range-counting queries to $P$. If $K
 error $O(\eta)$, the $n/K$ term is unnecessary.
 \end{lemma}
 
-% 3.1 Overview and intuition  [TODO: active cover; the empty-cell spatial estimator; why support-point
-%      sampling fails on the satellite instance; the c_j vs N_j accounting in one paragraph]
-% 3.2 The empty-cell leader estimator  [TODO: Lemma stmt E[Z]=c, Var<=Mc; inline]
-% 3.3 The additive call and removing the guess  [TODO]
+We prove \cref{lem:support} in this section, deferring the full query accounting and the accuracy
+calculation to \cref{sec:app-lemma3}.
+
+\subsection{Oracle operations on the support}\label{sec:support-oracle}
+
+Every cell and rectangle used below is a union of $h$-cells, so for such a region $R$ we have
+$Q\cap R\ne\varnothing$ iff $P\cap R\ne\varnothing$: one range count on $P$ tests support emptiness. A
+uniform point $p$ of $P$ is drawn with $O(\log\Delta)$ counts (binary search on nested rectangles,
+\cref{sec:prelim-sample}); accepting its $h$-cell with probability $1/\abs{P\cap C(p)}$ returns a uniform
+\emph{support} cell and accepts with probability $K/n$, so inverse-Bernoulli estimation gives $K$ to
+relative error $\kappa$ in $O(\kappa^{-2}(n/K)\log)$ counts. Until \cref{sec:support-call} we treat $K$ as
+known exactly and account for the $\kappa$-perturbation at the end.
+
+\subsection{Overview}\label{sec:support-overview}
+
+By the cluster-count integral~\eqref{eq:cluster-integral}, $\Wq=\int_0^\infty(\cQ(t)-1)\,dt$, so it
+suffices to estimate the component-count curve $\cQ$ of the support and integrate. The difficulty is one
+of \emph{rare, heavy} structure. Consider a dense $\sqrt K\times\sqrt K$ block of support points together
+with a few far-apart satellites; the satellites are a vanishing fraction of $Q$ yet they carry a constant
+fraction of $\Wq$. Any estimator that learns $\cQ$ by sampling $\poly\log K$ support \emph{points} and
+exploring their neighborhoods will, with high probability, never see a satellite, and so it underestimates
+$\Wq$ by a constant factor. Recovering the heavy tail forces $\Omega(\sqrt K)$ point samples, which is the
+barrier we must avoid charging at every scale.
+
+The fix is to sample \emph{space}, not mass. At a threshold $r$ we impose a grid of side $a=\Theta(\sigma
+r)$ and form the \emph{scale graph} $\Gamma_r$ whose vertices are the nonempty $a$-cells and whose edges
+join cells within distance $r$; its component count $\cG(r)$ brackets $\cQ$ at nearby thresholds
+(\cref{sec:support-filtration}). To estimate $\cG(r)$ we sample candidate cells \emph{uniformly from a
+spatial universe that includes empty cells}, and on an occupied sample we run a min-rank exploration that
+returns a nonzero value only at the unique \emph{leader} of its component. A far satellite occupies its
+own $a$-cell at its own scale, so it is one spatial cell among the candidate universe and is hit with the
+right probability; emptiness is cheap to test, and empty samples contribute zero. This is the empty-cell
+leader estimator of \cref{sec:support-estimator}; it is the one new primitive of the paper.
+
+Two quantities then control the cost, and separating them is what makes the bound $\Otil(\sqrt K)$ rather
+than $\Otil(K)$. The \emph{number of trials} needed to estimate $\cG(r)$ to a target additive accuracy is
+governed by the estimator's variance, which we show is at most $M c$ where $M$ is the candidate-universe
+size and $c=\cG(r)$ is the \emph{component count} -- not the number of occupied cells. The \emph{per-trial
+exploration cost}, on the other hand, does scale with the number of occupied cells $N$, but only through
+the crude bound $N\le K$. Summed over a geometric sequence of scales, the packing inequality $\Wq\ge
+b\delta/16$ of the active cover (\cref{sec:support-cover}) collapses both sums to $\Otil(\sqrt K)$.
+
+\subsection{The active cover and its packing bound}\label{sec:support-cover}
+
+Let $q=\ceil{\sqrt K}$. Starting from a bounding square of $Q$, repeatedly quarter every nonempty cell
+until the first dyadic level at which at least $q$ cells are nonempty; let $\mathcal B$ be that level's
+nonempty cells, $b=\abs{\mathcal B}$, and $\delta$ the common cell side. Since the previous level had
+fewer than $q$ nonempty cells and quartering multiplies their number by at most four,
+\begin{equation}\label{eq:cover-size}
+  q\le b<4q .
+\end{equation}
+Every level is found with $\Otil(\sqrt K)$ emptiness queries (each a single range count on $P$;
+\cref{sec:support-oracle}). The cover supports the packing bound that drives the whole accounting.
+
+\begin{lemma}[Active-cover packing]\label{lem:packing}
+$\Wq\ge b\delta/16$.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Pick one support point in each block of $\mathcal B$ and four-color the blocks by the parities of their
+grid indices. Points chosen from distinct same-color blocks are at distance at least $\delta$, so some
+color class $S$ of at least $b/4$ points has $\wt(\MST(S))\ge\delta(\abs S-1)$. For any $S\subseteq Q$,
+contracting $\MST(Q)$ onto $S$ and shortcutting gives $\wt(\MST(S))\le 2\Wq$. Combining,
+$\Wq\ge\delta(b-4)/8\ge b\delta/16$ for $b\ge 8$; the few small cases are handled by direct enumeration.
+Full details in \cref{sec:app-lemma3}.
+\end{proof}
+
+\subsection{The empty-cell leader estimator}\label{sec:support-estimator}
+
+Let $\mathcal U$ be a known family of $M$ candidate cells that contains every vertex of a graph $\Gamma$
+on occupied cells, and suppose $\Gamma$ has $c$ components. One \emph{trial} draws $X$ uniformly from
+$\mathcal U$ and outputs $Z$ as follows: if $X$ is empty, $Z=0$; otherwise assign independent uniform
+ranks to occupied cells (lazily) and explore the component of $X$ in $\Gamma$, stopping as soon as a cell
+of smaller rank than $X$ is met. Output $Z=M$ if no such cell exists (so $X$ is the minimum-rank cell, the
+\emph{leader}, of its component), and $Z=0$ otherwise.
+
+\begin{lemma}[Leader estimator]\label{lem:leader}
+$\E Z=c$ and $\Var(Z)=Mc-c^2\le Mc$.
+\end{lemma}
+
+\begin{proof}
+For any fixed rank assignment exactly one occupied cell per component is its leader, so exactly $c$ of the
+$M$ candidate cells return $Z=M$ and the rest return $0$. Hence $\Pr[Z=M]=c/M$, giving $\E Z=c$ and
+$\E Z^2=M^2\cdot c/M=Mc$, so $\Var(Z)=Mc-c^2\le Mc$. The occupied-cell count never enters.
+\end{proof}
+
+Given an upper bound $U\ge c$, a median-of-means average of $k=O\!\bigl((MU/\alpha^2)\log(1/\delta)\bigr)$
+trials estimates $c$ to additive error $\alpha$ with probability $1-\delta$. The per-trial exploration is
+cheap: a sampled cell is occupied with probability $N/M$ (where $N$ is the number of occupied cells), and
+an occupied trial in a component of size $s$ examines in expectation at most $1+H_{s-1}=O(\log K)$ cells,
+because cell $v_j$ in the exploration order is examined only when $X$ has the smallest rank among the
+first $j$ cells, an event of probability $1/(j-1)$. Each examined cell costs one range count to test for
+occupancy and $O(\sigma^{-2})$ counts to find its neighbors (\cref{sec:support-filtration}). The two cost
+drivers -- the trial count $k$ (through the variance bound $MU$) and the expected number of explored cells
+(through $N$) -- are accounted separately in \cref{sec:app-lemma3}, using $U\ge c$ for the first and
+$N\le K$ for the second.
+
+\subsection{Scale graphs and the filtration}\label{sec:support-filtration}
+
+Fix $\beta\in(0,\tfrac1{16})$ and put $\sigma=\beta/32$. For a threshold $r\ge h$ let $a(r)$ be a dyadic
+multiple of $h$ with $a(r)=h$ if $h>\sigma r/128$ and $\sigma r/128\le a(r)\le\sigma r/64$ otherwise. The
+scale graph $\Gamma_r$ has the nonempty $a(r)$-cells as vertices, with two cells adjacent when their
+Euclidean set-distance is at most $r$ (for $a(r)=h$, when their centers are within $r$). Because
+$a(r)=\Theta(\sigma r)$ in the non-floor regime and $r<128h/\sigma$ in the floor regime, only
+$O(\sigma^{-2})$ cells lie within distance $r$ of any fixed cell, so $\Gamma_r$ has degree
+$O(\sigma^{-2})$ and each neighbor test is one range count on an aligned rectangle.
+
+Writing $\cG(r)$ for the number of components of $\Gamma_r$, the scale graph brackets the support's
+component-count curve: with $r^+=(1+\sigma)r$,
+\begin{equation}\label{eq:interleave}
+  \cQ(r^+)\ \le\ \cG(r)\ \le\ \cQ(r).
+\end{equation}
+The upper bound holds because every Euclidean $r$-edge of $Q$ induces an edge of $\Gamma_r$ (then
+intra-cell contraction only merges components); the lower bound because cells adjacent in $\Gamma_r$ hold
+points within $r+2\sqrt2\,a(r)<r^+$. Combined with~\eqref{eq:components-edges}, $\cG(r)\le 1+\Wq/r$, so
+under any guess $G\ge\Wq$ the deterministic bound $U(r)=1+G/r$ satisfies $U(r)\ge\cG(r)$ -- a bound on the
+\emph{component} count, which is what \cref{lem:leader} needs.
+
+\subsection{The candidate universe}\label{sec:support-cand}
+
+At a fine scale ($a=a(r)\le\delta$) every occupied $a$-cell lies inside the union of the active
+$\delta$-blocks, so the candidate universe is the set of all $a$-subcells of $\mathcal B$, of size
+\begin{equation}\label{eq:Msize}
+  M(r)=b\,(\delta/a)^2\le C_M\,\frac{b\delta^2}{\sigma^2 r^2}.
+\end{equation}
+A uniform candidate is generated offline -- pick an active block uniformly, then one of its $a$-subcells --
+and one range count tests its occupancy. At a coarse scale ($a>\delta$) the occupied $a$-cells are exactly
+the $\le b$ distinct $a$-ancestors of $\mathcal B$, so $\Gamma_r$ and $\cG(r)$ are computed from the cover
+with no further queries and no recursion.
+
+\subsection{The additive call and removing the guess}\label{sec:support-call}
+
+Assume a guess $G\ge\Wq$. Set $r_0=\max\set{h,\beta G/(32K)}$, $r_j=r_0(1+\sigma)^j$, and $d_j=\sigma
+r_j$, stopping at $r_T>\diam(Q)$, so $T=O(\sigma^{-1}\log(\Delta/h))$. At each fine scale ($a(r_j)\le
+\delta$) estimate $c_j\eqdef\cG(r_j)$ to additive accuracy $\alpha_j=\beta G/(32\,T\,\sigma r_j)$ with the
+leader estimator over the candidate universe of \cref{sec:support-cand}, using $U_j=1+G/r_j$; coarse
+scales are computed exactly from the cover with no further queries. Output
+\begin{equation}\label{eq:additive-call}
+  \widehat W(G)=(K-1)h+\sum_{j=0}^{T-1} d_j\,(\widehat c_j-1).
+\end{equation}
+
+\begin{lemma}[Additive call]\label{lem:additive}
+If $G\ge\Wq$, then with probability $\ge 5/6$ the estimator~\eqref{eq:additive-call} satisfies
+$\abs{\widehat W(G)-\Wq}\le\beta G$ and uses $\Otil_\beta(\sqrt K)$ range-counting queries.
+\end{lemma}
+
+The accuracy combines three controlled errors -- the omitted interval $[h,r_0]$, the Riemann gap
+$\sum_j d_j(\cQ(r_j)-\cQ(r_{j+1}))\le\sigma\Wq$, and the statistical error $\sum_j d_j\alpha_j$ -- each at
+most $\beta G/32$; the cost is the two-part sum of \cref{sec:support-overview}, both branches equal to
+$\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both calculations are carried out in \cref{sec:app-lemma3}.
+
+To remove the guess, start from the valid bound $U_Q=(K-1)\diam(Q)\ge\Wq$ and run \cref{lem:additive} with
+$\beta_0=\tfrac1{32}$ on $G=U_Q,U_Q/2,U_Q/4,\dots$, stopping at the first $G$ with $\widehat W(G)\ge G/4$.
+A short calculation (\cref{sec:app-lemma3}) shows the selected $G_0$ satisfies $\Wq\le G_0<8\Wq$; a final
+call with $\beta=\eta/16$ then yields $\abs{\widehat\Wq-\Wq}\le\tfrac\eta2\Wq$, and amplification over the
+$O(\log(\Delta/h))$ guesses keeps the total cost $\Otil_\eta(\sqrt K)$. Replacing $K$ by an estimate of
+relative error $O(\eta)$ (\cref{sec:support-oracle}) perturbs every bound by a $1+O(\eta)$ factor and adds
+the $n/K$ term, completing \cref{lem:support}.
