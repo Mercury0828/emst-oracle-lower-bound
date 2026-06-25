@@ -161,10 +161,15 @@ $N\le K$ for the second.
 
 \subsection{Scale graphs and the filtration}\label{sec:support-filtration}
 
-Fix $\beta\in(0,\tfrac1{16})$ and put $\sigma=\beta/32$. For a threshold $r\ge h$ let $a(r)$ be a dyadic
-multiple of $h$ with $a(r)=h$ if $h>\sigma r/128$ and $\sigma r/128\le a(r)\le\sigma r/64$ otherwise. The
-scale graph $\Gamma_r$ has the nonempty $a(r)$-cells as vertices, with two cells adjacent when their
-Euclidean set-distance is at most $r$ (for $a(r)=h$, when their centers are within $r$). Because
+At a threshold $r$ we want a grid fine enough that grouping points into cells barely changes the
+threshold-$r$ component structure, yet coarse enough that few cells lie within distance $r$ of any one cell
+(so neighborhoods are cheap). A cell side $a=\Theta(\sigma r)$ achieves both, except when $r$ is so small
+that $\sigma r$ would fall below the support resolution $h$, in which case we simply use the support grid
+itself. Concretely, fix $\beta\in(0,\tfrac1{16})$ and put $\sigma=\beta/32$. For a threshold $r\ge h$ let
+$a(r)$ be a dyadic multiple of $h$ with $a(r)=h$ in the \emph{floor regime} $h>\sigma r/128$, and
+$\sigma r/128\le a(r)\le\sigma r/64$ in the \emph{scaling regime} otherwise. The scale graph $\Gamma_r$ has
+the nonempty $a(r)$-cells as vertices, with two cells adjacent when their Euclidean set-distance is at most
+$r$ (for $a(r)=h$, when their centers are within $r$). Because
 $a(r)=\Theta(\sigma r)$ in the non-floor regime and $r<128h/\sigma$ in the floor regime, only
 $O(\sigma^{-2})$ cells lie within distance $r$ of any fixed cell, so $\Gamma_r$ has degree
 $O(\sigma^{-2})$ and each neighbor test is one range count on an aligned rectangle.

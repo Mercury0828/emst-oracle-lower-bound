@@ -67,7 +67,21 @@ a $(1\pm\eta)$ factor, using $\Otil_\eta(\sqrt K+n/K)$ range-counting queries, w
 
 Balancing the two terms of \cref{lem:support} at $K=\Theta(n^{2/3})$ gives the $n^{1/3}$ rate; the
 reduction from $P$ to a support of this size, and the routing of the heavy tail of long MST edges, is the
-content of \cref{sec:dt,sec:main}.
+content of \cref{sec:dt,sec:main}. Together with the lower bound of~\cite{DMOSW25}, \cref{thm:main} pins
+the exponent exactly.
+
+\begin{corollary*}[\cref{cor:tight}]
+For every fixed $\eps\in(0,1)$, the randomized orthogonal range-counting query complexity of
+$(1\pm\eps)$-estimating the planar Euclidean MST weight is $n^{1/3}$, up to polylogarithmic and
+$\eps$-dependent factors.
+\end{corollary*}
+
+We make three remarks on the scope. First, the result is for the plane; the cluster-count integral and the
+WSPD spanner extend to any fixed dimension, but the balance point $K=\Theta(n^{2/3})$ and the packing
+exponent are two-dimensional, and we do not pursue $d\ge 3$ here. Second, the algorithm is randomized
+Monte Carlo with constant success probability, amplified by repetition and a median as usual. Third, the
+running time on a word RAM matches the query bound up to polylogarithmic factors (\cref{rem:time}), so the
+result is an honest sublinear \emph{algorithm}, not only a query bound.
 
 \subsection{Techniques}\label{sec:intro-tech}
 
