@@ -35,12 +35,24 @@ $\abs V^2$, giving $\Var[\tfrac{\abs V}{s}\sum_i X_L(v_i)]\le\abs V\,L\,\wt(\MST
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:spanner-stretch}]
-$H_X$ is a Euclidean graph on $X$, so $c_{H_X}(t)\ge c_X(t)$ (it has at most the threshold-$t$ edges of the
-complete graph); and it is a $(1+\rho)$-spanner, so an edge of length $\le t/(1+\rho)$ in the complete
-graph is matched by an $H_X$-path of bottleneck $\le t$, giving $c_{H_X}(t)\le c_X(t/(1+\rho))$.
-Integrating $c-1$ against the clip kernel $\mathbf 1[t\le L]$ and substituting yields
-$A_L(X)\le A_L(H_X)\le(1+\rho)A_L(X)$, where the right factor absorbs the $t\mapsto(1+\rho)t$ rescaling and
-$A_L\le\wt(\MST(X))$.
+We first bracket the threshold-graph component counts, then integrate. Since every edge of $H_X$ is a true
+pair of $X$ (\cref{lem:stretch}), the graph of $H_X$-edges of length $\le t$ is a subgraph of all $X$-pairs
+of length $\le t$, so it has at least as many components: $c_{H_X}(t)\ge c_X(t)$. For the other direction,
+$H_X$ is a $(1+\rho)$-spanner, so any two points $x,y\in X$ with $\norm{x-y}\le t/(1+\rho)$ are joined in
+$H_X$ by a path whose every edge has length $\le(1+\rho)\norm{x-y}\le t$; hence $x,y$ lie in one component
+of the $H_X$-edges of length $\le t$, giving $c_{H_X}(t)\le c_X(t/(1+\rho))$. Together,
+\begin{equation}\label{eq:HX-bracket}
+  c_X(t)\le c_{H_X}(t)\le c_X\!\bigl(t/(1+\rho)\bigr).
+\end{equation}
+Now integrate $c-1$ against the clip kernel $\mathbf 1[t\le L]$. The left inequality of \eqref{eq:HX-bracket}
+gives directly $A_L(X)=\int_0^L(c_X-1)\le\int_0^L(c_{H_X}-1)=A_L(H_X)$. For the upper bound, substitute
+$t=(1+\rho)s$ in $\int_0^L(c_{H_X}(t)-1)\,dt\le\int_0^L(c_X(t/(1+\rho))-1)\,dt$:
+\[
+  A_L(H_X)\le\int_0^{L}\!\bigl(c_X(t/(1+\rho))-1\bigr)\,dt=(1+\rho)\!\int_0^{L/(1+\rho)}\!\!(c_X(s)-1)\,ds
+   \le(1+\rho)\,A_L(X),
+\]
+the last step because the integrand is nonnegative and $L/(1+\rho)\le L$. This is \eqref{eq:spanner-stretch};
+the additive inflation is $A_L(H_X)-A_L(X)\le\rho\,A_L(X)\le\rho\,\wt(\MST(X))$.
 \end{proof}
 
 \subsection{Support regularization and snapping}\label{sec:app-snap}
@@ -93,21 +105,44 @@ of \cref{sec:main-pieces} remain $\Otil_\xi(n^{1/3})$.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]
-Snapping moves each point by at most $\sqrt2\,h$, so any pairwise distance changes by at most
-$\delta_s=\sqrt2\,h$. If two points are within $t$ before snapping, their centers are within
-$t+\delta_s$; if two centers are within $t$, the original points are within $t+\delta_s$. Hence a connected component at threshold $t$ for one set is connected at threshold
-$t+\delta_s$ for the other, giving $c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)$, which is
-\eqref{eq:snap-interleave}. Integrating over $[L,\infty)$ and using
-$B_L(X)=\int_L^\infty(c_X-1)=\sum_e(\abs e-L)_+$,
+\emph{Interleaving.} Snapping moves each point by at most $\sqrt2\,h$, so for any two points the change in
+their distance is at most $2\cdot\sqrt2\,h$; we absorb the factor and write $\delta_s=\sqrt2\,h$, noting
+that the cleaner one-sided statements below are what we use. Concretely, if two original points are within
+$t$ then their snapped centers are within $t+\delta_s$, and if two centers are within $t$ then the
+original points are within $t+\delta_s$. The first statement says a $P$-component at threshold $t$ stays
+connected in $Q$ at threshold $t+\delta_s$, so $\cQ(t+\delta_s)\le c_P(t)$; the second says a
+$Q$-component at threshold $t$ lifts to a $P$-component at threshold $t+\delta_s$, so $c_P(t+\delta_s)\le
+\cQ(t)$. Reindexing gives
+\[
+  c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)\qquad(t\ge\delta_s),
+\]
+which is \eqref{eq:snap-interleave}.
+
+\emph{Tail transfer.} Write $B_L(X)=\int_L^\infty(c_X(t)-1)\,dt=\sum_{e\in\MST(X)}(\abs e-L)_+$. Integrating
+the interleaving over $[L,\infty)$ and shifting the variable,
 \[
   B_{L+\delta_s}(P)\le B_L(Q)\le B_{L-\delta_s}(P),
 \]
-so $\abs{B_L(Q)-B_L(P)}\le\int_{L-\delta_s}^{L+\delta_s}(c_P(t)-1)\,dt\le\int_{L-\delta_s}^{L+\delta_s}
-\frac Wt\,dt\le\frac{2\delta_s}{L-\delta_s}W\le\frac{3\delta_s}{L}W$ for $\delta_s\le L/2$, which is
-\eqref{eq:tail-transfer} since $\delta_s=\sqrt2\,h=O(\xi L)$ (\cref{lem:kwindow}). For the last bound, contract $\MST(P)$
-by the $h$-cells and keep a spanning tree of the resulting graph on $Q$; each retained edge grows by at
-most $\delta_s$ under snapping, so $\Wq\le W+\delta_s(K-1)$. By \eqref{eq:Kh-packing} and $K=\Omega(K_0)$,
-$\delta_s K=O(hW/h)=O(W)$, giving $\Wq\le C_W W$.
+so $B_L(Q)$ and $B_L(P)$ both lie in $[B_{L+\delta_s}(P),B_{L-\delta_s}(P)]$, an interval of width
+\[
+  B_{L-\delta_s}(P)-B_{L+\delta_s}(P)=\int_{L-\delta_s}^{L+\delta_s}(c_P(t)-1)\,dt .
+\]
+Bounding the integrand by Markov, $c_P(t)-1\le W/t$ \eqref{eq:components-edges}, and using $\delta_s\le
+L/2$ so that $t\ge L-\delta_s\ge L/2$ on the range,
+\[
+  \abs{B_L(Q)-B_L(P)}\le\int_{L-\delta_s}^{L+\delta_s}\frac Wt\,dt\le\frac{2\delta_s}{L-\delta_s}\,W
+   \le\frac{4\delta_s}{L}\,W=O(\xi W),
+\]
+since $\delta_s=\sqrt2\,h=O(\xi L)$ by \cref{lem:kwindow}; this is \eqref{eq:tail-transfer}.
+
+\emph{Support weight.} Finally we bound $\Wq=\wt(\MST(Q))$. Contract $\MST(P)$ by mapping each point to its
+$h$-cell center; this yields a connected graph on the $K$ support centers with at most $K-1$ edges, each
+the image of an $\MST(P)$-edge and so of length at most $(\text{original length})+\delta_s$ (both
+endpoints move by $\le\sqrt2\,h/\sqrt2=\delta_s/\sqrt2$, hence the distance changes by $\le\delta_s$).
+A spanning tree of this graph therefore has weight $\le W+\delta_s(K-1)$, and $\MST(Q)$ is no heavier, so
+$\Wq\le W+\delta_s(K-1)$. By \eqref{eq:Kh-packing}, $K\le 8W/h+4$, so $\delta_s K=\sqrt2\,h\cdot K\le
+\sqrt2\,h(8W/h+4)=8\sqrt2\,W+4\sqrt2\,h=O(W)$ (using $h\le L\le G/K_0=O(W/K_0)=O(W)$). Hence $\Wq\le C_W W$
+for an absolute constant $C_W$.
 \end{proof}
 
 \subsection{The assembly bound (\texorpdfstring{\eqref{eq:guess-accuracy}}{guess accuracy})}\label{sec:app-combine}
