@@ -139,10 +139,37 @@ given $r$, with their exact weights. We obtain these by enumerating WSPD pairs d
 contracted-graph oracle of \cite[Lemma~24]{DMOSW25} (which navigates a threshold graph after cell
 contraction and does not return a vertex's defining pairs).
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=0.85, every node/.style={font=\footnotesize}]
+  % cell c containing u
+  \draw[fill=blue!8] (0,0) rectangle (1,1);
+  \fill[blue!70] (0.28,0.32) circle (1.6pt); \node[blue!70] at (0.28,0.62) {$u=\rep(c)$};
+  \node at (0.5,-0.32) {$c$, side $s$};
+  % annulus of well-separated partners
+  \draw[gray!55,dashed] (0.5,0.5) circle (2.0);
+  \draw[gray!55,dashed] (0.5,0.5) circle (3.4);
+  \node[gray!65] at (3.6,2.7) {partners at $d=\Theta(s/\rho)$};
+  % a few partner cells with representatives + spanner edges
+  \foreach \cx/\cy in {2.7/0.2, 0.2/2.6, 2.4/2.3, -1.9/1.4} {
+    \draw[fill=red!8] (\cx,\cy) rectangle (\cx+1,\cy+1);
+    \fill[red!70] (\cx+0.55,\cy+0.5) circle (1.4pt);
+    \draw[blue!50!black, thick] (0.28,0.32) -- (\cx+0.55,\cy+0.5);
+  }
+  \node[red!70] at (3.25,0.0) {$\rep(c')$};
+\end{tikzpicture}
+\caption{The incident-edge oracle (\cref{lem:incident}). For a cell $c$ of side $s$ with $\rep(c)=u$, its
+WSPD partners $c'$ lie in an annulus at center-distance $\Theta(s/\rho)$ and have comparable side; there are
+$O(\rho^{-2})$ of them, enumerated from $c$'s coordinates. Each surviving pair contributes a spanner edge
+$\{u,\rep(c')\}$ of exact Euclidean length. Scanning $u$'s $O(\log\Delta)$ ancestor cells where $u$ is the
+representative finds all incident edges.}
+\label{fig:wspd}
+\end{figure}
+
 \begin{lemma}[Vertex incident-edge oracle]\label{lem:incident}
 For a vertex $u\in X$ and a length $r$, all $S$-edges incident to $u$ of length at most $r$, with their
-exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting queries; their number is
-$O(\rho^{-2}\log\Delta)$.
+exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting queries (illustrated in
+\cref{fig:wspd}); their number is $O(\rho^{-2}\log\Delta)$.
 \end{lemma}
 
 \begin{proof}

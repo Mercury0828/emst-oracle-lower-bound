@@ -84,6 +84,25 @@ MST within a $(1+\rho)$ factor. The catch is that we cannot build $H$ explicitly
 we realize it implicitly with the well-separated pair decomposition (WSPD)~\cite{CK95,HarPeled11},
 navigating one vertex's spanner neighborhood at a time. The full implementation is \cref{sec:wspd}.
 
+We recall the two WSPD facts the implementation rests on. For a quadtree on $[\Delta]^2$ and a separation
+parameter $1/\rho$, a pair of cells $(c,c')$ is \emph{well separated} when their centers are at distance at
+least $\max\{r(c),r(c')\}/\rho$, where $r(\cdot)$ is the cell side; the Callahan--Kosaraju recursion
+produces a family $\mathcal W$ of well-separated pairs such that every pair of points is separated by
+exactly one pair of $\mathcal W$.
+
+\begin{lemma}[WSPD properties \cite{CK95,HarPeled11}]\label{lem:wspd-prelim}
+For separation $1/\rho$: (i) every $(c,c')\in\mathcal W$ has $r(c')/2\le r(c)\le 2r(c')$; (ii) every point
+of $[\Delta]^2$ lies in $O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$; and (iii) connecting a fixed
+representative of each cell across every pair, with the edge weight set to the representatives' Euclidean
+distance, yields a $(1+O(\rho))$-spanner of the point set whose MST weight is at most $(1+O(\rho))$ times
+the Euclidean MST weight.
+\end{lemma}
+
+Facts (i)--(iii) are standard~\cite{HarPeled11}; \cref{sec:wspd} turns them into a range-count
+implementation, the only nonstandard point being that a counting oracle reveals neither the points nor the
+WSPD, so each representative, each pair-membership test, and each spanner edge must be recovered by
+queries.
+
 \paragraph{Notation.}
 Throughout, $K$ denotes the number of nonempty cells of a grid imposed on $P$ (the size of a regularized
 \emph{support}), $Q$ the set of cell centers (the support point set), and $\Wq\eqdef\wt(\MST(Q))$. We
