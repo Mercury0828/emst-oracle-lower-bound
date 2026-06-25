@@ -9,3 +9,19 @@ __pycache__/
 # frozen Phase-0 numbers are reviewable without rerunning. (Comment out to ignore.)
 # sim/figures/
 # sim/results.json
+
+# Cloned skill reference (read-only; not part of this repo)
+.skill_js/
+
+# LaTeX build intermediates (paper/) — keep .tex/.bib tracked, ignore the rest
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/sections/*.aux
+paper/main.pdf

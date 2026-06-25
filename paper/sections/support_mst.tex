@@ -1,0 +1,24 @@
+\section{The support-MST estimator}\label{sec:support}
+
+% 3.1 overview + intuition  ->  3.2 the empty-cell leader estimator  ->  3.3 additive call + remove guess.
+% Core estimator inline; full proof in App.~\ref{sec:app-lemma3}.  [DRAFT IN PROGRESS]
+
+This section proves the technical core: estimating the MST weight of an implicitly defined grid
+\emph{support} under the range-counting oracle. Let $\mathcal G_h$ be an aligned grid of side $h$ on
+$[\Delta]^2$, and let
+\[
+  Q=\set{z_C : C\in\mathcal G_h,\ P\cap C\ne\varnothing},\qquad K=\abs Q,
+\]
+where $z_C$ is the center of cell $C$ (cells half-open). We estimate $\Wq=\wt(\MST(Q))$.
+
+\begin{lemma}[Support-MST estimator]\label{lem:support}
+For every $\eta\in(0,\tfrac14)$ there is a randomized algorithm that, with probability at least $2/3$,
+outputs $\widehat\Wq$ with $\abs{\widehat\Wq-\Wq}\le\eta\,\Wq$ using
+$\Otil_\eta\!\bigl(\sqrt K+\tfrac nK\bigr)$ range-counting queries to $P$. If $K$ is supplied to relative
+error $O(\eta)$, the $n/K$ term is unnecessary.
+\end{lemma}
+
+% 3.1 Overview and intuition  [TODO: active cover; the empty-cell spatial estimator; why support-point
+%      sampling fails on the satellite instance; the c_j vs N_j accounting in one paragraph]
+% 3.2 The empty-cell leader estimator  [TODO: Lemma stmt E[Z]=c, Var<=Mc; inline]
+% 3.3 The additive call and removing the guess  [TODO]

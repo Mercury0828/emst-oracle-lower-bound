@@ -1,0 +1,90 @@
+\section{Preliminaries}\label{sec:prelim}
+
+\paragraph{Point sets and the range-counting oracle.}
+The input is a multiset $P$ of $n$ points in the integer grid $[\Delta]^2$, where
+$[\Delta]=\{0,1,\dots,\Delta-1\}$ and $\Delta=O(n)$; thus $\log\Delta=O(\log n)$. We access $P$ only
+through an \emph{orthogonal range-counting oracle}: a query is an axis-aligned rectangle
+$R=[a_1,b_1)\times[a_2,b_2)$, and the oracle returns $\rcount{R}=\abs{P\cap R}$. The cost of an algorithm
+is the number of oracle queries it makes; all other computation is free and charged separately only in
+passing (the algorithms here run in time near-linear in their query count on a standard word RAM with
+$O(\log n)$-bit words). Two derived primitives are used throughout and each costs $O(\log\Delta)$
+queries: an \emph{emptiness} test ($\rcount{R}\overset{?}{=}0$) and a \emph{uniform point sample} from
+$P\cap R$ (binary search on nested rectangles; see \cref{sec:prelim-sample}). We write $\Otil(\cdot)$ to
+hide factors polylogarithmic in $n$, $\Delta$, and the accuracy parameters.
+
+\paragraph{The estimation problem.}
+For $p,q\in\R^2$ let $\dist(p,q)$ denote Euclidean ($\ell_2$) distance, and let $\MST(S)$ be a Euclidean
+minimum spanning tree of a finite point set $S$, with weight $\wt(\MST(S))=\sum_{e\in\MST(S)}\abs{e}$.
+We study the query complexity of estimating $W\eqdef\wt(\MST(P))$.
+
+\begin{problem}\label{prob:main}
+Given $\eps\in(0,1)$ and oracle access to $P\subseteq[\Delta]^2$ with $\abs{P}=n$, output $\widehat W$
+with $(1-\eps)W\le\widehat W\le(1+\eps)W$ with probability at least $2/3$, using as few range-counting
+queries as possible.
+\end{problem}
+
+The success probability $2/3$ is boosted to $1-\delta$ by $O(\log(1/\delta))$ independent repetitions and
+a median. Driemel, Monemizadeh, Oh, Staals, and Woodruff~\cite{DMOSW25} give an $\Otil(\sqrt n)$-query
+algorithm for \cref{prob:main} and an $\Omega(n^{1/3})$-query lower bound, leaving a polynomial gap. We
+close it from above.
+
+\paragraph{The cluster-count integral.}
+For a finite $S\subset\R^2$ and a threshold $t\ge 0$, let $G_S(t)$ be the graph on $S$ with an edge
+between every pair of points at distance at most $t$, and let $c_S(t)$ be its number of connected
+components. The components of $G_S(t)$ are exactly the \emph{single-linkage clusters} of $S$ at scale
+$t$, and $c_S$ is a nonincreasing step function with $c_S(0)=\abs{S}$ (for $S$ in general position) and
+$c_S(t)=1$ for $t\ge\diam(S)$. The Euclidean MST weight is the area under this curve:
+\begin{equation}\label{eq:cluster-integral}
+  \wt(\MST(S))=\int_0^\infty\bigl(c_S(t)-1\bigr)\,dt .
+\end{equation}
+Equation~\eqref{eq:cluster-integral} is the Euclidean instance of the Chazelle--Rubinfeld--Trevisan
+identity~\cite{CRT05}: an MST edge of length $\ell$ is the unique edge that merges two clusters as the
+threshold crosses $\ell$, so for every $t$,
+\begin{equation}\label{eq:components-edges}
+  c_S(t)-1=\abs{\set{e\in\MST(S):\abs{e}>t}},\qquad\text{hence}\qquad c_S(t)-1\le \frac{\wt(\MST(S))}{t}.
+\end{equation}
+The right inequality (Markov on the edge lengths) is used repeatedly to bound component counts at large
+thresholds. Estimating $W$ thus reduces to estimating the cluster-count curve $c_P(\cdot)$, which is what
+the oracle must support.
+
+\paragraph{Spanners and the death-time view.}
+We will not estimate $c_P$ directly from points; instead we sample from $P$ and explore a locally
+navigable $(1+\rho)$-spanner $H$ of the sampled neighborhood, following~\cite{DMOSW25}. For a connected
+weighted graph $H$ on vertex set $V$ with a fixed root, assign independent uniform ranks to $V$ and
+define the \emph{death time} $\tau(v)$ of a vertex as the bottleneck distance from $v$ to the root or to
+any lower-ranked vertex. The multiset $\set{\tau(v):v\in V}$ equals $\set{0}\cup\set{\wt(e):e\in\MST(H)}$
+(\cref{sec:dt}), so the clipped statistics $\min\{\tau(v),L\}$ recover the truncated MST weight
+$\sum_{e}\min\{\abs{e},L\}$. Because $H$ is a Euclidean $(1+\rho)$-spanner, $c_S(t)\le c_H(t)\le
+c_S(t/(1+\rho))$, so spanner death times approximate the point-set MST within a $(1+\rho)$ factor. We use
+the well-separated pair decomposition (WSPD)~\cite{CK95} to realize $H$ implicitly under the oracle; the
+details of this implementation are deferred to \cref{sec:wspd}.
+
+\paragraph{Notation.}
+Throughout, $K$ denotes the number of nonempty cells of a grid imposed on $P$ (the size of a regularized
+\emph{support}), $Q$ the set of cell centers (the support point set), and $\Wq\eqdef\wt(\MST(Q))$. We
+write $H_m=\sum_{i=1}^m 1/i=O(\log m)$ for the harmonic number, and reserve $\eta,\beta,\xi,\rho,\sigma$
+for accuracy parameters, all in $(0,1)$. \Cref{tab:notation} collects the recurring symbols.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+symbol & meaning\\
+\midrule
+$P\subseteq[\Delta]^2$, $n=\abs P$ & input point set; $\Delta=O(n)$\\
+$\rcount{R}$ & oracle answer $\abs{P\cap R}$ on rectangle $R$\\
+$W=\wt(\MST(P))$ & quantity to estimate\\
+$c_S(t)$ & \# components of the distance-$t$ threshold graph on $S$\\
+$\mathcal G_h$, $h$ & aligned grid and its cell side\\
+$Q$, $K=\abs Q$ & cell-center support and its size\\
+$\Wq=\wt(\MST(Q))$ & support MST weight\\
+$b$, $\delta$ & \# active-cover blocks and their side ($b=\Theta(\sqrt K)$)\\
+$\Gamma_r$, $\cG(r)$ & scale graph at threshold $r$ and its \# components\\
+$\tau(v)$ & death time of vertex $v$\\
+$A_L,\,B_L$ & $L$-clipped and $L$-tail MST weight\\
+\bottomrule
+\end{tabular}
+\caption{Recurring notation.}
+\label{tab:notation}
+\end{table}
