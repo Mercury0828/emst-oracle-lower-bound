@@ -6,7 +6,22 @@
 ## Status: PROOF BODY + ALL APPENDICES DRAFTED — compiles clean (15pp, 0 undefined refs).
 §2/§3/§4/§5 + App.A/B/C all drafted. Remaining stubs: §1 intro, §6 expand, §7 open. Then refs→~50-70, then Codex review panel.
 
-### App.A (WSPD death-time impl) — DRAFTED 2026-06-25; residual-debt discharge. Confidence flags (honesty rail):
+### REVIEW round 1 (Codex gpt-5.5 xhigh, 2026-06-25): App.A=FLAWED (8 BLOCKER), whole=MAJOR-REVISION.
+Verdicts archived docs/reviews/; triage paper/REVIEW_round1_concerns.md. Round-1 fixes APPLIED:
+- App.A fully REWRITTEN: exact Euclidean rep-edge weights (kills spanner-subgraph BLOCKER + dup-edge issue);
+  exact bottleneck PQ (no rounding bias); root rank −∞ matching §4; GLOBAL per-call budget + FAIL (no
+  upward-biased imputation — the cap BLOCKER); vertex-incident-edge oracle (Lem incident) over ancestor
+  cells on top of Lemma 24; rep_Q + Õ(n/K) seed cost for support; harmonic 1/(j-1); side-length notation;
+  n^{1/3}·poly(1/ε)·polylog made explicit.
+- §4: regularization now cites Lem kwindow; prelims: set of n≥2 DISTINCT points (was "multiset"), W≥n-1.
+- App.C: NEW Lemma kwindow — full halving-search proof (quadrupling overshoot ≤4×, fixed-budget one-sided
+  rejection test Õ(n/K_0)/scale × O(log Δ) scales = Õ(n^{1/3})).
+- intro/abstract: "settles polynomial query exponent" (qualified); Czumaj row CORRECTED to (1±ε) Õ_ε(√n)
+  (web-verified SICOMP'05 — prior "O(n^{1/4}) rel"/"additive error" was wrong); +ChenKhannaTan23
+  (2203.14798), +ChenKhanna23Steiner (2211.03893). Refs now 43.
+NEXT: re-audit App.A via Codex (was FLAWED → must clear BLOCKERs).
+
+### App.A (WSPD death-time impl) — confidence flags (honesty rail):
 - ~90% (matches Pro's 0.89): the bottleneck-search expected-extraction = O(log|V|) coupling to the rank
   order ON THE SPANNER (re-used the leader-estimator harmonic argument; a referee should check the
   ordering is by bottleneck distance from v, not graph-BFS order).

@@ -34,6 +34,35 @@ color class the chosen points are pairwise at distance $\ge h$, so the class has
 $K_h\le 4+8W/h$.
 \end{proof}
 
+\begin{lemma}[The regularization search]\label{lem:kwindow}
+There are constants $0<c<1<C_\xi$ with $C_\xi/c>4$ such that, given a guess $G\ge W$, halving $h$ from
+$h_0=\Theta(\xi L)$ and stopping at the first scale whose nonempty-cell count $K_h$ is certified to be at
+least $cK_0$ produces a scale with $cK_0\le K\le C_\xi K_0$, using $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$
+range-counting queries in total.
+\end{lemma}
+
+\begin{proof}
+As $h$ halves, each nonempty cell splits into at most four, so $K_h$ is nondecreasing in $1/h$ and grows
+by a factor at most $4$ per halving. At the initial scale $h_0=\Theta(\xi L)$ the bounding square of $P$
+has side $O(\Delta)$ and $h_0=\Omega(\xi G/K_0)$, so $K_{h_0}=O(\Delta^2/h_0^2)$ is below $cK_0$ for the
+chosen constants; if it is already above, the bound below still applies. Let $h^\star$ be the first scale
+in the halving sequence with $K_{h^\star}\ge cK_0$. By the quadrupling bound the previous scale had
+$K<cK_0$, so $K_{h^\star}<4cK_0\le C_\xi K_0$; hence $K=K_{h^\star}\in[cK_0,C_\xi K_0]$, which is
+\eqref{eq:K-window}.
+
+It remains to certify the crossing within budget. At each scale we run a fixed batch of $m=\Theta(\xi^{-2}
+(n/K_0)\log n)$ rejection trials (\cref{sec:support-oracle}): a trial draws a uniform point of $P$
+($O(\log\Delta)$ counts, \cref{lem:telescoping}) and accepts with probability $1/\abs{P\cap C}$, so a
+trial accepts with probability exactly $K_h/n$. If $K_h\ge cK_0$ the expected number of accepts is
+$\ge cK_0 m/n=\Omega(\xi^{-2}\log n)$, and if $K_h<\tfrac{c}{4}K_0$ it is $O(\xi^{-2}\log n/4)$; a Chernoff
+bound separates the two with failure probability $n^{-\Omega(1)}$, so the threshold test ``accepts
+$\ge\tfrac{c}{2}K_0 m/n$'' is correct at every scale with high probability. The test costs
+$\Otil(m)=\Otil_\xi(n/K_0)$ counts and is run at $O(\log(\Delta/h^\star))=O(\log\Delta)$ scales, for a
+total of $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$, the per-scale cost being capped at $m$ regardless of how small
+$K_h$ is. Once stopped, the same batch estimates $K$ to relative error $O(\xi)$, which is the input to
+\cref{lem:support} required by \cref{sec:main-pieces}.
+\end{proof}
+
 \begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]
 Snapping moves each point by at most $\delta_s=\sqrt2\,h$. If two points are within $t$ before snapping,
 their centers are within $t+\delta_s$; if two centers are within $t$, the original points are within

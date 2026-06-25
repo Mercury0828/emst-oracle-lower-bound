@@ -1,0 +1,60 @@
+VERDICT: FLAWED
+
+REASON:
+1. [PROOF-CORRECTNESS][BLOCKER] — §A.2 Stretch / §4 dependency. App.A defines spanner edges with center-distance weights: “the edge `{\rep(c),\rep(c')}` of length `d(c,c')`”, but §4 requires “a locally navigable Euclidean `(1+\rho)`-spanner” and uses `c_X(t)\le c_{H_X}(t)`. Center distance can be smaller than the actual representative distance, so `S` is not a Euclidean subgraph under the stated weights. Fix: use actual Euclidean representative-edge lengths, or reprove the clipped estimator with center-weight bias on both sides.
+
+2. [PROOF-CORRECTNESS][BLOCKER] — §A.3 to §A.4, neighbor oracle interface. Lemma A.4 returns cells: “All cells `c'` ... such that `S` has an edge ... between a point of `c` and a point of `c'`”. §A.4 then treats this as vertex adjacency: “enumerate the spanner neighbors of `u`”. Source Lemma 24 supports BFS on contracted grid-cell graphs, not incident-edge enumeration for one point representative. This can add non-edges or miss which endpoint to add. Fix: prove a true incident-edge oracle for a vertex `u`, enumerating surviving WSPD pairs for which `u` is the representative.
+
+3. [PROOF-CORRECTNESS][BLOCKER] — §A.4 exact death-time computation. The search uses rounded scales and outputs the scale: “Run ... over the ... scales `r=(1+\rho),(1+\rho)^2,\dots` ... Halt and output `\tau(v)=r`.” This does not return exact `\tau(v)` unless all edge weights lie on those scales. §4’s unbiased identity `|V| E X_L=A_L(H)` is then false as stated. Fix: run an exact bottleneck priority queue over exact edge weights, or explicitly analyze the rounded-up statistic as another `(1+O(\rho))` biased estimator.
+
+4. [PROOF-CORRECTNESS][BLOCKER] — §A.4 root handling. §4 defines death time to “the root or to any lower-ranked vertex,” but App.A halts only when `R` “contains a vertex of rank smaller than `rank(v)`.” The root is omitted, and App.A assigns ranks to “each vertex,” inconsistent with §4’s ranks on `V\setminus{r}`. Fix: choose a fixed root computable under the oracle, give it rank `-\infty`, and halt on root extraction as well as lower rank.
+
+5. [PROOF-CORRECTNESS][MINOR] — §A.4 harmonic extraction argument mostly survives after repair. The ordering “by bottleneck distance from `v`” is the right deterministic order if ties are fixed independently of ranks. But the quoted event is off by one: “the `j`-th is extracted only if `v` has the smallest rank among the first `j`.” The terminal lower-ranked vertex can be extracted even though `v` is not smallest among the first `j`; the correct bound is `1/(j-1)` for `j>1`, still giving `1+H_{|V|-1}`. Fix the statement and specify deterministic tie-breaking.
+
+6. [PROOF-CORRECTNESS][BLOCKER] — §A.4 cap direction is wrong. Offending text: “on that event we output `X_L(v)=L`. Since `X_L\le L` always, capping only lowers the reported value.” Outputting `L` can only increase the value when the true death time is below `L` but the lower-ranked/root vertex was not reached before the cap. This breaks unbiasedness in the wrong direction. Fix: treat cap hit as estimator failure/abort, or account for upward bias explicitly.
+
+7. [PROOF-CORRECTNESS][BLOCKER] — §A.4 cap probability is mathematically wrong. Offending text: “cap the extractions at `\Theta(\log|V|\cdot\log 1/\delta')`; by Markov the cap is hit with probability `\le\delta'`.” Markov from expectation `O(\log |V|)` gives a `1/\delta'` cap, not a `\log(1/\delta')` cap. The actual tail of first lower rank is about `1/m`. Fix: use a global expected-query cap with abort, or pay the correct tail cost.
+
+8. [PROOF-CORRECTNESS][BLOCKER] — §A.4 cap bias is not “absorbed” at constant `\delta'`. For `P`, the estimator scales each sample by `n`, so cap-imputation bias is at most `n \delta' L = \delta' G n^{1/3}`. To fit an `O(\xi G)` budget requires `\delta'=O(\xi n^{-1/3})`, not “a small constant times” accuracy. Fix: redo the full additive-error calculation or avoid imputation.
+
+9. [PROOF-CORRECTNESS][MAJOR] — §A.4 per-search cost arithmetic survives only conditionally. The multiplication “`O(\rho^{-1}\log\Delta)` scales” times “`O(\rho^{-2})` counts” is fine as an upper bound, but only after a valid vertex-incident oracle exists. As written, Lemma A.4 returns cell neighbors and ignores representative extraction/suppression costs. Fix: include the extra `\log\Delta` factors in `\widetilde O` and prove output-sensitive incident enumeration.
+
+10. [PROOF-CORRECTNESS][MAJOR] — §A.5 global query accounting is only expected-cost sound. Offending text: “the extraction cap bounds each search deterministically, so no search runs away.” The deterministic cap is invalid by items 6–8. The expected sum `s_P \cdot \widetilde O_\rho(1)=\widetilde O_\xi(n^{1/3})` survives, but the claimed worst-case bounded algorithm does not. Fix: use a whole-call query budget and return `FAIL` on overrun, as §5 vaguely suggests.
+
+11. [PROOF-CORRECTNESS][MAJOR] — §A.2 representative definition fails for `X=Q`. Offending text: “For a nonempty cell `c`, its representative `\rep(c)` is the point of `P\cap c`...” For the support sampler, vertices are snapped cell centers `Q`, not original points of `P`. This constructs the wrong graph for `A_L(Q)`. Fix: define `\rep_Q(c)` as the z-first nonempty support cell center, found by descending over `h`-cells using `P` emptiness.
+
+12. [PROOF-CORRECTNESS][MAJOR] — §A.1 overclaims uniform seed cost for supports. Offending text: “a uniform vertex of `X` ... costs `O(\log\Delta)` counts.” This is true for `P`, not for support `Q`; §support-oracle gives cost `\widetilde O(n/K)` by rejection. §A.5 later uses the right cost, so fix §A.1 to distinguish `P` and `Q`.
+
+13. [PROOF-CORRECTNESS][MAJOR] — §A.2 redundant-pair equality test is not valid as stated. Offending text: “`P\cap c=P\cap\bar c` ... reduces ... to comparing `\rep` and the count.” Same representative and same count do not imply equal point sets for arbitrary cells. It may work only for nested quadtree cells with containment plus equal counts. Fix: state and prove the exact nested-cell condition used by the CK recursion.
+
+14. [PROOF-CORRECTNESS][MAJOR] — §A.2 suppression may change edge weights. Offending text: “suppress all but the pair whose two cells are smallest in `z`-order.” If edge weight is center distance, duplicate point-set pairs can have different center distances; arbitrary suppression can keep a longer artificial edge and invalidate Lemma 23. Fix: either use actual representative distances, where duplicates have identical edge weight, or prove the chosen survivor preserves the stretch bound.
+
+15. [PROOF-CORRECTNESS][MAJOR] — §A.3 witness test silently switches from surviving WSPD to raw WSPD. Offending text: “some surviving pair ... links a subcell” followed by witness condition “`(\bar c,\bar c')\in\mathcal W`.” Source Lemma 24 is for `W`, not the suppressed family. Fix: define the navigated graph using raw `W` plus duplicate edges, or prove the witness procedure respects the suppressed canonical family.
+
+16. [PROOF-CORRECTNESS][MINOR] — §A.2 WSPD membership condition is oversimplified. Offending text: “recursion places `(c,c')` ... exactly when ... parent pair is not well-separated.” Algorithm 2 splits the larger cell and may swap orientation; the “parent pair” is not a single symmetric object. Fix: restate the exact O(1) membership test following Algorithm 2’s oriented parent.
+
+17. [PROOF-CORRECTNESS][MINOR] — §A.3 Lemma A.4 threshold is mostly faithful to source Lemma 24. The condition “`2^{i^*}\le \rho r/10<2^{i^*+1}`” and witness alternatives match source lines 826–857. But App.A’s opening says `r(c)` is a radius, while the source uses side length. Fix notation; constants can absorb this, but the paper must not mix radius and side length inside inequalities.
+
+18. [PROOF-COMPLETENESS][MAJOR] — §A.3 “modified recursion” is deferred, not proved. Offending text: “a modification of the recursion ... completes the search in `O(\rho^{-2})` counts.” This is acceptable only as a direct citation for the source cell-neighbor lemma. It is not acceptable for the new vertex-neighbor/suppressed-pair use. Fill in the actual traversal or narrow the claim.
+
+19. [PROOF-COMPLETENESS][MAJOR] — §A.2 stretch proof is not complete. Offending text: “an `S`-edge of length `\le t` certifies an `X`-pair within `(1+\rho)t`.” That gives a shifted lower bound, not `c_X(t)\le c_S(t)`. The proof in App.C assumes a Euclidean subgraph. Fix by changing weights or redoing the integral with both shifts.
+
+20. [PROOF-COMPLETENESS][MAJOR] — §A.4 does not specify how ranks are keyed. Offending text: “rank ... stored by cell identity.” Vertices may appear through many quadtree cells; ranks must be keyed by vertex identity, not search cell. Fix: key ranks by point coordinate for `P` and support `h`-cell id for `Q`.
+
+21. [PROOF-COMPLETENESS][MAJOR] — §A.4 “Because edges are processed in increasing length” is asserted, not implemented. The written threshold flood processes whole batches at a scale and then checks for a lower rank. Fix: define an exact priority-queue extraction order, or check after each newly discovered vertex with rank-independent tie-breaking.
+
+22. [PROOF-COMPLETENESS][MINOR] — §A.1 telescoping over a union of cells is sketched. Offending text: “Walk down `\mathcal T` from the cell(s) covering `R`.” This is fillable: first choose a covering cell proportional to its count, then descend. Acceptable for SODA, but should be one sentence.
+
+23. [OVERCLAIM][BLOCKER] — §A.1 opening overstates what App.A has made concrete. Offending text: “make every step concrete as a sequence of range counts.” The concrete range-count implementation is missing for vertex incident edges, suppression, exact edge weights, support representatives, and cap failure handling. Fix by weakening the claim or adding these procedures.
+
+24. [OVERCLAIM][BLOCKER] — §4/§5 exact death-time sampler is overclaimed. Offending text in §4: “A bottleneck Dijkstra search ... computes `\tau(v)`”; App.A’s implementation computes a rounded threshold and omits the root. The estimator consumed in §5 is therefore not the one analyzed in §4. Fix App.A or change §4/§5 to analyze the actually returned variable.
+
+25. [OVERCLAIM][MAJOR] — `\widetilde O_\epsilon` hides polynomial accuracy dependence. App.A has per-search `\rho^{-3}`, §5 has `s_P=O(\xi^{-2}n^{1/3})`, and the support lemma has larger polynomial factors. For fixed `\epsilon`, this is fine; for variable `\epsilon`, it is not merely polylogarithmic. Fix notation by writing `n^{1/3}\operatorname{poly}(1/\epsilon)\operatorname{polylog} n` somewhere explicit.
+
+26. [CONSISTENCY][BLOCKER] — App.A conflicts with source Lemma 24’s scope. Source lines 816–818 find grid cells with an edge between points in two cells; source lines 926–978 use this after contracting to a cell graph `S'_i`. App.A uses it directly for point-vertex death-time Dijkstra. That is not a faithful import. Fix by proving the missing point-graph local oracle.
+
+27. [CONSISTENCY][MAJOR] — App.A follows source line 811 in setting edge length to `d(c,c')`, but §4/App.C require a Euclidean graph. These cannot both be used without an extra comparison lemma. Fix the edge-weight convention globally.
+
+28. [CONSISTENCY][MAJOR] — Frozen proof §2 only asserts “WSPD impl via source Lemmas 23–24”; it does not justify App.A’s new cap-imputation argument. The statement “absorbed into the additive budget” is new and false under the §5 scaling. Fix by replacing it with a proved global-budget/failure-probability argument.
+
+29. [CONSISTENCY][MINOR] — Source representative is lexicographic/z-order deterministic; App.A uses z-order. Any deterministic representative is probably fine for standard WSPD stretch, but if citing the source verbatim, state that the proof is invariant to the deterministic order.

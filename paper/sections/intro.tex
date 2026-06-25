@@ -22,7 +22,7 @@ close it.
 \subsection{Our results}\label{sec:intro-results}
 
 Our main result is a range-counting algorithm whose query cost matches the lower bound up to
-polylogarithmic factors.
+polylogarithmic and $\eps$-dependent factors.
 
 \begin{theorem*}[\cref{thm:main}]
 For every fixed $\eps\in(0,1)$ and every $P\subseteq[\Delta]^2$ with $\abs P=n$ and $\Delta=O(n)$, there
@@ -33,9 +33,9 @@ range-counting queries.
 
 The success probability is boosted to $1-\delta$ by $O(\log(1/\delta))$ independent repetitions and a
 median. Since Driemel et al.~\cite{DMOSW25} prove that $\Omega(n^{1/3})$ queries are necessary even to
-estimate $\wt(\MST(P))$ within a constant factor, \cref{thm:main} settles the range-counting query
-complexity of Euclidean MST-weight estimation up to polylogarithmic and $\eps$-dependent factors
-(\cref{sec:optimality}). \Cref{tab:prior} places the bound in context.
+estimate $\wt(\MST(P))$ within a constant factor, \cref{thm:main} settles the polynomial query exponent
+of Euclidean MST-weight estimation in this model, the two bounds agreeing up to polylogarithmic and
+$\eps$-dependent factors (\cref{sec:optimality}). \Cref{tab:prior} places the bound in context.
 
 \begin{table}[t]
 \centering
@@ -44,13 +44,15 @@ complexity of Euclidean MST-weight estimation up to polylogarithmic and $\eps$-d
 \toprule
 result & oracle & queries & error\\
 \midrule
-Czumaj et al.~\cite{Czumaj05} & range-emptiness $+$ cone-ANN & $\Otil(\sqrt n)$ & $O(n^{1/4})$ rel.\\
+Czumaj et al.~\cite{Czumaj05} & range-emptiness $+$ cone-ANN & $\Otil_\eps(\sqrt n)$ & $(1\pm\eps)$\\
 Driemel et al.~\cite{DMOSW25} & orthogonal range counting & $\Otil(\sqrt n)$ & $(1\pm\eps)$\\
 Driemel et al.~\cite{DMOSW25} (LB) & orthogonal range counting & $\Omega(n^{1/3})$ & const.\ mult.\\
 \textbf{this paper} & orthogonal range counting & $\boldsymbol{\Otil_\eps(n^{1/3})}$ & $(1\pm\eps)$\\
 \bottomrule
 \end{tabular}
-\caption{Sublinear estimation of planar Euclidean MST weight under geometric oracles.}
+\caption{Sublinear estimation of planar Euclidean MST weight under geometric oracles. ``Error'' is the
+approximation guarantee on the returned weight. The improvement here is in the query exponent under the
+weaker range-counting oracle.}
 \label{tab:prior}
 \end{table}
 
@@ -115,10 +117,13 @@ and the threshold-graph view we use throughout descend from this line.
 
 \paragraph{Euclidean MST estimation and geometric oracles.}
 Czumaj, Erg\"un, Fortnow, Magen, Newman, Rubinfeld, and Sohler~\cite{Czumaj05} gave the first sublinear
-planar Euclidean MST-weight estimator, in $\Otil(\sqrt n)$ time, using range-emptiness queries together
-with approximate cone nearest-neighbor search and obtaining a polynomial additive error; the same group's
+planar Euclidean MST-weight estimator, a $(1\pm\eps)$-approximation in $\Otil_\eps(\sqrt n)$ time, using
+range-emptiness queries together with approximate cone nearest-neighbor search; the same group's
 metric reduction~\cite{CzumajSohler04,CzumajSohler09} and the early sublinear geometric algorithms of
-Chazelle, Liu, and Magen~\cite{ChazelleLiuMagen03} set the stage. Arya, Mount, and
+Chazelle, Liu, and Magen~\cite{ChazelleLiuMagen03} set the stage. In general metrics given by a distance
+matrix, Chen, Khanna, and Tan~\cite{ChenKhannaTan23} settle the space/query trade-off for estimating MST
+and TSP cost; these bounds are for the distance-matrix oracle and do not transfer to range counting,
+where distances are never revealed. Arya, Mount, and
 Park~\cite{AryaMountPark15} studied geometric MST range queries with approximate-range data structures,
 building on approximate range searching~\cite{AryaMount00}, and range-clustering and approximate-range
 clustering queries were studied by Abrahamsen et al.~\cite{AbrahamsenEtal17} and Oh and
@@ -134,7 +139,8 @@ ChanTsakalidis18,Chan19,ShengTao11,deBergEtal08}.
 The components of the threshold graph are the single-linkage clusters, and the cost of single-linkage
 clustering has been studied directly in the sublinear regime by Peng, Sohler, and
 Xu~\cite{PSX25}; MST and clustering under strong and weak distance oracles were studied
-in~\cite{MetricOracleMST23}. Streaming Euclidean MST to a constant factor was given by Chen, Cohen-Addad,
+in~\cite{MetricOracleMST23}, and the query complexity of the related metric Steiner tree problem by Chen
+and Khanna~\cite{ChenKhanna23Steiner}. Streaming Euclidean MST to a constant factor was given by Chen, Cohen-Addad,
 Jayaram, Levi, and Waingarten~\cite{ChenCAJLW23}; the contraction trick that keeps component counts
 robust to additive error, which we reuse in the support regularization, traces to dynamic-stream sampling
 of Frahling, Indyk, and Sohler~\cite{FrahlingIndykSohler05} and Indyk~\cite{Indyk04} and to

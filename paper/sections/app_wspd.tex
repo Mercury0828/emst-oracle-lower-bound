@@ -2,14 +2,15 @@
 
 This appendix discharges the one implementation step deferred by \cref{sec:dt}: realizing a locally
 navigable Euclidean $(1+\rho)$-spanner of a point set $X\subseteq[\Delta]^2$ under the range-counting
-oracle, so that the clipped death-time sampler of \cref{sec:dt-sampler} can be run from a uniformly
-sampled vertex at a cost we control. We follow the well-separated pair decomposition (WSPD) construction
-of Driemel et al.~\cite{DMOSW25} (whose spanner facts are from Har-Peled~\cite{HarPeled11} and whose
-sampling primitive is from Monemizadeh~\cite{Monemizadeh23}), and make every step concrete as a sequence
-of range counts. We use the term \emph{cell} for a node of the quadtree $\mathcal T$ on $[\Delta]^2$; a
-cell of side $r$ has radius $r(c)\le\sqrt2\,r$, and $d(c,c')$ is the distance between cell centers. All
-counts below are on the input $P$; when $X=Q$ is a snapped support, a $Q$-cell is nonempty exactly when
-the aligned $P$-region is nonempty, so each emptiness test is still one count on $P$ (\cref{sec:dt}).
+oracle, and running the clipped death-time sampler of \cref{sec:dt-sampler} on it. We build on the
+well-separated pair decomposition (WSPD) construction of Driemel et al.~\cite{DMOSW25} (whose spanner
+facts are from Har-Peled~\cite{HarPeled11} and whose sampling primitive is from
+Monemizadeh~\cite{Monemizadeh23}). We use \emph{cell} for a node of the quadtree $\mathcal T$ on
+$[\Delta]^2$; a cell $c$ has side length $r(c)$ and diameter $\sqrt2\,r(c)$, and $d(c,c')$ is the distance
+between cell centers. The vertex set is $X$; for $X=P$ a cell is nonempty when $\rcount\cdot>0$, and for a
+snapped support $X=Q$ an $h$-cell is nonempty exactly when the aligned $P$-region is nonempty, so every
+emptiness test is one count on $P$ (\cref{sec:dt}). Throughout, the WSPD separation parameter is a fixed
+$\Theta(\rho)$, chosen so that the spanner stretch below is $1+\rho$.
 
 \subsection{Uniform point sampling under the oracle}\label{sec:prelim-sample}
 
@@ -17,137 +18,182 @@ We first record the sampling primitive used here and in \cref{sec:support} (refe
 \cref{sec:support-oracle}). It is \emph{telescoping sampling}~\cite{Monemizadeh23}.
 
 \begin{lemma}[Uniform sampling]\label{lem:telescoping}
-Given a query rectangle $R$ that is a union of quadtree cells with $\rcount{R}>0$, one can return a point
-of $P\cap R$ drawn uniformly at random using $O(\log\Delta)$ range-counting queries.
+Given a query region $R$ that is a union of quadtree cells with $\rcount R>0$, one can return a point of
+$P\cap R$ drawn uniformly at random using $O(\log\Delta)$ range-counting queries.
 \end{lemma}
 
 \begin{proof}
-Walk down $\mathcal T$ from the cell(s) covering $R$. At a cell $c$ with children $c_1,\dots,c_4$, query
-the four counts $\rcount{c_i}$ (which sum to $\rcount c$) and descend into child $c_i$ with probability
-$\rcount{c_i}/\rcount c$. After $O(\log\Delta)$ levels the walk reaches a single grid point, which by the
-chain of conditional probabilities is uniform on $P\cap R$. Each level spends $O(1)$ counts, so the total
-is $O(\log\Delta)$.
+If $R$ is a union of several cells, first pick one of them with probability proportional to its count
+(one count per cell). Then walk down $\mathcal T$ from the chosen cell: at a cell $c$ with children
+$c_1,\dots,c_4$, query the four counts $\rcount{c_i}$ (which sum to $\rcount c$) and descend into $c_i$
+with probability $\rcount{c_i}/\rcount c$. After $O(\log\Delta)$ levels the walk reaches a single grid
+point, uniform on $P\cap R$ by the chain of conditional probabilities. Each level spends $O(1)$ counts.
 \end{proof}
 
-Two consequences are used repeatedly. First, a uniform vertex of $X$ (a death-time seed) costs
-$O(\log\Delta)$ counts. Second, the \emph{representative} of a cell, which we now define, is computable in
-$O(\log\Delta)$ counts.
+Sampling a uniform \emph{vertex} of $X$ has two costs. For $X=P$ a uniform vertex is a uniform point,
+$O(\log\Delta)$ counts. For a support $X=Q$ a uniform support cell is drawn by rejection
+(\cref{sec:support-oracle}): sample a uniform point of $P$, accept its $h$-cell with probability
+$1/\abs{P\cap C}$, which accepts with probability $K/n$ and so costs $\Otil(n/K)$ counts per support
+vertex. We use the first in the bulk sampler for $P$ and the second in the sampler for $Q$.
 
 \subsection{The spanner realized by range counts}\label{sec:wspd-spanner}
 
 \paragraph{Representatives.}
-For a nonempty cell $c$, its representative $\rep(c)$ is the point of $P\cap c$ that is smallest in the
-$z$-order (the order in which a quadtree traversal visits leaves). It is found by descending $\mathcal T$
-from $c$, at each level entering the $z$-first nonempty child; one emptiness count per child decides this,
-so $\rep(c)$ costs $O(\log\Delta)$ counts. The $z$-order is a total order on $[\Delta]^2$, so $\rep(c)$ is
-unique and the same cell always returns the same representative across every search; this fixes all ties
-and makes the spanner below a single well-defined graph.
+For a nonempty cell $c$, its representative $\rep(c)$ is the vertex of $X$ inside $c$ that is first in the
+$z$-order (the order a quadtree traversal visits leaves). For $X=P$ it is found by descending $\mathcal T$
+from $c$, at each level entering the $z$-first nonempty child (one emptiness count per child), reaching a
+single point in $O(\log\Delta)$ counts; for $X=Q$ the descent is over $h$-cells and returns the $z$-first
+nonempty $h$-cell center, again $O(\log\Delta)$ counts. The $z$-order is a total order, so $\rep(c)$ is
+unique and every search returns the same representative for the same cell; this fixes all ties. The
+computation returns the \emph{coordinates} of $\rep(c)$, so exact Euclidean distances between
+representatives are available with no further queries.
 
 \paragraph{Well-separated pairs.}
-A pair of cells $(c,c')$ is \emph{well-separated} at parameter $\rho$ if $\rho\cdot d(c,c')\ge
-\max\{r(c),r(c')\}$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
-recursion~\cite{CK95} on $\mathcal T$, of size $O(\rho^{-2}n)$~\cite{DMOSW25}. We never materialize
-$\mathcal W$. Two facts let us work with it locally:
+A pair of cells $(c,c')$ is \emph{well-separated} if the separation parameter times $\max\{r(c),r(c')\}$
+is at most $d(c,c')$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
+recursion~\cite{CK95} on $\mathcal T$. We never materialize $\mathcal W$; two facts let us use it locally.
 \begin{enumerate}
-\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts: well-separation is a geometric test
-on the two cells (no query), and the recursion places $(c,c')$ in $\mathcal W$ exactly when $(c,c')$ is
-well-separated, both cells are nonempty, and the parent pair is not well-separated; the three emptiness
-tests are $O(1)$ counts.
+\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. Well-separation is a geometric test on
+the two cells (no query). The recursion (which always splits the cell of larger side) places $(c,c')$ in
+$\mathcal W$ exactly when both cells are nonempty, $(c,c')$ is well-separated, and the \emph{oriented
+parent} pair, obtained by replacing the larger cell with its quadtree parent, is not well-separated;
+the two emptiness tests are $O(1)$ counts.
 \item (\cite{HarPeled11}, restated in \cite{DMOSW25}.) For every $(c,c')\in\mathcal W$, $r(c')/2\le
-r(c)\le 2r(c')$, and every point of $[\Delta]^2$ lies in $O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$.
+r(c)\le 2r(c')$, and after redundant-pair removal (below) every point of $[\Delta]^2$ lies in
+$O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$, which number $O(\rho^{-2}n)$ in total.
 \end{enumerate}
-The \emph{spanner} $S=(X,E(S))$ adds, for each $(c,c')\in\mathcal W$, the edge $\{\rep(c),\rep(c')\}$ of
-length $d(c,c')$. By the second fact every vertex has $O(\rho^{-2}\log\Delta)$ incident spanner edges, so
-$S$ is sparse.
+The \emph{spanner} $S=(X,E(S))$ has, for each $(c,c')\in\mathcal W$, the edge $\{\rep(c),\rep(c')\}$ whose
+weight is the \emph{exact Euclidean length} $\norm{\rep(c)-\rep(c')}$. Every edge of $S$ is therefore a
+genuine pair of points of $X$ carrying its true distance, so $S$ is a Euclidean subgraph of the complete
+graph on $X$; this is what \cref{sec:dt} needs.
 
 \paragraph{Redundant-pair suppression.}
-The Callahan--Kosaraju recursion run on the quadtree of $[\Delta]^2$ (not on the points) can emit two
-pairs $(c,c')$ and $(\bar c,\bar c')$ with $P\cap c=P\cap\bar c$ and $P\cap c'=P\cap\bar c'$: geometrically
-distinct cells carrying the same point sets. We suppress all but the pair whose two cells are smallest in
-$z$-order among those with equal point sets. The test ``$P\cap c=P\cap\bar c$'' for two candidate cells
-of comparable side reduces, by \cref{lem:telescoping}'s walk, to comparing $\rep$ and the count
-$\rcount c$, and adds $O(\log\Delta)$ counts per pair touched. Suppression makes each point-pair $\{x,y\}$
-covered by a unique surviving pair, so the surviving family still has size $O(\rho^{-2}n)$ and the
-per-point bound $O(\rho^{-2}\log\Delta)$ of fact~(2) holds for the spanner $S$.
+Running the recursion on the quadtree of $[\Delta]^2$ (not on the points) can emit two pairs $(c,c')$ and
+$(\bar c,\bar c')$ that carry the same point sets, which happens only for \emph{nested} cells: $\bar
+c\subseteq c$, $\bar c'\subseteq c'$ with $P\cap c=P\cap\bar c$ and $P\cap c'=P\cap\bar c'$. For nested
+cells, equal counts ($\rcount c=\rcount{\bar c}$, one count each) imply equal point sets, which is the
+test we use. Because the edge weight is the exact Euclidean distance between representatives, and equal
+point sets give the same $z$-first representative, all such duplicates produce the \emph{identical} edge
+$\{\rep(c),\rep(c')\}$ of the same weight. Suppressing them therefore does not change the edge set $E(S)$;
+it only removes repeated work, and is what makes fact~(2)'s $O(\rho^{-2}\log\Delta)$ count of
+\emph{distinct} incident edges per vertex hold.
 
 \paragraph{Stretch.}
-The spanner inherits the standard guarantee.
+The spanner inherits the standard WSPD guarantee at separation $\Theta(\rho)$.
 
 \begin{lemma}[Spanner stretch \cite{HarPeled11,DMOSW25}]\label{lem:stretch}
-$\wt(\MST(S))\le(1+\rho)\,\wt(\MST(X))$, and for every threshold $t$,
-$c_X(t)\le c_S(t)\le c_X(t/(1+\rho))$.
-\end{lemma}
-
-The first inequality is Lemma~23 of \cite{DMOSW25}. The second is the threshold-graph form: an $S$-edge of
-length $d(c,c')$ joins two points at distance $\le(1+\rho)\,d(c,c')$ and $\ge d(c,c')-r(c)-r(c')\ge
-d(c,c')/(1+\rho)$ by well-separation, so an $S$-edge of length $\le t$ certifies an $X$-pair within
-$(1+\rho)t$, and an $X$-pair within $t/(1+\rho)$ is spanned by an $S$-edge of length $\le t$. Integrating
-the second inequality against \eqref{eq:cluster-integral} gives \eqref{eq:spanner-stretch}.
-
-\subsection{Local navigability}\label{sec:wspd-nav}
-
-The death-time search needs, from a vertex of $S$, its spanner neighbors within a given length. We provide
-this at each dyadic length scale.
-
-\begin{lemma}[Neighbor oracle]\label{lem:navigate}
-Let $c$ be a cell of side $r/2$. All cells $c'$ of side $r/2$ such that $S$ has an edge of length at most
-$r$ between a point of $c$ and a point of $c'$ can be found using $O(\rho^{-2})$ range-counting queries.
+$S$ is a $(1+\rho)$-spanner of $X$: for all $x,y\in X$ there is an $x$--$y$ path in $S$ of length at most
+$(1+\rho)\norm{x-y}$. Consequently $\wt(\MST(S))\le(1+\rho)\,\wt(\MST(X))$, and for every threshold $t$,
+\begin{equation}\label{eq:appA-stretch}
+  c_X(t)\le c_S(t)\le c_X\!\bigl(t/(1+\rho)\bigr).
+\end{equation}
 \end{lemma}
 
 \begin{proof}
-This is Lemma~24 of \cite{DMOSW25}; we restate the realization. If an $S$-edge of length $\le r$ joins $c$
-and $c'$ then $d(c,c')\le 3r$, and there are $O(1)$ cells $c'$ of side $r/2$ with $d(c,c')\le 3r$. For each
-such candidate we must decide whether some surviving pair of $\mathcal W$ links a subcell of $c$ to a
-subcell of $c'$ at distance $\le r$. A direct WSPD recursion on $(c,c')$ could descend $\Theta(n)$ times,
-so we truncate at side $2^{i^*}$ with $2^{i^*}\le\rho r/10<2^{i^*+1}$: declare a \emph{witness} a pair
-$(\bar c,\bar c')$ of nonempty cells of side $\ge 2^{i^*}$, with $\bar c\subseteq c$, $\bar c'\subseteq
-c'$, satisfying either (i) $(\bar c,\bar c')\in\mathcal W$ and $d(\bar c,\bar c')\le r$, or (ii) $(\bar
-c,\bar c')$ not well-separated and $d(\bar c,\bar c')+r(\bar c)+r(\bar c')\le r$. There are
-$O(\rho^{-2})$ subcells of side $\ge 2^{i^*}$ inside $c$ (and inside $c'$), so $O(\rho^{-4})$ candidate
-witness pairs; a modification of the recursion that tests these pairs by membership and emptiness
-(each $O(1)$ counts) and prunes well-separated branches early completes the search in $O(\rho^{-2})$
-counts. Correctness of the truncation (a witness exists iff $(c,c')$ is a yes-instance) is the argument of
-\cite[Lemma~24]{DMOSW25}: a too-small defining pair forces its parent pair to be non-well-separated, which
-brings the endpoints within $2r/5$ and so produces a side-$2^{i^*}$ witness.
+The spanner property is the WSPD spanner theorem~\cite[Thm.~on WSPD spanners]{HarPeled11} with separation
+$\Theta(\rho)$; the MST bound is its Lemma~23 in \cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
+$S$-edge is a true $X$-pair, so the graph of $S$-edges of length $\le t$ is a subgraph of the $X$-pairs of
+length $\le t$, giving $c_X(t)\le c_S(t)$. Conversely, if $\norm{x-y}\le t/(1+\rho)$ then the spanner path
+between $x,y$ has every edge of length $\le(1+\rho)\norm{x-y}\le t$, so $x,y$ lie in one component of the
+$S$-edges of length $\le t$; hence $c_S(t)\le c_X(t/(1+\rho))$.
 \end{proof}
 
-\subsection{The bottleneck death-time search}\label{sec:wspd-search}
+Integrating \eqref{eq:appA-stretch} against \eqref{eq:cluster-integral} yields the additive spanner bias
+$A_L(X)\le A_L(H_X)\le(1+\rho)A_L(X)$ of \eqref{eq:spanner-stretch}.
 
-We can now compute the clipped death time $X_L(v)=\min\{\tau(v),L\}$ of a seed $v$ (\cref{sec:dt-sampler}).
-Assign each vertex an independent uniform rank in $[0,1]$, drawn lazily and stored by cell identity, so
-ranks are consistent and a.s.\ distinct (ties, of probability zero, are broken by $z$-order). Recall
-$\tau(v)$ is the bottleneck (min--max-edge) distance from $v$ to the root or to any lower-ranked vertex.
+\subsection{Local navigability}\label{sec:wspd-nav}
+
+The death-time search needs, from a vertex of $S$, its incident spanner edges within a given length. We
+build this from the cell-level neighbor oracle of \cite{DMOSW25}.
+
+\begin{lemma}[Cell-neighbor oracle, {\cite[Lemma~24]{DMOSW25}}]\label{lem:navigate}
+Let $c$ be a cell of side $r/2$. All cells $c'$ of side $r/2$ for which some WSPD pair links a subcell of
+$c$ to a subcell of $c'$ at separation distance realizing an $S$-edge of length at most $r$ can be found
+using $O(\rho^{-2})$ range-counting queries.
+\end{lemma}
+
+\begin{proof}
+This is Lemma~24 of \cite{DMOSW25}, stated there with the WSPD separation written as $\eps$; we use
+$\Theta(\rho)$. If an $S$-edge of length $\le r$ links $c$ and $c'$ then $d(c,c')\le 3r$, and there are
+$O(1)$ cells $c'$ of side $r/2$ with $d(c,c')\le 3r$. For each, the existence of a linking WSPD pair is
+decided by a witness search truncated at side $2^{i^*}$ with $2^{i^*}\le\rho r/10<2^{i^*+1}$: a witness is
+a pair $(\bar c,\bar c')$ of nonempty cells of side $\ge 2^{i^*}$, $\bar c\subseteq c$, $\bar
+c'\subseteq c'$, with either $(\bar c,\bar c')\in\mathcal W$ and $d(\bar c,\bar c')\le r$, or $(\bar
+c,\bar c')$ not well-separated and $d(\bar c,\bar c')+r(\bar c)+r(\bar c')\le r$. There are
+$O(\rho^{-2})$ subcells of side $\ge 2^{i^*}$ inside $c$, hence $O(\rho^{-4})$ candidate witness pairs;
+a modification of the recursion that tests membership and emptiness ($O(1)$ counts each) and prunes
+well-separated branches early completes the search in $O(\rho^{-2})$ counts. Correctness of the
+truncation is the argument of \cite[Lemma~24]{DMOSW25}: a too-small defining pair forces its parent pair
+to be non-well-separated, bringing the endpoints within $2r/5$ and so producing a side-$2^{i^*}$ witness.
+\end{proof}
+
+\begin{lemma}[Vertex incident-edge oracle]\label{lem:incident}
+For a vertex $u\in X$ and a length $r$, all $S$-edges incident to $u$ of length at most $r$, together with
+their exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting queries; their
+number is $O(\rho^{-2}\log\Delta)$.
+\end{lemma}
+
+\begin{proof}
+Every incident edge $\{u,u'\}$ comes from a pair $(c,c')\in\mathcal W$ with $u\in\{\rep(c),\rep(c')\}$;
+say $\rep(c)=u$. Then $u\in c$, so $c$ is one of the $O(\log\Delta)$ quadtree ancestors of the leaf of
+$u$, and $u$ is the $z$-first vertex in $c$. We iterate over those ancestors: for each ancestor $c$ with
+$\rep(c)=u$ (verified by one representative computation, $O(\log\Delta)$ counts), apply
+\cref{lem:navigate} at the scale matching $r(c)$ to obtain the $O(1)$ candidate neighbor cells $c'$
+($O(\rho^{-2})$ counts), test $(c,c')\in\mathcal W$ ($O(1)$ counts), compute $\rep(c')$
+($O(\log\Delta)$ counts), and emit $\{u,\rep(c')\}$ with weight $\norm{u-\rep(c')}$ if this is at most
+$r$. Summing $O(\rho^{-2})+O(\log\Delta)$ per ancestor over $O(\log\Delta)$ ancestors gives
+$O(\rho^{-2}\log^2\Delta)$ counts. Distinctness and the $O(\rho^{-2}\log\Delta)$ bound on the number of
+incident edges follow from fact~(2) of \cref{sec:wspd-spanner} after redundant-pair suppression.
+\end{proof}
+
+\subsection{The exact bottleneck death-time search}\label{sec:wspd-search}
+
+We now compute the clipped death time $X_L(v)=\min\{\tau(v),L\}$ of a seed $v$ exactly. Fix once a
+\emph{root} $r_X=\rep(\text{root cell of }\mathcal T)$, the global $z$-first vertex of $X$, and assign it
+rank $-\infty$; assign every other vertex an independent uniform rank in $[0,1]$, drawn lazily and keyed
+by \emph{vertex identity} (the point coordinates for $X=P$, the $h$-cell identifier for $X=Q$), so a
+vertex has one rank no matter through which cell it is reached, and ranks are a.s.\ distinct (ties have
+probability zero and are broken by $z$-order). As in \cref{sec:dt-sampler}, $\tau(v)$ is the bottleneck
+(min--max-edge) distance from $v$ to the root or to any lower-ranked vertex.
 
 \paragraph{The search.}
-Run a bottleneck Dijkstra from $v$ over the dyadic length scales $r=(1+\rho),(1+\rho)^2,\dots$ up to $L$.
-Maintain the set $R$ of reached vertices, initialized to $\{v\}$. At scale $r$, for every reached vertex
-$u$ apply \cref{lem:navigate} (at the cell side matching $u$) to enumerate the spanner neighbors of $u$
-joined by an edge of length $\le r$, and add them to $R$. Halt and output $\tau(v)=r$ the first time $R$
-contains a vertex of rank smaller than $\mathrm{rank}(v)$; if the scale passes $L$ first, output
-$X_L(v)=L$. Because edges are processed in increasing length, the level at which a lower-ranked vertex
-first enters $R$ is the bottleneck value, so the procedure returns $\min\{\tau(v),L\}$.
+Run a bottleneck variant of Dijkstra from $v$: maintain, for each reached vertex, the smallest value
+$\beta(\cdot)$ such that $v$ reaches it by a path whose every edge is $\le\beta(\cdot)$, in a priority
+queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the queue-minimum vertex $u$;
+if $u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$, output $\tau(v)=\beta(u)$ and stop. Otherwise expand
+$u$ by \cref{lem:incident} at length $\min\{\beta(u)\cdot(1+\rho),L\}$ (enlarging the explored length only
+as the frontier grows), relaxing each incident edge $\{u,u'\}$ of weight $\omega$ to
+$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$. If the queue-minimum $\beta$ exceeds $L$
+before any halt, output $X_L(v)=L$. Because the queue extracts vertices in increasing $\beta$ and $\beta$
+is computed from exact weights, the value at the first extraction of a root/lower-ranked vertex is exactly
+$\tau(v)$, and the $L$-cutoff returns exactly $\min\{\tau(v),L\}$; no rounding enters.
 
-\paragraph{Per-search cost.}
-The number of vertices extracted before a lower-ranked one appears is small in expectation: order the
-vertices by bottleneck distance from $v$; the $j$-th is extracted only if $v$ has the smallest rank among
-the first $j$ (else the search would have halted earlier), an event of probability $1/j$, so the expected
-number of extractions is $\sum_{j\ge1}1/j$ truncated at $|V|$, i.e.\ $H_{|V|}=O(\log|V|)$ (the same
-harmonic bound as the leader estimator, \cref{lem:leader}). Each extracted vertex is expanded over
-$O(\rho^{-1}\log\Delta)$ scales, each costing $O(\rho^{-2})$ counts by \cref{lem:navigate}, so a search
-costs $O(\rho^{-3}\log\Delta)\cdot O(\log|V|)=\Otil_\rho(1)$ range counts in expectation. To bound the
-worst case we cap the extractions at $\Theta(\log|V|\cdot\log\tfrac1{\delta'})$; by Markov the cap is hit
-with probability $\le\delta'$, and on that event we output $X_L(v)=L$. Since $X_L\le L$ always, capping
-only lowers the reported value on a $\delta'$-fraction of seeds, an effect absorbed into the additive
-budget of \cref{sec:main} by taking $\delta'$ a small constant times the target relative accuracy.
+\paragraph{Per-search cost in expectation.}
+Order the vertices by bottleneck distance from $v$. The search halts at the first root/lower-ranked vertex
+in this order, so it extracts the $j$-th vertex only if none of the first $j-1$ is the root and $v$ has
+smaller rank than all of them, an event of probability $\le 1/(j-1)$ for $j\ge2$ (the ranks of the first
+$j-1$ vertices and $v$ are exchangeable). The expected number of extractions is thus at most
+$1+\sum_{j\ge2}1/(j-1)=1+H_{\abs V-1}=O(\log\abs V)$. Each extraction expands one vertex by
+\cref{lem:incident} at $O(\rho^{-2}\log^2\Delta)$ counts, so a search costs
+$O(\rho^{-2}\log^2\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
+expectation, independent of $n^{1/3}$, i.e.\ $\Otil_\rho(1)$.
 
-\subsection{The global query cap}\label{sec:wspd-cap}
+\subsection{The global query budget}\label{sec:wspd-cap}
 
-The sampler of \cref{sec:dt-sampler} draws seeds uniformly from $V$ (\cref{lem:telescoping},
-$O(\log\Delta)$ counts each) and runs the search above on each. For the bulk term $A_L(P)$ the assembly
-uses $s_P=O(\xi^{-2}n^{1/3})$ seeds (\cref{sec:main}); at $\Otil_\rho(1)$ counts per search the bulk
-sampler costs $\Otil_\xi(n^{1/3})$ counts. For $A_L(Q)$ the sampler uses $s_Q=O_\xi(1)$ support seeds,
-each drawn and explored at the support-sampling cost $\Otil(n/K)=\Otil(n^{1/3})$ of
-\cref{sec:support-oracle}, again $\Otil_\xi(n^{1/3})$. Redundant-pair suppression keeps every vertex
-degree $O(\rho^{-2}\log\Delta)$, and the extraction cap bounds each search deterministically, so no search
-runs away and the total over the whole algorithm is $\Otil_\eps(n^{1/3})$, matching the count claimed in
-\cref{sec:dt} and \cref{sec:main}.
+We do \emph{not} cap individual searches or impute a value to an unfinished one, since imputing $X_L=L$
+would bias the death-time mean upward when $\tau(v)<L$. Instead we bound the whole estimator call.
+The bulk sampler for $A_L(P)$ runs $s_P=O(\xi^{-2}n^{1/3})$ searches, each $\Otil_\rho(1)$ counts in
+expectation (seeds drawn at $O(\log\Delta)$ counts by \cref{lem:telescoping}); the sampler for $A_L(Q)$
+runs $s_Q=O_\xi(1)$ searches with seeds at $\Otil(n/K)=\Otil(n^{1/3})$ counts each. Hence the call has
+expected query cost
+\begin{equation}\label{eq:appA-totalcost}
+  \overline Q=n^{1/3}\cdot\poly(\rho^{-1},\xi^{-1})\cdot\poly\log(n,\Delta)=\Otil_\eps(n^{1/3}).
+\end{equation}
+Fix a deterministic budget $B=C\overline Q$ for an absolute constant $C$ and abort the call, returning
+\textsc{fail}, the moment the running count exceeds $B$. By Markov's inequality the call exceeds $B$ with
+probability at most $1/C$, a small constant, and \textsc{fail} is treated by the geometric $W$-search of
+\cref{sec:main-combine} as a non-stopping outcome inside its constant-probability amplification. A call
+that does not abort returns the unbiased clipped death-time averages of \cref{sec:dt-sampler}. The cost is
+$B=\Otil_\eps(n^{1/3})$ deterministically, and the displayed $\poly(1/\eps)$ factors in
+\eqref{eq:appA-totalcost} are hidden by $\Otil_\eps$ for fixed $\eps$; for variable $\eps$ the bound reads
+$n^{1/3}\poly(1/\eps)\poly\log(n,\Delta)$.

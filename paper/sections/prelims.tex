@@ -1,8 +1,9 @@
 \section{Preliminaries}\label{sec:prelim}
 
 \paragraph{Point sets and the range-counting oracle.}
-The input is a multiset $P$ of $n$ points in the integer grid $[\Delta]^2$, where
-$[\Delta]=\{0,1,\dots,\Delta-1\}$ and $\Delta=O(n)$; thus $\log\Delta=O(\log n)$. We access $P$ only
+The input is a set $P$ of $n\ge 2$ distinct points in the integer grid $[\Delta]^2$, where
+$[\Delta]=\{0,1,\dots,\Delta-1\}$ and $\Delta=O(n)$; thus $\log\Delta=O(\log n)$. (For $n\le 1$ the MST
+weight is $0$.) Distinctness gives $W=\wt(\MST(P))\ge n-1$, since every MST edge has length at least one. We access $P$ only
 through an \emph{orthogonal range-counting oracle}: a query is an axis-aligned rectangle
 $R=[a_1,b_1)\times[a_2,b_2)$, and the oracle returns $\rcount{R}=\abs{P\cap R}$. The cost of an algorithm
 is the number of oracle queries it makes; all other computation is free and charged separately only in
