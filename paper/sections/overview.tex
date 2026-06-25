@@ -131,14 +131,23 @@ $B_L(P)$ to $B_L(Q)$ up to an $O(\xi W)$ error. The support tail is then $B_L(Q)
 is the support-MST weight from \cref{lem:support} and $A_L(Q)$ is another clipped death-time average, this
 time on a spanner of the support.
 
-\emph{Assembly.} Adding the bulk of $P$ to the tail of the snapped support,
+\emph{Assembly.} The identity behind the algorithm is $W=A_L(P)+B_L(P)$ with $B_L(P)\approx B_L(Q)=
+\Wq-A_L(Q)$, so $W\approx A_L(P)+\Wq-A_L(Q)$. We therefore add the bulk of $P$ to the tail of the snapped
+support,
 \begin{equation}\label{eq:ov-assembly}
   \widehat W=\widehat A_P+\widehat\Wq-\widehat A_Q ,
 \end{equation}
-and choosing the internal accuracy $\xi=\Theta(\eps)$ makes every error term $O(\eps G)$. A guess $G\ge W$
-is removed by a geometric search that stops at the first $G$ with $\widehat W(G)\ge G/8$, which lands in
-$[W,16W)$; a final calibrated call then gives the $(1\pm\eps)$ estimate. The three estimators draw fresh
-samples, so their errors are independent, and no seed is reused across thresholds.
+in which $\widehat\Wq$ carries the heavy tail (its whole reason for being computed by the support
+estimator) and the two death-time terms supply and then cancel the bulk that the support and the input
+share. Choosing the internal accuracy $\xi=\Theta(\eps)$ makes every error term $O(\eps G)$, and since all
+four are measured against the same guess scale $G$ they add to $O(\eps G)$. The remaining issue is that the
+algorithm needs a guess $G\ge W$ to fix $L$ and the budgets, while $W$ is the unknown. This is handled by a
+geometric search: the per-guess output is accurate whenever $G\ge W$, so sweeping $G$ downward by halving
+and stopping at the first $G$ with $\widehat W(G)\ge G/8$ brackets $G_0\in[W,16W)$, after which a single
+calibrated call on $G_0$ delivers the $(1\pm\eps)$ estimate. The three estimators draw fresh samples, so
+their errors are independent, and no seed is reused across thresholds or across the three pieces; an
+aborted call (the global budget is a hard cap) is treated as a failed run inside the median amplification
+that protects all $O(\log n)$ guesses at once.
 
 \subsection{Realizing the spanner under a counting oracle}\label{sec:ov-wspd}
 

@@ -58,6 +58,15 @@ edges the support handles. Each estimate:
 No sample seed is reused across thresholds or across the three estimators, so the three errors are
 independent.
 
+\begin{remark}[The choice $K_0=n^{2/3}$]\label{rem:k0}
+The support size $K_0$ is the only free knob, and the three costs above pin it down. The support estimator
+costs $\Otil(\sqrt{K_0}+n/K_0)$; the bulk sampler costs $\Otil(\xi^{-2}n/K_0)$ (more support cells mean a
+smaller clip $L=G/K_0$, hence lower death-time variance and fewer seeds); the support sampler costs
+$\Otil(n/K_0)$ per seed. The first is increasing in $K_0$ through its $\sqrt{K_0}$ term and the rest are
+decreasing, and all four meet when $\sqrt{K_0}=\Theta(n/K_0)$, i.e.\ $K_0=\Theta(n^{2/3})$, giving the
+common value $\Otil(n^{1/3})$. Any other choice makes one of the terms dominate and the bound worse.
+\end{remark}
+
 \subsection{Combining and removing the guess}\label{sec:main-combine}
 
 Output
