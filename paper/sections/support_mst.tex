@@ -50,13 +50,28 @@ own $a$-cell at its own scale, so it is one spatial cell among the candidate uni
 right probability; emptiness is cheap to test, and empty samples contribute zero. This is the empty-cell
 leader estimator of \cref{sec:support-estimator}; it is the one new primitive of the paper.
 
-Two quantities then control the cost, and separating them is what makes the bound $\Otil(\sqrt K)$ rather
-than $\Otil(K)$. The \emph{number of trials} needed to estimate $\cG(r)$ to a target additive accuracy is
+Two quantities then control the cost, and separating them is what makes the bound $\Otil(\sqrt K)$ and not
+$\Otil(K)$. The \emph{number of trials} needed to estimate $\cG(r)$ to a target additive accuracy is
 governed by the estimator's variance, which we show is at most $M c$ where $M$ is the candidate-universe
 size and $c=\cG(r)$ is the \emph{component count} -- not the number of occupied cells. The \emph{per-trial
 exploration cost}, on the other hand, does scale with the number of occupied cells $N$, but only through
 the crude bound $N\le K$. Summed over a geometric sequence of scales, the packing inequality $\Wq\ge
 b\delta/16$ of the active cover (\cref{sec:support-cover}) collapses both sums to $\Otil(\sqrt K)$.
+
+\paragraph{A warm-up.}
+The dense-block-plus-satellites instance of \cref{sec:overview} shows the two cost drivers concretely.
+Take a $\sqrt K\times\sqrt K$ block of occupied unit cells together with $s$ satellites placed at pairwise
+distances $\Theta(D)$ for some large $D$, so $K'=K+s$ cells in all and $\Wq=\Theta(\sqrt K)+\Theta(sD)$.
+At a scale $r\ll D$ the block is one cluster and each satellite is its own, so $c=\cG(r)=s+1$. A mass
+sample of $\poly\log$ points lands in a satellite with probability $\Theta(s/K')$ and misses all of them
+unless $\Omega(K'/s)$ points are drawn; this is the $\sqrt n$ trap. The leader estimator instead draws
+from the spatial universe of all $M=\Theta(K')$ candidate cells, so a satellite is hit with probability
+$\Theta(1/M)$ like any other cell, and by \eqref{eq:ov-var} the variance is $Mc=\Theta(K' s)$, so
+$\Otil(M c/\alpha^2)$ trials at additive accuracy $\alpha=\Theta(\eps\Wq/(\text{\#scales}\cdot r))$ suffice.
+The exploration cost stays bounded because exploring the block component touches $O(\log K)$ cells in
+expectation, not all $K$. The packing bound converts ``$M c$ trials, each $O(\log K)$ work'' into
+$\Otil(\sqrt K)$ once summed over scales; \cref{sec:app-accounting} carries this out for arbitrary
+supports.
 
 \subsection{The active cover and its packing bound}\label{sec:support-cover}
 

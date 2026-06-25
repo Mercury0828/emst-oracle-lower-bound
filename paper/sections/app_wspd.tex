@@ -24,7 +24,7 @@ subgraph (\cref{sec:wspd-spanner}). (3) From a vertex $u$, its incident spanner 
 enumerated by scanning $u$'s $O(\log\Delta)$ quadtree ancestors and, for each, its $O(\rho^{-2})$
 well-separated partner cells (\cref{lem:incident}). (4) The clipped death time of a seed is computed by an
 exact bottleneck Dijkstra (\cref{alg:deathtime}) that halts at the first lower-ranked or root vertex after
-$O(\log\abs V)$ expansions in expectation. A single global query budget, rather than a per-search cap,
+$O(\log\abs V)$ expansions in expectation. A single global query budget, in place of a per-search cap,
 controls the worst case without biasing any estimate. Nothing here reveals a point's location beyond what
 a representative computation already costs, and every line is a range count.
 
@@ -105,8 +105,17 @@ $(1+\rho)\norm{x-y}$. Consequently $\wt(\MST(S))\le(1+\rho)\,\wt(\MST(X))$, and 
 
 \begin{proof}
 The spanner property is the WSPD spanner theorem~\cite[Thm.~on WSPD spanners]{HarPeled11} at geometric
-separation $\Theta(1/\rho)$ (stretch $1+O(\rho)$, rescaled to $1+\rho$ as above); the MST bound is its
-Lemma~23 in \cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
+separation $\Theta(1/\rho)$; we recall the argument. Fix $x,y\in X$ and induct on the rank of
+$\norm{x-y}$ among all pairwise distances. Let $(c,c')$ be the unique WSPD pair with $x\in c$, $y\in c'$,
+and put $u=\rep(c)$, $u'=\rep(c')$, so $\{u,u'\}\in E(S)$. Well-separation gives $\max\{r(c),r(c')\}\le\rho
+\,d(c,c')$, hence $\norm{x-u}\le\sqrt2\,r(c)\le 2\rho\norm{x-y}$ and likewise $\norm{y-u'}\le 2\rho
+\norm{x-y}$ for small $\rho$ (the cells have diameter $\le\sqrt2 r$ and $d(c,c')\le\norm{x-y}+\sqrt2(r(c)
++r(c'))$). Each of $\norm{x-u}$ and $\norm{y-u'}$ is a strictly shorter pairwise distance, so by induction
+$S$ contains an $x$--$u$ path and a $y$--$u'$ path of stretch $1+\rho$; concatenating them with the edge
+$\{u,u'\}$ yields an $x$--$y$ path of length $\le(1+O(\rho))\norm{x-y}$. Choosing the separation a suitable
+multiple of $1/\rho$ makes the constant $1$, i.e.\ stretch $1+\rho$. Summing the spanner paths over
+$\MST(X)$ and taking a spanning subgraph gives $\wt(\MST(S))\le(1+\rho)\wt(\MST(X))$, which is Lemma~23 of
+\cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
 $S$-edge is a true $X$-pair, so the graph of $S$-edges of length $\le t$ is a subgraph of the $X$-pairs of
 length $\le t$, giving $c_X(t)\le c_S(t)$. Conversely, if $\norm{x-y}\le t/(1+\rho)$ then the spanner path
 between $x,y$ has every edge of length $\le(1+\rho)\norm{x-y}\le t$, so $x,y$ lie in one component of the
@@ -215,7 +224,7 @@ Fix a deterministic budget $B=C\overline Q$ for an absolute constant $C$ and abo
 probability at most $1/C$, a small constant, and \textsc{fail} is treated by the geometric $W$-search of
 \cref{sec:main-combine} as a bad run inside its median amplification. The uncapped sample average is the
 exact clipped death-time average of \cref{sec:dt-sampler} and is unbiased; a run is counted bad if it
-aborts or is inaccurate, and \cref{sec:main-combine} union-bounds the bad probability rather than
+aborts or is inaccurate, and \cref{sec:main-combine} union-bounds the bad probability instead of
 conditioning on non-abort. The cost is
 $B=\Otil_\eps(n^{1/3})$ deterministically, and the displayed $\poly(1/\eps)$ factors in
 \eqref{eq:appA-totalcost} are hidden by $\Otil_\eps$ for fixed $\eps$; for variable $\eps$ the bound reads

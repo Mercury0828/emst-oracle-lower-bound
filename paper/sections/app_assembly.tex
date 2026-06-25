@@ -3,17 +3,35 @@
 \subsection{The death-time sampler}\label{sec:app-dt}
 
 \begin{proof}[Proof of \eqref{eq:death-multiset} and \eqref{eq:dt-var}]
-Fix a rank assignment and a threshold $t$. A vertex $v$ has $\tau(v)>t$ iff every path from $v$ to the
-root or to a lower-ranked vertex uses an edge of weight $>t$, i.e.\ iff the component of $v$ in the
-threshold graph $G_H(t)$ contains no lower-ranked vertex and not the root; equivalently $v$ is the
-minimum-rank vertex of a non-root component of $G_H(t)$. There is exactly one such vertex per non-root
-component, so $\abs{\{v:\tau(v)>t\}}=c_H(t)-1$, which by \eqref{eq:components-edges} is the number of MST
-edges of weight $>t$. Two nonnegative integer measures with equal tails are equal, giving
-\eqref{eq:death-multiset}. Integrating $\abs{\{v:\tau(v)>t\}}=c_H(t)-1$ over $t\in[0,L]$ and adding the
-clip gives $\sum_v\min\{\tau(v),L\}=\sum_{e\in\MST(H)}\min\{\wt(e),L\}=A_L(H)$, so
-$\abs V\cdot\E X_L=A_L(H)$ for a uniform $v$. Since $0\le X_L\le L$ we have $X_L^2\le L X_L$, hence
-$\Var(X_L)\le\E X_L^2\le L\,\E X_L=L\,A_L(H)/\abs V\le L\,\wt(\MST(H))/\abs V$; averaging $s$ independent
-samples and scaling by $\abs V$ gives \eqref{eq:dt-var}.
+Fix a rank assignment and a threshold $t$, and let $G_H(t)$ be the graph on $V$ with the edges of $H$ of
+weight $\le t$. A vertex $v$ has $\tau(v)>t$ iff every path in $H$ from $v$ to the root or to a
+lower-ranked vertex uses an edge of weight $>t$; equivalently the component of $v$ in $G_H(t)$ contains
+neither the root nor any vertex of smaller rank, i.e.\ $v$ is the minimum-rank vertex of a component of
+$G_H(t)$ that does not contain the root. Each component of $G_H(t)$ has exactly one minimum-rank vertex,
+and one of these components is the root's, so
+\[
+  \abs{\{v:\tau(v)>t\}}=(\#\text{components of }G_H(t))-1=c_H(t)-1,
+\]
+which by \eqref{eq:components-edges} equals the number of MST edges of weight $>t$. Two nonnegative
+integer-valued measures on $[0,\infty)$ with equal right tails at every $t$ are equal, so the multiset
+$\{\tau(v)\}$ equals $\{0\}\cup\{\wt(e):e\in\MST(H)\}$ (the lone $0$ being the root's death time); this is
+\eqref{eq:death-multiset}.
+
+For the clipped statistic, integrate the tail identity against the clip kernel. Since $\min\{\tau(v),L\}
+=\int_0^L\mathbf 1[\tau(v)>t]\,dt$,
+\[
+  \sum_{v\in V}\min\{\tau(v),L\}=\int_0^L\abs{\{v:\tau(v)>t\}}\,dt=\int_0^L(c_H(t)-1)\,dt
+    =\sum_{e\in\MST(H)}\min\{\wt(e),L\}=A_L(H),
+\]
+so for a uniformly random $v$ we have $\E X_L=A_L(H)/\abs V$, i.e.\ $\abs V\cdot\E X_L=A_L(H)$, and the
+sample mean scaled by $\abs V$ is unbiased for $A_L(H)$. For the variance, $0\le X_L\le L$ gives
+$X_L^2\le L\,X_L$, hence
+\[
+  \Var(X_L)\le\E X_L^2\le L\,\E X_L=\frac{L\,A_L(H)}{\abs V}\le\frac{L\,\wt(\MST(H))}{\abs V}.
+\]
+Averaging $s$ independent samples divides the variance by $s$; scaling by $\abs V$ multiplies it by
+$\abs V^2$, giving $\Var[\tfrac{\abs V}{s}\sum_i X_L(v_i)]\le\abs V\,L\,\wt(\MST(H))/s$, which is
+\eqref{eq:dt-var}.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:spanner-stretch}]

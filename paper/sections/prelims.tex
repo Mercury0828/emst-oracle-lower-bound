@@ -97,3 +97,15 @@ $A_L,\,B_L$ & $L$-clipped and $L$-tail MST weight\\
 \caption{Recurring notation.}
 \label{tab:notation}
 \end{table}
+
+\paragraph{Probabilistic tools.}
+We use two standard facts repeatedly. The first is the multiplicative Chernoff bound: if $Y$ is a sum of
+independent $[0,1]$ variables with mean $\mu$, then $\Pr[\abs{Y-\mu}\ge\gamma\mu]\le 2e^{-\gamma^2\mu/3}$
+for $\gamma\in(0,1)$. The second is median-of-means amplification: to estimate a quantity $q$ to additive
+error $\alpha$ with failure probability $\delta$ from an unbiased estimator of variance $V$, average
+$O(V/\alpha^2)$ samples into one block (so each block is within $\alpha$ with probability $\ge 2/3$ by
+Chebyshev) and take the median of $O(\log(1/\delta))$ blocks; the median is within $\alpha$ with
+probability $1-\delta$. We invoke this both for the leader estimator (\cref{lem:leader}, with $V\le MU$)
+and for the death-time averages (\cref{sec:dt-sampler}). When several estimates must hold at once we set
+each block's $\delta$ to a $1/\poly$ fraction and union-bound, absorbing the $O(\log)$ overhead into
+$\Otil(\cdot)$.

@@ -18,3 +18,12 @@ counting in Euclidean MST-weight estimation is fixed: the $\Otil(\sqrt n)$ of~\c
 true rate, and no further polynomial improvement in the query exponent is available. The remaining slack
 is the polylogarithmic and $\eps$-dependent overhead carried by the estimator of \cref{sec:support} and
 the death-time sampler of \cref{sec:dt}.
+
+It is worth noting why $n^{1/3}$, and not $\sqrt n$, is the right exponent, since our balance point makes
+this transparent. The lower bound of~\cite{DMOSW25} hides $\Theta(n^{2/3})$ clusters whose presence or
+absence each shifts the MST weight by a $\Theta(1)$ fraction, and distinguishing the two cases costs
+$\Omega(n^{1/3})$ range counts. Our algorithm spends its budget at exactly the matching granularity: it
+regularizes to a support of $K_0=\Theta(n^{2/3})$ cells, where the support estimator's two terms $\sqrt K$
+and $n/K$ are equal, and reads the cluster structure there with $\Otil(n^{1/3})$ queries. The spatial
+leader estimator is what lets the $\sqrt K$ term appear in place of a $K$ term; without it the same
+reduction would reproduce the $\Otil(\sqrt n)$ bound.
