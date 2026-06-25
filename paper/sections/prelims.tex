@@ -51,9 +51,9 @@ the oracle must support.
 \paragraph{Spanners and the death-time view.}
 We will not estimate $c_P$ directly from points; instead we sample from $P$ and explore a locally
 navigable $(1+\rho)$-spanner $H$ of the sampled neighborhood, following~\cite{DMOSW25}. For a connected
-weighted graph $H$ on vertex set $V$ with a fixed root, assign independent uniform ranks to $V$ and
-define the \emph{death time} $\tau(v)$ of a vertex as the bottleneck distance from $v$ to the root or to
-any lower-ranked vertex. The multiset $\set{\tau(v):v\in V}$ equals $\set{0}\cup\set{\wt(e):e\in\MST(H)}$
+weighted graph $H$ on vertex set $V$ with a fixed root $r$, assign independent uniform ranks to
+$V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ of a vertex as the bottleneck distance from
+$v$ to the root or to any lower-ranked vertex. The multiset $\set{\tau(v):v\in V}$ equals $\set{0}\cup\set{\wt(e):e\in\MST(H)}$
 (\cref{sec:dt}), so the clipped statistics $\min\{\tau(v),L\}$ recover the truncated MST weight
 $\sum_{e}\min\{\abs{e},L\}$. Because $H$ is a Euclidean $(1+\rho)$-spanner, $c_S(t)\le c_H(t)\le
 c_S(t/(1+\rho))$, so spanner death times approximate the point-set MST within a $(1+\rho)$ factor. We use

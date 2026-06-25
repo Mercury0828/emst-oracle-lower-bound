@@ -49,8 +49,16 @@ and each of the four terms is $O(\xi G)$, so for a suitable constant $C_*$,
   \abs{\widehat W(G)-W}\le C_*\xi G\qquad\text{whenever }G\ge W .
 \end{equation}
 Rescaling the internal accuracy to $\zeta=C_*\xi$ gives $\abs{\widehat W(G)-W}\le\zeta G$ in
-$\Otil_\zeta(n^{1/3})$ queries per call, with a predetermined query cap enforced by aborting (a guess
-$G<W$ that requests a larger budget returns \textsc{fail}).
+$\Otil_\zeta(n^{1/3})$ queries per call. A single run of the call carries the deterministic budget
+$B=\Otil_\zeta(n^{1/3})$ of \cref{sec:wspd-cap} and returns \textsc{fail} if it aborts. We amplify each
+guess into a robust estimate by taking the median of $t=O(\log n)$ independent runs, where an aborted run
+contributes $+\infty$ to the median. For a guess with $G\ge W$, one run is \emph{bad} if it aborts
+(probability $\le 1/C$) or is inaccurate (probability $\le 1/6$); choosing the budget constant $C$ large
+makes the bad probability less than $1/3$, so fewer than half of the $t$ runs are bad with probability
+$1-n^{-\Omega(1)}$, and the median is then an accurate, finite estimate. A union bound over the $O(\log
+n)$ guesses keeps all guesses with $G\ge W$ simultaneously accurate with constant probability; guesses
+with $G<W$ need no guarantee beyond not stopping the search prematurely, which the accurate guesses above
+already enforce.
 
 A deterministic upper bound is $U=\sqrt2(n-1)\Delta\ge W$, and $W\ge n-1$ since the points are distinct
 integer-grid points, so $U/W=O(\Delta)=O(n)$ and only $O(\log n)$ guesses are needed. Run the per-guess

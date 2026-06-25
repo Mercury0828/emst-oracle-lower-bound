@@ -35,32 +35,43 @@ $K_h\le 4+8W/h$.
 \end{proof}
 
 \begin{lemma}[The regularization search]\label{lem:kwindow}
-There are constants $0<c<1<C_\xi$ with $C_\xi/c>4$ such that, given a guess $G\ge W$, halving $h$ from
-$h_0=\Theta(\xi L)$ and stopping at the first scale whose nonempty-cell count $K_h$ is certified to be at
-least $cK_0$ produces a scale with $cK_0\le K\le C_\xi K_0$, using $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$
-range-counting queries in total.
+Fix a small constant $c\in(0,1)$ and set $C_\xi=\Theta(1/\xi)$ with $C_\xi/c>16$. Given a guess $G\ge W$,
+start at $h_0=\Theta(\xi L)$ and, if the nonempty-cell count $K_{h_0}$ is certified below $cK_0$, halve $h$
+until it is first certified at least $cK_0$. The resulting scale $h$ satisfies $h\le h_0=\Theta(\xi L)$ and
+$\tfrac{c}{4}K_0\le K=K_h\le C_\xi K_0$, using $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$ range-counting queries in
+total.
 \end{lemma}
 
 \begin{proof}
-As $h$ halves, each nonempty cell splits into at most four, so $K_h$ is nondecreasing in $1/h$ and grows
-by a factor at most $4$ per halving. At the initial scale $h_0=\Theta(\xi L)$ the bounding square of $P$
-has side $O(\Delta)$ and $h_0=\Omega(\xi G/K_0)$, so $K_{h_0}=O(\Delta^2/h_0^2)$ is below $cK_0$ for the
-chosen constants; if it is already above, the bound below still applies. Let $h^\star$ be the first scale
-in the halving sequence with $K_{h^\star}\ge cK_0$. By the quadrupling bound the previous scale had
-$K<cK_0$, so $K_{h^\star}<4cK_0\le C_\xi K_0$; hence $K=K_{h^\star}\in[cK_0,C_\xi K_0]$, which is
-\eqref{eq:K-window}.
+As $h$ halves, each nonempty cell splits into at most four, so $K_h$ is nondecreasing as $h$ decreases and
+grows by a factor at most $4$ per halving. We only ever halve, so the final scale obeys $h\le
+h_0=\Theta(\xi L)$, which is what the snapping bound $\delta_s=\sqrt2\,h=O(\xi L)$ of \cref{sec:dt-snap}
+needs.
 
-It remains to certify the crossing within budget. At each scale we run a fixed batch of $m=\Theta(\xi^{-2}
-(n/K_0)\log n)$ rejection trials (\cref{sec:support-oracle}): a trial draws a uniform point of $P$
-($O(\log\Delta)$ counts, \cref{lem:telescoping}) and accepts with probability $1/\abs{P\cap C}$, so a
-trial accepts with probability exactly $K_h/n$. If $K_h\ge cK_0$ the expected number of accepts is
-$\ge cK_0 m/n=\Omega(\xi^{-2}\log n)$, and if $K_h<\tfrac{c}{4}K_0$ it is $O(\xi^{-2}\log n/4)$; a Chernoff
-bound separates the two with failure probability $n^{-\Omega(1)}$, so the threshold test ``accepts
-$\ge\tfrac{c}{2}K_0 m/n$'' is correct at every scale with high probability. The test costs
-$\Otil(m)=\Otil_\xi(n/K_0)$ counts and is run at $O(\log(\Delta/h^\star))=O(\log\Delta)$ scales, for a
-total of $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$, the per-scale cost being capped at $m$ regardless of how small
-$K_h$ is. Once stopped, the same batch estimates $K$ to relative error $O(\xi)$, which is the input to
-\cref{lem:support} required by \cref{sec:main-pieces}.
+\emph{Upper bound on $K$.} At the initial scale, $K_{h_0}\le 8W/h_0+4=O(K_0/\xi)\le C_\xi K_0$ by
+\eqref{eq:Kh-packing} and $h_0=\Theta(\xi G/K_0)\ge\Theta(\xi W/K_0)$. If $K_{h_0}\ge cK_0$ we stop at
+$h_0$ and $K=K_{h_0}\in[cK_0,C_\xi K_0]$. Otherwise let $h$ be the first halved scale certified at least
+$cK_0$; the previous scale was below $cK_0$, so the quadrupling bound gives $K<4cK_0\le C_\xi K_0$. (A
+finest scale always crosses, since at cell side $1$ every point is its own cell and $K=n\ge K_0$.) Either
+way $K\le C_\xi K_0$.
+
+\emph{Lower bound on $K$ and the test.} At each scale we run a fixed batch of $m=\Theta(\xi^{-2}(n/K_0)\log
+n)$ rejection trials (\cref{sec:support-oracle}): a trial draws a uniform point of $P$ ($O(\log\Delta)$
+counts, \cref{lem:telescoping}) and accepts with probability $1/\abs{P\cap C}$, so it accepts with
+probability exactly $K_h/n$. A Chernoff bound on the accept count separates $K_h\ge cK_0$ from
+$K_h<\tfrac{c}{4}K_0$ with failure probability $n^{-\Omega(1)}$, so the threshold test ``accepts
+$\ge\tfrac{c}{2}K_0\,m/n$'' is correct at every scale with high probability. We stop at the first scale the
+test accepts; there $K_h\ge\tfrac{c}{4}K_0$ (else the test would have rejected). Combined with the upper
+bound, $K\in[\tfrac{c}{4}K_0,C_\xi K_0]$, i.e.\ $\Theta_\xi(K_0)$, which is \eqref{eq:K-window} with the
+constants relabeled.
+
+\emph{Cost.} The test spends $\Otil(m)=\Otil_\xi(n/K_0)$ counts per scale regardless of how small $K_h$
+is, and runs at $O(\log\Delta)$ scales, for $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$ total. Once stopped, the
+same batch estimates $K$ to relative error $O(\xi)$ (its accept count concentrates at $K_h m/n$), the
+input to \cref{lem:support} required by \cref{sec:main-pieces}. Both the support estimator
+$\Otil_\eta(\sqrt K+n/K)$ and the support death-time sampler are run at this $K=\Theta_\xi(K_0)$, and
+since $\sqrt{C_\xi K_0}=\Otil_\xi(n^{1/3})$ and $n/(\tfrac{c}{4}K_0)=\Otil_\xi(n^{1/3})$, all three pieces
+of \cref{sec:main-pieces} remain $\Otil_\xi(n^{1/3})$.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]

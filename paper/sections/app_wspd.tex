@@ -7,9 +7,11 @@ well-separated pair decomposition (WSPD) construction of Driemel et al.~\cite{DM
 facts are from Har-Peled~\cite{HarPeled11} and whose sampling primitive is from
 Monemizadeh~\cite{Monemizadeh23}). We use \emph{cell} for a node of the quadtree $\mathcal T$ on
 $[\Delta]^2$; a cell $c$ has side length $r(c)$ and diameter $\sqrt2\,r(c)$, and $d(c,c')$ is the distance
-between cell centers. The vertex set is $X$; for $X=P$ a cell is nonempty when $\rcount\cdot>0$, and for a
-snapped support $X=Q$ an $h$-cell is nonempty exactly when the aligned $P$-region is nonempty, so every
-emptiness test is one count on $P$ (\cref{sec:dt}). Throughout, the WSPD separation parameter is a fixed
+between cell centers. The vertex set is $X$; for $X=P$ a cell is nonempty when $\rcount\cdot>0$. For a
+snapped support $X=Q$ we take the grid side $h$ to be a dyadic quadtree scale, so each support $h$-cell is
+itself a quadtree cell and every region queried below is a union of $h$-cells; an $h$-cell is then nonempty
+exactly when the aligned $P$-region is nonempty, so every emptiness test is one count on $P$
+(\cref{sec:dt}). Throughout, the WSPD separation parameter is a fixed
 $\Theta(\rho)$, chosen so that the spanner stretch below is $1+\rho$.
 
 \subsection{Uniform point sampling under the oracle}\label{sec:prelim-sample}
@@ -103,47 +105,36 @@ $A_L(X)\le A_L(H_X)\le(1+\rho)A_L(X)$ of \eqref{eq:spanner-stretch}.
 
 \subsection{Local navigability}\label{sec:wspd-nav}
 
-The death-time search needs, from a vertex of $S$, its incident spanner edges within a given length. We
-build this from the cell-level neighbor oracle of \cite{DMOSW25}.
-
-\begin{lemma}[Cell-neighbor oracle, {\cite[Lemma~24]{DMOSW25}}]\label{lem:navigate}
-Let $c$ be a cell of side $r/2$. All cells $c'$ of side $r/2$ for which some WSPD pair links a subcell of
-$c$ to a subcell of $c'$ at separation distance realizing an $S$-edge of length at most $r$ can be found
-using $O(\rho^{-2})$ range-counting queries.
-\end{lemma}
-
-\begin{proof}
-This is Lemma~24 of \cite{DMOSW25}, stated there with the WSPD separation written as $\eps$; we use
-$\Theta(\rho)$. If an $S$-edge of length $\le r$ links $c$ and $c'$ then $d(c,c')\le 3r$, and there are
-$O(1)$ cells $c'$ of side $r/2$ with $d(c,c')\le 3r$. For each, the existence of a linking WSPD pair is
-decided by a witness search truncated at side $2^{i^*}$ with $2^{i^*}\le\rho r/10<2^{i^*+1}$: a witness is
-a pair $(\bar c,\bar c')$ of nonempty cells of side $\ge 2^{i^*}$, $\bar c\subseteq c$, $\bar
-c'\subseteq c'$, with either $(\bar c,\bar c')\in\mathcal W$ and $d(\bar c,\bar c')\le r$, or $(\bar
-c,\bar c')$ not well-separated and $d(\bar c,\bar c')+r(\bar c)+r(\bar c')\le r$. There are
-$O(\rho^{-2})$ subcells of side $\ge 2^{i^*}$ inside $c$, hence $O(\rho^{-4})$ candidate witness pairs;
-a modification of the recursion that tests membership and emptiness ($O(1)$ counts each) and prunes
-well-separated branches early completes the search in $O(\rho^{-2})$ counts. Correctness of the
-truncation is the argument of \cite[Lemma~24]{DMOSW25}: a too-small defining pair forces its parent pair
-to be non-well-separated, bringing the endpoints within $2r/5$ and so producing a side-$2^{i^*}$ witness.
-\end{proof}
+The death-time search needs, from a vertex $u$ of $S$, all its incident spanner edges of length at most a
+given $r$, with their exact weights. We obtain these by enumerating WSPD pairs directly, without the
+contracted-graph oracle of \cite[Lemma~24]{DMOSW25} (which navigates a threshold graph after cell
+contraction and does not return a vertex's defining pairs).
 
 \begin{lemma}[Vertex incident-edge oracle]\label{lem:incident}
-For a vertex $u\in X$ and a length $r$, all $S$-edges incident to $u$ of length at most $r$, together with
-their exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting queries; their
-number is $O(\rho^{-2}\log\Delta)$.
+For a vertex $u\in X$ and a length $r$, all $S$-edges incident to $u$ of length at most $r$, with their
+exact weights, can be enumerated using $O(\rho^{-2}\log\Delta)$ range-counting queries, and their number
+is $O(\rho^{-2}\log\Delta)$.
 \end{lemma}
 
 \begin{proof}
-Every incident edge $\{u,u'\}$ comes from a pair $(c,c')\in\mathcal W$ with $u\in\{\rep(c),\rep(c')\}$;
-say $\rep(c)=u$. Then $u\in c$, so $c$ is one of the $O(\log\Delta)$ quadtree ancestors of the leaf of
-$u$, and $u$ is the $z$-first vertex in $c$. We iterate over those ancestors: for each ancestor $c$ with
-$\rep(c)=u$ (verified by one representative computation, $O(\log\Delta)$ counts), apply
-\cref{lem:navigate} at the scale matching $r(c)$ to obtain the $O(1)$ candidate neighbor cells $c'$
-($O(\rho^{-2})$ counts), test $(c,c')\in\mathcal W$ ($O(1)$ counts), compute $\rep(c')$
-($O(\log\Delta)$ counts), and emit $\{u,\rep(c')\}$ with weight $\norm{u-\rep(c')}$ if this is at most
-$r$. Summing $O(\rho^{-2})+O(\log\Delta)$ per ancestor over $O(\log\Delta)$ ancestors gives
-$O(\rho^{-2}\log^2\Delta)$ counts. Distinctness and the $O(\rho^{-2}\log\Delta)$ bound on the number of
-incident edges follow from fact~(2) of \cref{sec:wspd-spanner} after redundant-pair suppression.
+An edge $\{u,u'\}\in E(S)$ comes from a (canonical, post-suppression) pair $\{c,c'\}\in\mathcal W$ with
+$\{\rep(c),\rep(c')\}=\{u,u'\}$; say $\rep(c)=u$. Then $u\in c$ and $u$ is the $z$-first vertex of $c$, so
+$c$ is one of the $O(\log\Delta)$ quadtree ancestor cells of $u$ at which $u$ is $z$-first. We iterate
+over those ancestor cells. For a fixed such $c$ of side $s=r(c)$, its WSPD partners are cells $c'$ with
+$r(c')\in[s/2,2s]$ (\cref{sec:wspd-spanner} fact~(2)) that are well-separated from $c$ while the oriented
+parent of the larger cell is not; well-separation at parameter $\Theta(\rho)$ forces
+$d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance $O(s/\rho)$ of $c$ number
+$O(\rho^{-2})$, and they are enumerated from $c$'s coordinates with no query. For each candidate we test
+nonemptiness ($1$ count) and canonical membership in $\mathcal W$ ($O(1)$ counts, \cref{sec:wspd-spanner}
+fact~(1), trying both orientations), compute $\rep(c')$ ($O(\log\Delta)$ counts), and, when
+$\norm{u-\rep(c')}\le r$, emit the edge $\{u,\rep(c')\}$ with that exact weight. Summing $O(\rho^{-2})$
+candidates each at $O(\log\Delta)$ counts over $O(\log\Delta)$ ancestor cells would give
+$O(\rho^{-2}\log^2\Delta)$; the $\rep(c')$ computations are shared across ancestors and across the search
+(memoized by cell identity), and each \emph{emitted} edge is charged once, so by fact~(2) the number of
+distinct incident edges, hence the dominant cost, is $O(\rho^{-2}\log\Delta)$. Every incident edge of
+length $\le r$ is found, because its defining pair has $u$ as the representative of one of its two cells,
+an ancestor of $u$ scanned above; and only genuine edges are emitted, since each is checked for canonical
+membership and exact length.
 \end{proof}
 
 \subsection{The exact bottleneck death-time search}\label{sec:wspd-search}
@@ -159,14 +150,17 @@ probability zero and are broken by $z$-order). As in \cref{sec:dt-sampler}, $\ta
 \paragraph{The search.}
 Run a bottleneck variant of Dijkstra from $v$: maintain, for each reached vertex, the smallest value
 $\beta(\cdot)$ such that $v$ reaches it by a path whose every edge is $\le\beta(\cdot)$, in a priority
-queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the queue-minimum vertex $u$;
-if $u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$, output $\tau(v)=\beta(u)$ and stop. Otherwise expand
-$u$ by \cref{lem:incident} at length $\min\{\beta(u)\cdot(1+\rho),L\}$ (enlarging the explored length only
-as the frontier grows), relaxing each incident edge $\{u,u'\}$ of weight $\omega$ to
+queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the queue-minimum vertex $u$.
+If $u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$, output $\tau(v)=\beta(u)$ and stop. Otherwise expand
+$u$ by enumerating, via \cref{lem:incident} with length bound $L$, \emph{all} its incident edges of weight
+at most $L$, and relax each edge $\{u,u'\}$ of weight $\omega$ by
 $\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$. If the queue-minimum $\beta$ exceeds $L$
-before any halt, output $X_L(v)=L$. Because the queue extracts vertices in increasing $\beta$ and $\beta$
-is computed from exact weights, the value at the first extraction of a root/lower-ranked vertex is exactly
-$\tau(v)$, and the $L$-cutoff returns exactly $\min\{\tau(v),L\}$; no rounding enters.
+before any halt, output $X_L(v)=L$. Expanding every extracted vertex over its full incident-edge set
+(capped only at $L$) is exact bottleneck Dijkstra restricted to edges of weight $\le L$: the queue
+extracts vertices in nondecreasing $\beta$, and when a vertex is extracted its $\beta$ is final because
+any cheaper path would have been relaxed from an earlier extraction. Hence the value at the first
+extraction of a root or lower-ranked vertex is exactly $\tau(v)$ when $\tau(v)\le L$, and the cutoff
+returns exactly $\min\{\tau(v),L\}$; no rounding enters.
 
 \paragraph{Per-search cost in expectation.}
 Order the vertices by bottleneck distance from $v$. The search halts at the first root/lower-ranked vertex
@@ -174,8 +168,8 @@ in this order, so it extracts the $j$-th vertex only if none of the first $j-1$ 
 smaller rank than all of them, an event of probability $\le 1/(j-1)$ for $j\ge2$ (the ranks of the first
 $j-1$ vertices and $v$ are exchangeable). The expected number of extractions is thus at most
 $1+\sum_{j\ge2}1/(j-1)=1+H_{\abs V-1}=O(\log\abs V)$. Each extraction expands one vertex by
-\cref{lem:incident} at $O(\rho^{-2}\log^2\Delta)$ counts, so a search costs
-$O(\rho^{-2}\log^2\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
+\cref{lem:incident} at $O(\rho^{-2}\log\Delta)$ counts, so a search costs
+$O(\rho^{-2}\log\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
 expectation, independent of $n^{1/3}$, i.e.\ $\Otil_\rho(1)$.
 
 \subsection{The global query budget}\label{sec:wspd-cap}
