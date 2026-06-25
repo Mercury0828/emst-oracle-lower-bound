@@ -75,15 +75,20 @@ supports.
 
 \subsection{The active cover and its packing bound}\label{sec:support-cover}
 
-Let $q=\ceil{\sqrt K}$. Starting from a bounding square of $Q$, repeatedly quarter every nonempty cell
-until the first dyadic level at which at least $q$ cells are nonempty; let $\mathcal B$ be that level's
-nonempty cells, $b=\abs{\mathcal B}$, and $\delta$ the common cell side. Since the previous level had
-fewer than $q$ nonempty cells and quartering multiplies their number by at most four,
+The cover is a set of $\Theta(\sqrt K)$ disjoint cells, occupied by $Q$, that we can find cheaply and that
+certifies a lower bound on $\Wq$. Let $q=\ceil{\sqrt K}$. Impose the quadtree on a bounding square of $Q$
+and descend level by level, at each level counting how many cells are nonempty (one range count per
+candidate cell; only the children of nonempty cells need be examined, so a level with $m$ nonempty cells
+costs $O(m)$ counts). Stop at the first dyadic level $\mathcal B$ at which at least $q$ cells are nonempty;
+let $b=\abs{\mathcal B}$ and let $\delta$ be the common side of those cells. The previous level had fewer
+than $q$ nonempty cells, and quartering a cell creates at most four nonempty children, so the new count is
+less than $4q$; together with the stopping rule,
 \begin{equation}\label{eq:cover-size}
-  q\le b<4q .
+  q\le b<4q,\qquad\text{i.e.}\qquad b=\Theta(\sqrt K).
 \end{equation}
-Every level is found with $\Otil(\sqrt K)$ emptiness queries (each a single range count on $P$;
-\cref{sec:support-oracle}). The cover supports the packing bound that drives the whole accounting.
+Each level visited has $O(q)=O(\sqrt K)$ nonempty cells, and there are $O(\log\Delta)$ levels, so the
+whole construction costs $\Otil(\sqrt K)$ range counts on $P$ (\cref{sec:support-oracle}). The cover
+supports the packing bound that drives the whole accounting.
 
 \begin{lemma}[Active-cover packing]\label{lem:packing}
 $\Wq\ge b\delta/16$.

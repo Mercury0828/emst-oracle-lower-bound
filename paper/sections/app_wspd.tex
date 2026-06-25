@@ -229,3 +229,14 @@ conditioning on non-abort. The cost is
 $B=\Otil_\eps(n^{1/3})$ deterministically, and the displayed $\poly(1/\eps)$ factors in
 \eqref{eq:appA-totalcost} are hidden by $\Otil_\eps$ for fixed $\eps$; for variable $\eps$ the bound reads
 $n^{1/3}\poly(1/\eps)\poly\log(n,\Delta)$.
+
+\paragraph{Summary.}
+Collecting the four layers: a seed and any representative cost $O(\log\Delta)$ counts; the spanner is
+defined and navigated locally, with each vertex expansion $O(\rho^{-2}\log^2\Delta)$ counts and each
+search $\Otil_\rho(1)$ counts in expectation over $O(\log\abs V)$ expansions; the bulk sampler runs
+$O(\xi^{-2}n^{1/3})$ searches and the support sampler $O_\xi(1)$ searches at $\Otil(n/K)$ each, all
+governed by one global budget that aborts rarely. No step reveals a point beyond what a representative
+computation already costs, no step uses a non-rectangular query, and the returned death-time averages are
+exactly the unbiased clipped statistics of \cref{sec:dt-sampler}. This discharges the realization of the
+locally navigable $(1+\rho)$-spanner deferred from \cref{sec:dt}, and with it the death-time primitive
+runs within the $\Otil_\eps(n^{1/3})$ budget claimed in \cref{sec:main}.

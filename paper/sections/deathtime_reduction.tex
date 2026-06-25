@@ -45,16 +45,24 @@ e-L)_+$ (routed through a snapped support).}
 
 Let $H$ be a connected weighted graph on $V$ with a fixed root $r$. Assign independent uniform ranks to
 $V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ as the bottleneck (min--max-edge) distance
-from $v$ to the root or to any lower-ranked vertex. The death times recover the MST edge weights as a
+from $v$ to the root or to any lower-ranked vertex: the smallest $b$ such that $v$ can reach the root or a
+lower-ranked vertex by a path of edges all $\le b$. The name is apt: as the threshold $b$ grows from $0$,
+$v$'s cluster keeps absorbing neighbors until, at $b=\tau(v)$, it first touches someone more senior and
+$v$ ceases to be the leader of its own cluster. The death times recover the MST edge weights as a
 multiset:
 \begin{equation}\label{eq:death-multiset}
   \set{\tau(v):v\in V}=\set 0\cup\set{\wt(e):e\in\MST(H)},
 \end{equation}
 because for every $t$ the count $\abs{\{v:\tau(v)>t\}}$ equals $c_H(t)-1$, the number of MST edges heavier
-than $t$. A bottleneck Dijkstra search from $v$ that halts at the first lower-ranked vertex computes
-$\tau(v)$ while extracting $O(\log\abs V)$ vertices in expectation. For a clip level $L$ set
-$X_L(v)=\min\{\tau(v),L\}$. Then $\abs V\cdot\E X_L=A_L(H)\eqdef\sum_{e\in\MST(H)}\min\{\wt(e),L\}$, and
-$X_L^2\le L X_L$, so the average of $s$ independent samples has
+than $t$ (a vertex survives past $t$ exactly when it is the minimum-rank vertex of a non-root cluster at
+scale $t$, and there is one such vertex per non-root cluster). A bottleneck Dijkstra search from $v$ that
+halts at the first lower-ranked vertex computes $\tau(v)$; because the search stops as soon as it meets
+someone of smaller rank, and ranks are uniform, it extracts only $O(\log\abs V)$ vertices in expectation
+(the $j$-th closest vertex is reached only if $v$ outranks the previous $j-1$, probability $\le 1/(j-1)$),
+which is what makes a single death time cheap to compute. For a clip level $L$ set
+$X_L(v)=\min\{\tau(v),L\}$. Integrating the tail identity up to $L$ gives $\abs V\cdot\E
+X_L=A_L(H)\eqdef\sum_{e\in\MST(H)}\min\{\wt(e),L\}$, and $0\le X_L\le L$ forces $X_L^2\le L X_L$, so the
+average of $s$ independent samples has
 \begin{equation}\label{eq:dt-var}
   \Var\Bigl[\tfrac{\abs V}{s}\textstyle\sum_i X_L(v_i)\Bigr]\le\frac{\abs V\,L\,\wt(\MST(H))}{s}.
 \end{equation}
