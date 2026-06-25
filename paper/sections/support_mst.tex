@@ -174,8 +174,34 @@ $a(r)=\Theta(\sigma r)$ in the non-floor regime and $r<128h/\sigma$ in the floor
 $O(\sigma^{-2})$ cells lie within distance $r$ of any fixed cell, so $\Gamma_r$ has degree
 $O(\sigma^{-2})$ and each neighbor test is one range count on an aligned rectangle.
 
-Writing $\cG(r)$ for the number of components of $\Gamma_r$, the scale graph brackets the support's
-component-count curve: with $r^+=(1+\sigma)r$,
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=0.62, every node/.style={font=\scriptsize}]
+  \draw[step=1cm, gray!35, thin] (0,0) grid (9,5);
+  % component A (left)
+  \foreach \x/\y in {0/0,1/0,0/1,1/2,2/1} {\fill[blue!18] (\x,\y) rectangle (\x+1,\y+1);}
+  % component B (top middle)
+  \foreach \x/\y in {3/3,4/3,4/4,5/3} {\fill[green!18] (\x,\y) rectangle (\x+1,\y+1);}
+  % isolated satellites
+  \fill[orange!25] (7,1) rectangle (8,2);
+  \fill[orange!25] (8,4) rectangle (9,5);
+  % edges within distance r (schematic) inside each component
+  \draw[blue!60,thick] (0.5,0.5)--(1.5,0.5) (0.5,0.5)--(0.5,1.5) (0.5,1.5)--(1.5,2.5) (1.5,2.5)--(2.5,1.5);
+  \draw[green!50!black,thick] (3.5,3.5)--(4.5,3.5) (4.5,3.5)--(4.5,4.5) (4.5,3.5)--(5.5,3.5);
+  \node[blue!60!black] at (1.0,-0.5) {component};
+  \node[orange!75!black] at (7.5,0.5) {isolated};
+  \node[orange!75!black] at (8.5,3.5) {isolated};
+  \draw[<->] (6.0,0.3)--(7.0,0.3); \node at (6.5,-0.05) {$\le r$?};
+\end{tikzpicture}
+\caption{A scale graph $\Gamma_r$ at threshold $r$ on side-$a(r)$ cells. Vertices are nonempty cells;
+two are adjacent when within Euclidean distance $r$ (degree $O(\sigma^{-2})$). Here $\cG(r)=4$: two
+multi-cell components and two isolated satellite cells. The leader estimator estimates this component
+count by spatial sampling, and \eqref{eq:interleave} brackets it against the support's curve $\cQ$.}
+\label{fig:scalegraph}
+\end{figure}
+
+Writing $\cG(r)$ for the number of components of $\Gamma_r$ (\cref{fig:scalegraph}), the scale graph
+brackets the support's component-count curve: with $r^+=(1+\sigma)r$,
 \begin{equation}\label{eq:interleave}
   \cQ(r^+)\ \le\ \cG(r)\ \le\ \cQ(r).
 \end{equation}
@@ -220,10 +246,18 @@ If $G\ge\Wq$, then with probability $\ge 5/6$ the estimator~\eqref{eq:additive-c
 $\abs{\widehat W(G)-\Wq}\le\beta G$ and uses $\Otil_\beta(\sqrt K)$ range-counting queries.
 \end{lemma}
 
-The accuracy combines three controlled errors -- the omitted interval $[h,r_0]$, the Riemann gap
-$\sum_j d_j(\cQ(r_j)-\cQ(r_{j+1}))\le\sigma\Wq$, and the statistical error $\sum_j d_j\alpha_j$ -- each at
-most $\beta G/32$; the cost is the two-part sum of \cref{sec:support-overview}, both branches equal to
-$\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both calculations are carried out in \cref{sec:app-lemma3}.
+The estimator \eqref{eq:additive-call} is a Riemann sum for the cluster-count integral $\Wq=\int_0^\infty
+(\cQ-1)$, and its error decomposes into three pieces, each kept to $\beta G/32$ by the choices above. The
+$(K-1)h$ term is the exact contribution of $[0,h]$ (distinct centers are $\ge h$ apart, so $\cQ=K$ there);
+the \emph{omitted interval} $[h,r_0]$ contributes at most $Kr_0=\beta G/32$ by the choice of $r_0$; the
+\emph{Riemann gap} between the discretized sum and the integral is at most the total staircase drop
+$\sum_j d_j(\cQ(r_j)-\cQ(r_{j+1}))\le\sigma\Wq\le\beta G/32$, since an MST edge of length $\ell\in(r_j,
+r_{j+1}]$ contributes $d_j=\sigma r_j\le\sigma\ell$; and the \emph{statistical error} $\sum_j d_j\abs{\widehat
+c_j-c_j}\le\sum_j d_j\alpha_j$ telescopes to $\beta G/32$ because $d_j\alpha_j=\sigma r_j\cdot\beta G/(32T
+\sigma r_j)=\beta G/(32T)$ is the same at every scale. Summing the three gives $\abs{\widehat W(G)-\Wq}\le
+3\beta G/32<\beta G$. The cost is the two-part sum of \cref{sec:support-overview}, both branches equal to
+$\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both the accuracy and the cost are carried out in full in
+\cref{sec:app-lemma3}.
 
 To remove the guess, start from the valid bound $U_Q=(K-1)\diam(Q)\ge\Wq$ and run \cref{lem:additive} with
 $\beta_0=\tfrac1{32}$ on $G=U_Q,U_Q/2,U_Q/4,\dots$, stopping at the first $G$ with $\widehat W(G)\ge G/4$.

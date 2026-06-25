@@ -110,12 +110,17 @@ $(1+\rho)$-spanner realized under the oracle by a well-separated pair decomposit
 \subsection{Related work}\label{sec:intro-related}
 
 \paragraph{Sublinear MST weight.}
-The graph model was opened by Chazelle, Rubinfeld, and Trevisan~\cite{CRT05}, who reduced MST weight to
-counting connected components of threshold graphs and gave a $(1\pm\eps)$-estimator in
-$\Otil(d_{\max}\eps^{-2})$ time for average degree $d_{\max}$; Czumaj and Sohler~\cite{CzumajSohler09}
-extended the component-counting reduction to general metrics under a distance oracle, and Patlin and van
-den Brand~\cite{PatlinvdB25} recently revisited the running-time dependence. The cluster-count integral
-and the threshold-graph view we use throughout descend from this line.
+The graph model was opened by Chazelle, Rubinfeld, and Trevisan~\cite{CRT05}, who observed that the MST
+weight is determined by the connected-component counts of the threshold graphs and that these counts can
+be estimated by sampling vertices and exploring bounded portions of their components, yielding a
+$(1\pm\eps)$-estimator in time $\Otil(d_{\max}\eps^{-2})$ for graphs of average degree $d_{\max}$,
+independent of the number of vertices. This component-counting reduction, and the cluster-count integral
+$\wt(\MST)=\int_0^\infty(c-1)$ it rests on, is the backbone of every result in the area, ours included.
+Czumaj and Sohler~\cite{CzumajSohler09,CzumajSohler04} carried it to general metrics under a distance
+oracle, where the same $\Otil(\poly(1/\eps))$-time bound holds; Patlin and van den Brand~\cite{PatlinvdB25}
+recently revisited the running-time dependence with a simpler analysis. What changes from one model to the
+next is not the reduction but the cost of estimating one component count, and that single subroutine is
+where the geometry, and our improvement, lives.
 
 \paragraph{Euclidean MST estimation and geometric oracles.}
 Czumaj, Erg\"un, Fortnow, Magen, Newman, Rubinfeld, and Sohler~\cite{Czumaj05} gave the first sublinear
