@@ -21,13 +21,27 @@ calculation to \cref{sec:app-lemma3}.
 
 \subsection{Oracle operations on the support}\label{sec:support-oracle}
 
-Every cell and rectangle used below is a union of $h$-cells, so for such a region $R$ we have
-$Q\cap R\ne\varnothing$ iff $P\cap R\ne\varnothing$: one range count on $P$ tests support emptiness. A
-uniform point $p$ of $P$ is drawn with $O(\log\Delta)$ counts (binary search on nested rectangles,
-\cref{sec:prelim-sample}); accepting its $h$-cell with probability $1/\abs{P\cap C(p)}$ returns a uniform
-\emph{support} cell and accepts with probability $K/n$, so inverse-Bernoulli estimation gives $K$ to
-relative error $\kappa$ in $O(\kappa^{-2}(n/K)\log)$ counts. Until \cref{sec:support-call} we treat $K$ as
-known exactly and account for the $\kappa$-perturbation at the end.
+The support $Q$ is implicit, but three operations on it reduce to range counts on $P$.
+
+\emph{Emptiness.} Every cell and rectangle used below is a union of $h$-cells, and such a region $R$
+contains a support center iff it contains a point of $P$ (the center of an $h$-cell is in $Q$ exactly when
+that $h$-cell is nonempty in $P$). So $Q\cap R\ne\varnothing$ iff $P\cap R\ne\varnothing$, and one range
+count on $P$ tests support emptiness.
+
+\emph{Uniform support cell.} A uniform support cell is drawn by rejection. Sample a uniform point $p$ of
+$P$ with $O(\log\Delta)$ counts (binary search on nested rectangles, \cref{sec:prelim-sample}), let $C(p)$
+be its $h$-cell, and accept with probability $1/\abs{P\cap C(p)}$ (the count $\abs{P\cap C(p)}$ is one more
+range query). Conditioned on acceptance, a fixed nonempty $h$-cell $C$ is returned with probability
+proportional to $\sum_{p\in P\cap C}\Pr[p\text{ sampled}]\cdot\tfrac1{\abs{P\cap C}}=\abs{P\cap C}\cdot
+\tfrac1n\cdot\tfrac1{\abs{P\cap C}}=\tfrac1n$, the same for every nonempty cell, so the accepted cell is
+uniform over the $K$ support cells. The acceptance probability is $\sum_{C}\abs{P\cap C}\cdot\tfrac1n\cdot
+\tfrac1{\abs{P\cap C}}=K/n$.
+
+\emph{Estimating $K$.} Since each rejection trial accepts independently with probability $K/n$, the number
+of accepts in $m$ trials is $\mathrm{Bin}(m,K/n)$ with mean $mK/n$; taking $m=\Theta(\kappa^{-2}(n/K)\log)$
+and a Chernoff bound, the empirical accept rate times $n$ estimates $K$ to relative error $\kappa$, at a
+cost of $O(\kappa^{-2}(n/K)\log)$ counts. Until \cref{sec:support-call} we treat $K$ as known exactly and
+account for the $\kappa$-perturbation at the end.
 
 \subsection{Overview}\label{sec:support-overview}
 

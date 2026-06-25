@@ -39,11 +39,18 @@ $P\cap R$ drawn uniformly at random using $O(\log\Delta)$ range-counting queries
 \end{lemma}
 
 \begin{proof}
-If $R$ is a union of several cells, first pick one of them with probability proportional to its count
-(one count per cell). Then walk down $\mathcal T$ from the chosen cell: at a cell $c$ with children
+If $R$ is a union of several quadtree cells, first pick one of them with probability proportional to its
+count (one count per cell). Then walk down $\mathcal T$ from the chosen cell: at a cell $c$ with children
 $c_1,\dots,c_4$, query the four counts $\rcount{c_i}$ (which sum to $\rcount c$) and descend into $c_i$
 with probability $\rcount{c_i}/\rcount c$. After $O(\log\Delta)$ levels the walk reaches a single grid
-point, uniform on $P\cap R$ by the chain of conditional probabilities. Each level spends $O(1)$ counts.
+point $p$. The probability of reaching $p$ is the product of the conditional probabilities along its
+root-to-leaf path, which telescopes:
+\[
+  \Pr[\text{reach }p]=\prod_{\text{levels}}\frac{\rcount{c^{(\ell+1)}}}{\rcount{c^{(\ell)}}}
+   =\frac{\rcount{\{p\}}}{\rcount R}=\frac1{\abs{P\cap R}},
+\]
+where $c^{(\ell)}$ are the cells on $p$'s path; so $p$ is uniform on $P\cap R$. Each level spends $O(1)$
+counts and there are $O(\log\Delta)$ of them.
 \end{proof}
 
 Sampling a uniform \emph{vertex} of $X$ has two costs. For $X=P$ a uniform vertex is a uniform point,
