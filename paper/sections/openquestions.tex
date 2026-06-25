@@ -1,4 +1,23 @@
 \section{Open questions}\label{sec:open}
 
-% Headline open direction: extend the empty-cell spatial estimator to EMD (same SoCG'25 framework).
-% Also: dimensions d>=3; removing polylog; deterministic algorithms. [TODO]
+\paragraph{Earth Mover's Distance.}
+The Earth Mover's Distance between two planar point sets sits in the same range-counting framework of
+Driemel et al.~\cite{DMOSW25} as MST weight, and there too a polynomial gap separates the known upper
+bound from the lower bound. The empty-cell spatial leader estimator of \cref{sec:support-estimator} is
+not specific to single-linkage clustering: it estimates the number of components of an implicitly defined
+geometric graph from a spatial sample, with variance governed by the component count. Identifying the
+analogue of the cluster-count integral for EMD, and the analogue of the active-cover packing inequality
+that collapses the per-scale cost, is the natural next target, and would test whether the spatial-sampling
+idea is the right primitive for this oracle in general.
+
+\paragraph{Higher dimensions.}
+For $P\subseteq[\Delta]^d$ with $d\ge3$ the WSPD spanner and the cluster-count integral both go through,
+but the packing exponent and the balance point $K=\Theta(n^{2/3})$ are tuned to the plane. The
+dimension-dependence of the optimal range-counting exponent, and whether it degrades gracefully with $d$,
+is open.
+
+\paragraph{Polylogarithmic factors and determinism.}
+\Cref{cor:tight} leaves a polylogarithmic and $\eps$-dependent gap. Pinning down the exact dependence on
+$\eps$ and $\log\Delta$, and asking whether a deterministic range-counting algorithm can match the
+$n^{1/3}$ rate or whether randomization is necessary at this oracle, are concrete questions about the
+constant in the exponent's neighborhood.

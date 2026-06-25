@@ -47,13 +47,13 @@ Macro note: range-count macro is `\rcount` (`\count` is a TeX primitive — do n
 ## Section status
 | § | title | drafted | proofs-in-appendix | style-gate | notes |
 |---|---|---|---|---|---|
-| 1 | Introduction | ☐ | — | ☐ | contribs last; related work folded in |
+| 1 | Introduction | ☑ draft | — | ☐ | results+prior table+techniques+related(8 strands folded); theorem*/lemma* restatements |
 | 2 | Preliminaries | ☑ draft | — | ☐ | model + cluster-count integral + WSPD + notation table |
 | 3 | Support-MST estimator (Lemma 3) | ☑ draft | App. B ☑ FULL | ☐ | the new primitive; packing+interleaving+leader+2-part accounting+accuracy+guess all proved |
 | 4 | Death-time + reduction for P | ☑ draft | App. C ☑ FULL | ☐ | sampler+spanner+regularize+snapping+decomp |
 | 5 | Main theorem (assembly) | ☑ draft | App. C ☑ FULL | ☐ | 3 pieces + error budget + W-search |
-| 6 | Optimality (tightness) | ☐ | — | ☐ | owner: standalone vs folded |
-| 7 | Open questions | ☐ | — | ☐ | EMD extension as headline |
+| 6 | Optimality (tightness) | ☑ draft | — | ☐ | standalone; Cor tight (n^{1/3} up to polylog) |
+| 7 | Open questions | ☑ draft | — | ☐ | EMD headline + d>=3 + polylog/determinism |
 | A | WSPD death-time impl (FULL) | ☑ draft | — | ☐ | 🔴 residual-debt discharge; telescoping+spanner+navigate+bottleneck-search+global cap; conf flags above |
 | B | proof of Lemma 3 | ☑ draft | — | ☐ | committed f4837ae |
 | C | proofs of §4–§5 | ☑ draft | — | ☐ | committed f4837ae |
