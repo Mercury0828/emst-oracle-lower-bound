@@ -135,8 +135,7 @@ Here the occupied-cell count enters, but only through $N_j\le K$:
   \frac{N_jU_j}{\alpha_j^2}\le K\Bigl(1+\frac G{r_j}\Bigr)\frac{T^2\sigma^2 r_j^2}{\beta^2 G^2}
    = \frac{KT^2\sigma^2}{\beta^2}\Bigl(\frac{r_j^2}{G^2}+\frac{r_j}{G}\Bigr).
 \end{equation}
-The crucial difference from the candidate-root sum is that the exploration sum runs only over
-\emph{fine} scales. A scale contributes explorations only when $a(r_j)\le\delta$, and the floor rule for
+The difference from the candidate-root sum is that the exploration sum runs only over \emph{fine} scales. A scale contributes explorations only when $a(r_j)\le\delta$, and the floor rule for
 $a(\cdot)$ (\cref{sec:support-filtration}) makes $a(r_j)=\Theta(\sigma r_j)$ unless it has hit its floor;
 either way $a(r_j)\le\delta$ forces $r_j\le R\eqdef 128\delta/\sigma$. So the fine scales are a
 $(1+\sigma)$-geometric sequence \emph{capped above} at $R$, and geometric sums are dominated by their

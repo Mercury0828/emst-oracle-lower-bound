@@ -3,7 +3,19 @@
 > Update after EVERY section. On long context, re-read THIS + `COMPONENT_MAPPING.md` + the frozen proof
 > (`docs/webpro_round5_response.md`) before continuing — never write from memory. Venue = SODA = THEORY.
 
-## Status: FULL DRAFT COMPLETE + REVIEWED — compiles clean, 29pp, 43 verified refs, 0 undefined.
+## Status (2026-06-25, expanded): 32pp, 43 refs, 0 undefined. Proofs PROMOTED TO BODY (only WSPD in App.).
+Owner asked to push toward 40pp via non-padding route. Added: §2 Technical Overview, 3 figures (leader /
+cluster-staircase / death-time), 3 algorithm boxes (leader trial / bottleneck death-time / top-level +
+W-search), 2 tables (notation / accuracy-params), CRT-identity proof, probabilistic-tools; expanded every
+major proof to full steps. Restructure: app_lemma3 + app_assembly now BODY sections; only app_wspd under
+\appendix. Codex expansion-regression check = SOUND-WITH-FIXES (core algebra all CORRECT: CRT, packing,
+two-part accounting, betaG/32 cancellation, spanner stretch, death-time identity, restructure consistent);
+4 MINOR snapping/support-weight fixes applied (per-point move sqrt2 h/2; contraction = multigraph + spanning
+tree; delta_s K=O(W) via window not via G). 32pp is the genuine full-rigor length; prior Codex referee
+judged 28pp "appropriate, not padded", so 32pp is fuller still. Honest note: 40pp not reachable without
+padding for this result. Verdicts archived docs/reviews/.
+
+## (superseded) Status: FULL DRAFT COMPLETE + REVIEWED — compiles clean, 29pp, 43 verified refs, 0 undefined.
 All sections + §2 Technical Overview + 2 figures + 2 algorithm boxes. App.A (residual-debt WSPD impl)
 reached Codex SOUND-WITH-FIXES over 5 adversarial rounds. Whole-paper Codex review = MINOR-REVISION, all
 round-1 concerns FIXED, readability R-W1 clean / R-W2,R-W3 OK-with-notes (no BLOCKER), length lens

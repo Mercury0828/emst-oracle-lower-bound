@@ -105,9 +105,9 @@ of \cref{sec:main-pieces} remain $\Otil_\xi(n^{1/3})$.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]
-\emph{Interleaving.} Snapping moves each point by at most $\sqrt2\,h$, so for any two points the change in
-their distance is at most $2\cdot\sqrt2\,h$; we absorb the factor and write $\delta_s=\sqrt2\,h$, noting
-that the cleaner one-sided statements below are what we use. Concretely, if two original points are within
+\emph{Interleaving.} Snapping moves each point by at most $\sqrt2\,h/2$ (the half-diagonal of an
+$h$-cell), so for any two points the change in their distance is at most $2\cdot\sqrt2\,h/2=\sqrt2\,h$; we
+write $\delta_s=\sqrt2\,h$, noting that the cleaner one-sided statements below are what we use. Concretely, if two original points are within
 $t$ then their snapped centers are within $t+\delta_s$, and if two centers are within $t$ then the
 original points are within $t+\delta_s$. The first statement says a $P$-component at threshold $t$ stays
 connected in $Q$ at threshold $t+\delta_s$, so $\cQ(t+\delta_s)\le c_P(t)$; the second says a
@@ -135,14 +135,19 @@ L/2$ so that $t\ge L-\delta_s\ge L/2$ on the range,
 \]
 since $\delta_s=\sqrt2\,h=O(\xi L)$ by \cref{lem:kwindow}; this is \eqref{eq:tail-transfer}.
 
-\emph{Support weight.} Finally we bound $\Wq=\wt(\MST(Q))$. Contract $\MST(P)$ by mapping each point to its
-$h$-cell center; this yields a connected graph on the $K$ support centers with at most $K-1$ edges, each
-the image of an $\MST(P)$-edge and so of length at most $(\text{original length})+\delta_s$ (both
-endpoints move by $\le\sqrt2\,h/\sqrt2=\delta_s/\sqrt2$, hence the distance changes by $\le\delta_s$).
-A spanning tree of this graph therefore has weight $\le W+\delta_s(K-1)$, and $\MST(Q)$ is no heavier, so
-$\Wq\le W+\delta_s(K-1)$. By \eqref{eq:Kh-packing}, $K\le 8W/h+4$, so $\delta_s K=\sqrt2\,h\cdot K\le
-\sqrt2\,h(8W/h+4)=8\sqrt2\,W+4\sqrt2\,h=O(W)$ (using $h\le L\le G/K_0=O(W/K_0)=O(W)$). Hence $\Wq\le C_W W$
-for an absolute constant $C_W$.
+\emph{Support weight.} Finally we bound $\Wq=\wt(\MST(Q))$. Map each point of $P$ to its $h$-cell center;
+this sends the $n-1$ edges of $\MST(P)$ to a connected \emph{multigraph} on the $K$ support centers (it may
+have parallel edges and loops). The image of an $\MST(P)$-edge has length at most its original length plus
+$\delta_s$, since each of its two endpoints moves by at most $\sqrt2\,h/2=\delta_s/2$, so their distance
+changes by at most $\delta_s$. Take any spanning tree of this multigraph: it has $K-1$ edges, each the
+image of a distinct $\MST(P)$-edge, so its weight is at most $\sum_{e\in\MST(P)}\abs e+\delta_s(K-1)\le
+W+\delta_s(K-1)$. Since $\MST(Q)$ is no heavier than this spanning tree, $\Wq\le W+\delta_s(K-1)$.
+To finish, $\delta_s(K-1)\le\delta_s K=\sqrt2\,h\cdot K$; by the packing bound \eqref{eq:Kh-packing} and
+the window $K=\Omega(K_0)$ of \cref{lem:kwindow}, $K\le 8W/h+4$ gives $h\le 8W/(K-4)=O(W/K_0)$, so
+\[
+  \delta_s K=\sqrt2\,h\,K\le\sqrt2\,h(8W/h+4)=8\sqrt2\,W+4\sqrt2\,h=O(W) .
+\]
+Hence $\Wq\le W+O(W)=C_W W$ for an absolute constant $C_W$.
 \end{proof}
 
 \subsection{The assembly bound (\texorpdfstring{\eqref{eq:guess-accuracy}}{guess accuracy})}\label{sec:app-combine}

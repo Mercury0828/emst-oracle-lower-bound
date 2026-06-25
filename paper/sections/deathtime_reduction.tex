@@ -100,8 +100,9 @@ Fix this $h$ and its support $Q$.
 
 \subsection{Snapping}\label{sec:dt-snap}
 
-Snapping each point of $P$ to its $h$-cell center moves it by at most $\sqrt2\,h$, so any pairwise
-distance changes by at most $\delta_s=\sqrt2\,h$, and the threshold graphs interleave:
+Snapping each point of $P$ to its $h$-cell center moves it by at most $\sqrt2\,h/2$ (the half-diagonal of
+an $h$-cell), so any pairwise distance changes by at most $\delta_s=\sqrt2\,h$, and the threshold graphs
+interleave:
 \begin{equation}\label{eq:snap-interleave}
   c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)\qquad(t\ge\delta_s).
 \end{equation}

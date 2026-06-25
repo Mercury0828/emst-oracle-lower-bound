@@ -97,9 +97,9 @@ To turn \eqref{eq:ov-var} into an algorithm we estimate $c=c_\Gamma(r)$ at each 
 accuracy $\alpha_r$ tuned so the scale-by-scale errors sum to $\eps\Wq$. A median-of-means average of the
 one-bit experiment needs $O(MU/\alpha_r^2)$ trials, where $U\ge c$ is an a-priori bound on the component
 count; this is the \emph{trial cost}. Separately, each occupied trial explores cells, and an exploration
-can touch up to $N$ occupied cells; this is the \emph{exploration cost}. The crucial point is that these
-two costs scale with different quantities, $U$ (a bound on the component count) and $N$ (the occupied-cell
-count), and we account for them separately.
+can touch up to $N$ occupied cells; this is the \emph{exploration cost}. The point is that these two costs
+scale with different quantities, $U$ (a bound on the component count) and $N$ (the occupied-cell count),
+and we account for them separately.
 
 Both sums are collapsed by a single geometric fact about the support, the \emph{active-cover packing}
 inequality $\Wq\ge b\delta/16$ (\cref{lem:packing}), where $b=\Theta(\sqrt K)$ is the number of blocks of
