@@ -101,6 +101,16 @@ can touch up to $N$ occupied cells; this is the \emph{exploration cost}. The poi
 scale with different quantities, $U$ (a bound on the component count) and $N$ (the occupied-cell count),
 and we account for them separately.
 
+It is worth dwelling on why separating the two costs is what saves a polynomial factor. If one bounded the
+exploration cost the lazy way, by $N\le K$, and also let the trial count see $K$, every scale would cost
+$\Theta(K)$ and the sum would be $\Theta(K)=\Theta(n^{2/3})$ at the balance point, worse than $\sqrt n$.
+The gain comes from the asymmetry: the \emph{number of trials} is set by the variance $Mc$, which sees the
+component count $c\le U$ and not the occupied-cell count, so a scale with few components but many cells is
+cheap to estimate; the \emph{work per trial} sees $N$, but a trial does that work only when its cell is
+occupied, an event of probability $N/M$, so the two $N$'s and $M$'s partly cancel. Bounding the first sum
+by $U$ and the second by $N\le K$, and summing each against the packing inequality, leaves $\sqrt K$ in
+both.
+
 Both sums are collapsed by a single geometric fact about the support, the \emph{active-cover packing}
 inequality $\Wq\ge b\delta/16$ (\cref{lem:packing}), where $b=\Theta(\sqrt K)$ is the number of blocks of
 a canonical cover and $\delta$ their side. Intuitively, a support with $K$ cells cannot have its MST weight
