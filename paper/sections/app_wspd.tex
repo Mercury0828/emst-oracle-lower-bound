@@ -56,11 +56,14 @@ A pair of cells $(c,c')$ is \emph{well-separated} if $\max\{r(c),r(c')\}\le\rho\
 $d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
 recursion~\cite{CK95} on $\mathcal T$. We never materialize $\mathcal W$; two facts let us use it locally.
 \begin{enumerate}
-\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. Well-separation is a geometric test on
-the two cells (no query). The recursion (which always splits the cell of larger side) places $(c,c')$ in
-$\mathcal W$ exactly when both cells are nonempty, $(c,c')$ is well-separated, and the \emph{oriented
-parent} pair, obtained by replacing the larger cell with its quadtree parent, is not well-separated;
-the two emptiness tests are $O(1)$ counts.
+\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. Following the Callahan--Kosaraju
+recursion (\cite{CK95}; Algorithm~2 of \cite{DMOSW25}), orient the pair so that $r(c)\le r(c')$, breaking
+a tie $r(c)=r(c')$ by the $z$-order of the cell centers; the recursion always subdivides the larger cell
+$c'$. Then $(c,c')\in\mathcal W$ exactly when both cells are nonempty, the pair is well-separated
+($r(c')\le\rho\,d(c,c')$), and its \emph{predecessor} $(c,p(c'))$ -- obtained by replacing the larger cell
+$c'$ with its quadtree parent $p(c')$ -- is \emph{not} well-separated ($r(p(c'))>\rho\,d(c,p(c'))$). Both
+conditions are geometric except the two emptiness tests, which are $O(1)$ counts; the predecessor is
+unique because the recursion subdivides only the larger cell, so the test is well defined.
 \item (\cite{HarPeled11}, restated in \cite{DMOSW25}.) For every $(c,c')\in\mathcal W$, $r(c')/2\le
 r(c)\le 2r(c')$, and every point of $[\Delta]^2$ lies in $O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$.
 \end{enumerate}
@@ -75,7 +78,9 @@ representative of $O(\log\Delta)$ cells and each such cell lies in $O(\rho^{-2})
 vertex has $O(\rho^{-2}\log\Delta)$ distinct incident edges.
 
 \paragraph{Stretch.}
-The spanner inherits the standard WSPD guarantee at separation $1/\rho$.
+With geometric separation $1/\rho$ the WSPD spanner has stretch $1+O(\rho)$; we absorb the constant by
+taking the separation parameter a suitable constant multiple of $1/\rho$, so the stretch is at most
+$1+\rho$ (and downstream $\rho=\Theta(\xi)=\Theta(\eps)$).
 
 \begin{lemma}[Spanner stretch \cite{HarPeled11,DMOSW25}]\label{lem:stretch}
 $S$ is a $(1+\rho)$-spanner of $X$: for all $x,y\in X$ there is an $x$--$y$ path in $S$ of length at most
@@ -86,8 +91,9 @@ $(1+\rho)\norm{x-y}$. Consequently $\wt(\MST(S))\le(1+\rho)\,\wt(\MST(X))$, and 
 \end{lemma}
 
 \begin{proof}
-The spanner property is the WSPD spanner theorem~\cite[Thm.~on WSPD spanners]{HarPeled11} with separation
-$\Theta(\rho)$; the MST bound is its Lemma~23 in \cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
+The spanner property is the WSPD spanner theorem~\cite[Thm.~on WSPD spanners]{HarPeled11} at geometric
+separation $\Theta(1/\rho)$ (stretch $1+O(\rho)$, rescaled to $1+\rho$ as above); the MST bound is its
+Lemma~23 in \cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
 $S$-edge is a true $X$-pair, so the graph of $S$-edges of length $\le t$ is a subgraph of the $X$-pairs of
 length $\le t$, giving $c_X(t)\le c_S(t)$. Conversely, if $\norm{x-y}\le t/(1+\rho)$ then the spanner path
 between $x,y$ has every edge of length $\le(1+\rho)\norm{x-y}\le t$, so $x,y$ lie in one component of the
@@ -116,9 +122,11 @@ say $\rep(c)=u$, so $u\in c$ and $u$ is the $z$-first vertex of $c$. Hence $c$ i
 quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\log\Delta)$ ancestor cells; for each, one
 representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both finds the
 relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its WSPD partners
-$c'$ have $r(c')\in[s/2,2s]$ (fact~(2)) and, by well-separation at parameter $1/\rho$, lie at
-$d(c,c')\le\max\{r(c),r(c')\}/\rho=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance
-$O(s/\rho)$ of $c$ number $O(\rho^{-2})$ and are enumerated from $c$'s coordinates with no query. For each
+$c'$ have $r(c')\in[s/2,2s]$ (fact~(2)). Their distance is bounded \emph{above} by the membership
+predicate, not by well-separation: the predecessor pair is not well-separated, so $d(c,p(c'))<
+r(p(c'))/\rho=O(s/\rho)$, and since $c'\subseteq p(c')$ has $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p(c'))$, also
+$d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance $O(s/\rho)$ of $c$ therefore
+number $O(\rho^{-2})$ and are enumerated from $c$'s coordinates with no query. For each
 such candidate $c'$ we test nonemptiness ($1$ count) and recursion membership $(c,c')\in\mathcal W$
 ($O(1)$ counts, fact~(1), trying both orientations), compute $\rep(c')$ ($O(\log\Delta)$ counts), and,
 when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
