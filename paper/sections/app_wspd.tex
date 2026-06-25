@@ -11,8 +11,9 @@ between cell centers. The vertex set is $X$; for $X=P$ a cell is nonempty when $
 snapped support $X=Q$ we take the grid side $h$ to be a dyadic quadtree scale, so each support $h$-cell is
 itself a quadtree cell and every region queried below is a union of $h$-cells; an $h$-cell is then nonempty
 exactly when the aligned $P$-region is nonempty, so every emptiness test is one count on $P$
-(\cref{sec:dt}). Throughout, the WSPD separation parameter is a fixed
-$\Theta(\rho)$, chosen so that the spanner stretch below is $1+\rho$.
+(\cref{sec:dt}). Throughout, the WSPD separation is $1/\rho$ (a
+pair is well separated when its cells are at distance $\ge\max\{r(c),r(c')\}/\rho$), chosen so that the
+spanner stretch below is $1+\rho$.
 
 \subsection{Uniform point sampling under the oracle}\label{sec:prelim-sample}
 
@@ -51,8 +52,8 @@ computation returns the \emph{coordinates} of $\rep(c)$, so exact Euclidean dist
 representatives are available with no further queries.
 
 \paragraph{Well-separated pairs.}
-A pair of cells $(c,c')$ is \emph{well-separated} if the separation parameter times $\max\{r(c),r(c')\}$
-is at most $d(c,c')$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
+A pair of cells $(c,c')$ is \emph{well-separated} if $\max\{r(c),r(c')\}\le\rho\,d(c,c')$, equivalently
+$d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
 recursion~\cite{CK95} on $\mathcal T$. We never materialize $\mathcal W$; two facts let us use it locally.
 \begin{enumerate}
 \item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. Well-separation is a geometric test on
@@ -61,27 +62,20 @@ $\mathcal W$ exactly when both cells are nonempty, $(c,c')$ is well-separated, a
 parent} pair, obtained by replacing the larger cell with its quadtree parent, is not well-separated;
 the two emptiness tests are $O(1)$ counts.
 \item (\cite{HarPeled11}, restated in \cite{DMOSW25}.) For every $(c,c')\in\mathcal W$, $r(c')/2\le
-r(c)\le 2r(c')$, and after redundant-pair removal (below) every point of $[\Delta]^2$ lies in
-$O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$, which number $O(\rho^{-2}n)$ in total.
+r(c)\le 2r(c')$, and every point of $[\Delta]^2$ lies in $O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$.
 \end{enumerate}
 The \emph{spanner} $S=(X,E(S))$ has, for each $(c,c')\in\mathcal W$, the edge $\{\rep(c),\rep(c')\}$ whose
-weight is the \emph{exact Euclidean length} $\norm{\rep(c)-\rep(c')}$. Every edge of $S$ is therefore a
-genuine pair of points of $X$ carrying its true distance, so $S$ is a Euclidean subgraph of the complete
-graph on $X$; this is what \cref{sec:dt} needs.
-
-\paragraph{Redundant-pair suppression.}
-Running the recursion on the quadtree of $[\Delta]^2$ (not on the points) can emit two pairs $(c,c')$ and
-$(\bar c,\bar c')$ that carry the same point sets, which happens only for \emph{nested} cells: $\bar
-c\subseteq c$, $\bar c'\subseteq c'$ with $P\cap c=P\cap\bar c$ and $P\cap c'=P\cap\bar c'$. For nested
-cells, equal counts ($\rcount c=\rcount{\bar c}$, one count each) imply equal point sets, which is the
-test we use. Because the edge weight is the exact Euclidean distance between representatives, and equal
-point sets give the same $z$-first representative, all such duplicates produce the \emph{identical} edge
-$\{\rep(c),\rep(c')\}$ of the same weight. Suppressing them therefore does not change the edge set $E(S)$;
-it only removes repeated work, and is what makes fact~(2)'s $O(\rho^{-2}\log\Delta)$ count of
-\emph{distinct} incident edges per vertex hold.
+weight is the \emph{exact Euclidean length} $\norm{\rep(c)-\rep(c')}$. We take $E(S)$ to be the \emph{set}
+of these edges, so $S$ is well defined directly from the recursion's membership predicate; no
+canonical-survivor rule is needed, since duplicate pairs (which arise only for nested cells with equal
+point sets, hence the same $z$-first representatives) produce the identical edge and collapse in the set.
+Every edge of $S$ is a genuine pair of points of $X$ carrying its true distance, so $S$ is a Euclidean
+subgraph of the complete graph on $X$; this is what \cref{sec:dt} needs. By fact~(2), each vertex is a
+representative of $O(\log\Delta)$ cells and each such cell lies in $O(\rho^{-2})$ pairs (below), so a
+vertex has $O(\rho^{-2}\log\Delta)$ distinct incident edges.
 
 \paragraph{Stretch.}
-The spanner inherits the standard WSPD guarantee at separation $\Theta(\rho)$.
+The spanner inherits the standard WSPD guarantee at separation $1/\rho$.
 
 \begin{lemma}[Spanner stretch \cite{HarPeled11,DMOSW25}]\label{lem:stretch}
 $S$ is a $(1+\rho)$-spanner of $X$: for all $x,y\in X$ there is an $x$--$y$ path in $S$ of length at most
@@ -112,29 +106,27 @@ contraction and does not return a vertex's defining pairs).
 
 \begin{lemma}[Vertex incident-edge oracle]\label{lem:incident}
 For a vertex $u\in X$ and a length $r$, all $S$-edges incident to $u$ of length at most $r$, with their
-exact weights, can be enumerated using $O(\rho^{-2}\log\Delta)$ range-counting queries, and their number
-is $O(\rho^{-2}\log\Delta)$.
+exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting queries; their number is
+$O(\rho^{-2}\log\Delta)$.
 \end{lemma}
 
 \begin{proof}
-An edge $\{u,u'\}\in E(S)$ comes from a (canonical, post-suppression) pair $\{c,c'\}\in\mathcal W$ with
-$\{\rep(c),\rep(c')\}=\{u,u'\}$; say $\rep(c)=u$. Then $u\in c$ and $u$ is the $z$-first vertex of $c$, so
-$c$ is one of the $O(\log\Delta)$ quadtree ancestor cells of $u$ at which $u$ is $z$-first. We iterate
-over those ancestor cells. For a fixed such $c$ of side $s=r(c)$, its WSPD partners are cells $c'$ with
-$r(c')\in[s/2,2s]$ (\cref{sec:wspd-spanner} fact~(2)) that are well-separated from $c$ while the oriented
-parent of the larger cell is not; well-separation at parameter $\Theta(\rho)$ forces
-$d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance $O(s/\rho)$ of $c$ number
-$O(\rho^{-2})$, and they are enumerated from $c$'s coordinates with no query. For each candidate we test
-nonemptiness ($1$ count) and canonical membership in $\mathcal W$ ($O(1)$ counts, \cref{sec:wspd-spanner}
-fact~(1), trying both orientations), compute $\rep(c')$ ($O(\log\Delta)$ counts), and, when
-$\norm{u-\rep(c')}\le r$, emit the edge $\{u,\rep(c')\}$ with that exact weight. Summing $O(\rho^{-2})$
-candidates each at $O(\log\Delta)$ counts over $O(\log\Delta)$ ancestor cells would give
-$O(\rho^{-2}\log^2\Delta)$; the $\rep(c')$ computations are shared across ancestors and across the search
-(memoized by cell identity), and each \emph{emitted} edge is charged once, so by fact~(2) the number of
-distinct incident edges, hence the dominant cost, is $O(\rho^{-2}\log\Delta)$. Every incident edge of
-length $\le r$ is found, because its defining pair has $u$ as the representative of one of its two cells,
-an ancestor of $u$ scanned above; and only genuine edges are emitted, since each is checked for canonical
-membership and exact length.
+An edge $\{u,u'\}\in E(S)$ comes from a pair $\{c,c'\}\in\mathcal W$ with $\{\rep(c),\rep(c')\}=\{u,u'\}$;
+say $\rep(c)=u$, so $u\in c$ and $u$ is the $z$-first vertex of $c$. Hence $c$ is one of the $O(\log\Delta)$
+quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\log\Delta)$ ancestor cells; for each, one
+representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both finds the
+relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its WSPD partners
+$c'$ have $r(c')\in[s/2,2s]$ (fact~(2)) and, by well-separation at parameter $1/\rho$, lie at
+$d(c,c')\le\max\{r(c),r(c')\}/\rho=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance
+$O(s/\rho)$ of $c$ number $O(\rho^{-2})$ and are enumerated from $c$'s coordinates with no query. For each
+such candidate $c'$ we test nonemptiness ($1$ count) and recursion membership $(c,c')\in\mathcal W$
+($O(1)$ counts, fact~(1), trying both orientations), compute $\rep(c')$ ($O(\log\Delta)$ counts), and,
+when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
+$O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are $O(\log\Delta)$ ancestors, for
+$O(\rho^{-2}\log^2\Delta)$ counts; the emitted edge set is deduplicated by vertex identity. Every incident
+edge of length $\le r$ is found, since its defining pair has $u$ as the representative of one of its two
+cells, an ancestor of $u$ scanned above and tested in both orientations; only genuine edges are emitted,
+each checked for membership and exact length. The distinct-edge count $O(\rho^{-2}\log\Delta)$ is fact~(2).
 \end{proof}
 
 \subsection{The exact bottleneck death-time search}\label{sec:wspd-search}
@@ -154,8 +146,8 @@ queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the qu
 If $u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$, output $\tau(v)=\beta(u)$ and stop. Otherwise expand
 $u$ by enumerating, via \cref{lem:incident} with length bound $L$, \emph{all} its incident edges of weight
 at most $L$, and relax each edge $\{u,u'\}$ of weight $\omega$ by
-$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$. If the queue-minimum $\beta$ exceeds $L$
-before any halt, output $X_L(v)=L$. Expanding every extracted vertex over its full incident-edge set
+$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$. Since only edges of weight at most $L$ are
+relaxed, if the queue empties before any halt then $\tau(v)>L$, and we output $X_L(v)=L$. Expanding every extracted vertex over its full incident-edge set
 (capped only at $L$) is exact bottleneck Dijkstra restricted to edges of weight $\le L$: the queue
 extracts vertices in nondecreasing $\beta$, and when a vertex is extracted its $\beta$ is final because
 any cheaper path would have been relaxed from an earlier extraction. Hence the value at the first
@@ -168,8 +160,8 @@ in this order, so it extracts the $j$-th vertex only if none of the first $j-1$ 
 smaller rank than all of them, an event of probability $\le 1/(j-1)$ for $j\ge2$ (the ranks of the first
 $j-1$ vertices and $v$ are exchangeable). The expected number of extractions is thus at most
 $1+\sum_{j\ge2}1/(j-1)=1+H_{\abs V-1}=O(\log\abs V)$. Each extraction expands one vertex by
-\cref{lem:incident} at $O(\rho^{-2}\log\Delta)$ counts, so a search costs
-$O(\rho^{-2}\log\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
+\cref{lem:incident} at $O(\rho^{-2}\log^2\Delta)$ counts, so a search costs
+$O(\rho^{-2}\log^2\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
 expectation, independent of $n^{1/3}$, i.e.\ $\Otil_\rho(1)$.
 
 \subsection{The global query budget}\label{sec:wspd-cap}

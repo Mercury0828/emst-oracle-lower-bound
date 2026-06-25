@@ -86,7 +86,7 @@ $B_L(X)=\int_L^\infty(c_X-1)=\sum_e(\abs e-L)_+$,
 \]
 so $\abs{B_L(Q)-B_L(P)}\le\int_{L-\delta_s}^{L+\delta_s}(c_P(t)-1)\,dt\le\int_{L-\delta_s}^{L+\delta_s}
 \frac Wt\,dt\le\frac{2\delta_s}{L-\delta_s}W\le\frac{3\delta_s}{L}W$ for $\delta_s\le L/2$, which is
-\eqref{eq:tail-transfer} since $\delta_s=\sqrt2\,h=\Theta(\xi L)$. For the last bound, contract $\MST(P)$
+\eqref{eq:tail-transfer} since $\delta_s=\sqrt2\,h=O(\xi L)$ (\cref{lem:kwindow}). For the last bound, contract $\MST(P)$
 by the $h$-cells and keep a spanning tree of the resulting graph on $Q$; each retained edge grows by at
 most $\delta_s$ under snapping, so $\Wq\le W+\delta_s(K-1)$. By \eqref{eq:Kh-packing} and $K=\Omega(K_0)$,
 $\delta_s K=O(hW/h)=O(W)$, giving $\Wq\le C_W W$.
@@ -95,7 +95,7 @@ $\delta_s K=O(hW/h)=O(W)$, giving $\Wq\le C_W W$.
 \subsection{The assembly bound (\texorpdfstring{\eqref{eq:guess-accuracy}}{guess accuracy})}\label{sec:app-combine}
 
 \begin{proof}[Proof of \eqref{eq:guess-accuracy}]
-Assume $G\ge W$, so $L=G/K_0\ge W/K_0$ and $\delta_s=\Theta(\xi L)$ satisfies $\delta_s\le L/2$ for small
+Assume $G\ge W$, so $L=G/K_0\ge W/K_0$ and $\delta_s=O(\xi L)$ satisfies $\delta_s\le L/2$ for small
 $\xi$. The four error terms are bounded as follows. The bulk estimate has bias $\le\rho W=O(\xi G)$ from
 \eqref{eq:spanner-stretch} and standard deviation $O(\xi G)$ from \eqref{eq:dt-var} with the stated
 $s_P$, so $\abs{\widehat A_P-A_L(P)}=O(\xi G)$ with constant probability; similarly
