@@ -68,16 +68,21 @@ at large thresholds. Estimating $W$ thus reduces to estimating the cluster-count
 is what the oracle must support.
 
 \paragraph{Spanners and the death-time view.}
-We will not estimate $c_P$ directly from points; instead we sample from $P$ and explore a locally
-navigable $(1+\rho)$-spanner $H$ of the sampled neighborhood, following~\cite{DMOSW25}. For a connected
-weighted graph $H$ on vertex set $V$ with a fixed root $r$, assign independent uniform ranks to
-$V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ of a vertex as the bottleneck distance from
-$v$ to the root or to any lower-ranked vertex. The multiset $\set{\tau(v):v\in V}$ equals $\set{0}\cup\set{\wt(e):e\in\MST(H)}$
-(\cref{sec:dt}), so the clipped statistics $\min\{\tau(v),L\}$ recover the truncated MST weight
-$\sum_{e}\min\{\abs{e},L\}$. Because $H$ is a Euclidean $(1+\rho)$-spanner, $c_S(t)\le c_H(t)\le
-c_S(t/(1+\rho))$, so spanner death times approximate the point-set MST within a $(1+\rho)$ factor. We use
-the well-separated pair decomposition (WSPD)~\cite{CK95} to realize $H$ implicitly under the oracle; the
-details of this implementation are deferred to \cref{sec:wspd}.
+There are two ways to read the cluster-count curve, and we use both. The support estimator of
+\cref{sec:support} reads it by sampling \emph{space}; for the bulk of $P$ we instead read it by sampling
+\emph{vertices} of a sparse graph and measuring how far each must travel to merge with someone senior.
+Concretely we sample from $P$ and explore a locally navigable $(1+\rho)$-spanner $H$ of the sampled
+neighborhood, following~\cite{DMOSW25}. For a connected weighted graph $H$ on vertex set $V$ with a fixed
+root $r$, assign independent uniform ranks to $V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$
+of a vertex as the bottleneck distance from $v$ to the root or to any lower-ranked vertex. The multiset
+$\set{\tau(v):v\in V}$ equals $\set{0}\cup\set{\wt(e):e\in\MST(H)}$ (\cref{sec:dt}), so the clipped
+statistics $\min\{\tau(v),L\}$ recover the truncated MST weight $\sum_{e}\min\{\abs{e},L\}$, and a uniform
+sample of vertices estimates that truncated weight without ever forming the MST. The reason a spanner
+suffices is that the threshold graphs of $H$ bracket those of the points: because $H$ is a Euclidean
+$(1+\rho)$-spanner, $c_S(t)\le c_H(t)\le c_S(t/(1+\rho))$, so its death times approximate the point-set
+MST within a $(1+\rho)$ factor. The catch is that we cannot build $H$ explicitly under a counting oracle;
+we realize it implicitly with the well-separated pair decomposition (WSPD)~\cite{CK95,HarPeled11},
+navigating one vertex's spanner neighborhood at a time. The full implementation is \cref{sec:wspd}.
 
 \paragraph{Notation.}
 Throughout, $K$ denotes the number of nonempty cells of a grid imposed on $P$ (the size of a regularized

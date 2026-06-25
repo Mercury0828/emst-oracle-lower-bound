@@ -85,6 +85,14 @@ n)$ guesses keeps all guesses with $G\ge W$ simultaneously accurate with constan
 with $G<W$ need no guarantee beyond not stopping the search prematurely, which the accurate guesses above
 already enforce.
 
+The estimator needs a guess $G\ge W$ to set its clip level $L=G/K_0$ and its budgets, but $W$ is what we
+are computing. The way out is that the guarantee \eqref{eq:guess-accuracy} is one-sided in a useful way:
+for any $G\ge W$ the output $\widehat W(G)$ is within $\zeta G$ of $W$, so reading $\widehat W(G)$ against
+the scale of $G$ tells us whether $G$ is still far above $W$ or has come down near it. Sweeping $G$
+downward by halving and watching for $\widehat W(G)$ to first reach a constant fraction of $G$ therefore
+brackets $W$ within a factor of two, after which one calibrated call finishes the job. We make this
+precise.
+
 A deterministic upper bound is $U=\sqrt2(n-1)\Delta\ge W$, and $W\ge n-1$ since the points are distinct
 integer-grid points, so $U/W=O(\Delta)=O(n)$ and only $O(\log n)$ guesses are needed. Run the per-guess
 estimator with $\zeta_0=\tfrac1{64}$ on $G=U,U/2,U/4,\dots$, amplified so that with constant probability

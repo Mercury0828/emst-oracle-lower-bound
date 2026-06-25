@@ -168,15 +168,22 @@ under any guess $G\ge\Wq$ the deterministic bound $U(r)=1+G/r$ satisfies $U(r)\g
 
 \subsection{The candidate universe}\label{sec:support-cand}
 
-At a fine scale ($a=a(r)\le\delta$) every occupied $a$-cell lies inside the union of the active
-$\delta$-blocks, so the candidate universe is the set of all $a$-subcells of $\mathcal B$, of size
+The leader estimator needs a universe $\mathcal U$ of candidate cells that we can both sample uniformly
+and recognize, and that contains every occupied cell of the current scale graph. At a fine scale
+($a=a(r)\le\delta$) every nonempty $a$-cell of $Q$ lies inside a block of the active cover $\mathcal B$:
+indeed any support point sits in some $\delta$-block, and its $a$-cell is a subcell of that block. So we
+take $\mathcal U$ to be the set of all $a$-subcells of the $b$ active blocks, of size
 \begin{equation}\label{eq:Msize}
-  M(r)=b\,(\delta/a)^2\le C_M\,\frac{b\delta^2}{\sigma^2 r^2}.
+  M(r)=b\,(\delta/a)^2\le C_M\,\frac{b\delta^2}{\sigma^2 r^2},
 \end{equation}
-A uniform candidate is generated offline -- pick an active block uniformly, then one of its $a$-subcells --
-and one range count tests its occupancy. At a coarse scale ($a>\delta$) the occupied $a$-cells are exactly
-the $\le b$ distinct $a$-ancestors of $\mathcal B$, so $\Gamma_r$ and $\cG(r)$ are computed from the cover
-with no further queries and no recursion.
+using $a=\Theta(\sigma r)$. A uniform candidate is generated with no queries at all -- pick one of the $b$
+active blocks uniformly, then one of its $(\delta/a)^2$ subcells uniformly -- and a single range count
+then tests whether that $a$-cell is occupied. This is exactly the spatial sampling the estimator wants:
+the universe is known offline, empties are cheap, and an occupied cell is found in proportion to its share
+of $\mathcal U$, independent of how many points it holds. At a coarse scale ($a>\delta$) there is nothing
+to sample: the occupied $a$-cells are precisely the $\le b$ distinct $a$-ancestors of the active blocks,
+so $\Gamma_r$ and its component count $\cG(r)$ are read off the cover directly, with no further queries
+and no recursion into the points.
 
 \subsection{The additive call and removing the guess}\label{sec:support-call}
 
