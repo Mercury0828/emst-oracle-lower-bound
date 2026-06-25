@@ -34,7 +34,7 @@ Macro note: range-count macro is `\rcount` (`\count` is a TeX primitive — do n
 - [x] Read structure-clone exemplar (NSW SODA'25) section skeleton.
 - [x] Build COMPONENT_MAPPING.md.
 - [ ] **OWNER ALIGNMENT on the mapping table (the gate before prose).** ← HERE
-- [ ] W0 preconditions: refs.bib resolver-verified (the 8 strands); copy AI_STYLE_CHECKLIST into `.agent/`.
+- [x] W0 refs.bib: 41 cited entries, all 8 strands covered, all verified (source-bib transcription + dedup-sweep arXiv IDs). Below 50-70 heuristic by design (tight scope; no padding) — Codex REFERENCE-COVERAGE to adjudicate.
 - [ ] Scaffold `paper/main.tex` + `sections/*.tex` + latexmk + gitignore intermediates.
 - [ ] W1 draft order: prelims → theory(full proofs) → assembly → related → intro(contribs last) → concl → abstract.
 - [ ] W3 per-batch style gates (token sweep / acronym order / number echo).

@@ -3,7 +3,10 @@
 \paragraph{Earth Mover's Distance.}
 The Earth Mover's Distance between two planar point sets sits in the same range-counting framework of
 Driemel et al.~\cite{DMOSW25} as MST weight, and there too a polynomial gap separates the known upper
-bound from the lower bound. The empty-cell spatial leader estimator of \cref{sec:support-estimator} is
+bound from the lower bound. Sublinear and sketching algorithms for EMD have a long
+history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02}, as do near-linear geometric matching
+algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19}, but none operates under a pure
+range-counting oracle. The empty-cell spatial leader estimator of \cref{sec:support-estimator} is
 not specific to single-linkage clustering: it estimates the number of components of an implicitly defined
 geometric graph from a spatial sample, with variance governed by the component count. Identifying the
 analogue of the cluster-count integral for EMD, and the analogue of the active-cover packing inequality

@@ -116,22 +116,34 @@ and the threshold-graph view we use throughout descend from this line.
 \paragraph{Euclidean MST estimation and geometric oracles.}
 Czumaj, Erg\"un, Fortnow, Magen, Newman, Rubinfeld, and Sohler~\cite{Czumaj05} gave the first sublinear
 planar Euclidean MST-weight estimator, in $\Otil(\sqrt n)$ time, using range-emptiness queries together
-with approximate cone nearest-neighbor search and obtaining a polynomial additive error. Arya, Mount, and
-Park~\cite{AryaMountPark15} studied geometric MST range queries with approximate-range data structures.
-The range-counting oracle of Driemel et al.~\cite{DMOSW25} is the setting of the present paper; their
-$\Otil(\sqrt n)$ upper bound also reduces to component counting, via the Callahan--Kosaraju WSPD
-spanner~\cite{CK95,HarPeled11}, but pays $\sqrt n$ at the component-counting step, which is the cost our
-spatial leader estimator removes.
+with approximate cone nearest-neighbor search and obtaining a polynomial additive error; the same group's
+metric reduction~\cite{CzumajSohler04,CzumajSohler09} and the early sublinear geometric algorithms of
+Chazelle, Liu, and Magen~\cite{ChazelleLiuMagen03} set the stage. Arya, Mount, and
+Park~\cite{AryaMountPark15} studied geometric MST range queries with approximate-range data structures,
+building on approximate range searching~\cite{AryaMount00}, and range-clustering and approximate-range
+clustering queries were studied by Abrahamsen et al.~\cite{AbrahamsenEtal17} and Oh and
+Ahn~\cite{OhAhn18}. The range-counting oracle of Driemel et al.~\cite{DMOSW25} is the setting of the
+present paper; their $\Otil(\sqrt n)$ upper bound also reduces to component counting, via the
+Callahan--Kosaraju WSPD spanner~\cite{CK95,HarPeled11,NarasimhanSmid07}, but pays $\sqrt n$ at the
+component-counting step, which is the cost our spatial leader estimator removes. The oracle has since
+been applied to convex-hull and emptiness problems~\cite{SchiblerXueZhu26}. Orthogonal range counting is
+itself a heavily studied data-structuring primitive~\cite{AfshaniArgeLarsen09,ChanLarsenPatrascu11,
+ChanTsakalidis18,Chan19,ShengTao11,deBergEtal08}.
 
 \paragraph{Single-linkage clustering and related primitives.}
 The components of the threshold graph are the single-linkage clusters, and the cost of single-linkage
 clustering has been studied directly in the sublinear regime by Peng, Sohler, and
-Xu~\cite{PSX25}. Streaming Euclidean MST to a constant factor was given by Chen, Cohen-Addad, Jayaram,
-Levi, and Waingarten~\cite{ChenCAJLW23}; the contraction trick that keeps component counts robust to
-additive error, which we reuse in the support regularization, also appears in the streaming
-setting. The well-separated pair decomposition and geometric spanners are standard tools
-(Callahan--Kosaraju~\cite{CK95}, Har-Peled~\cite{HarPeled11}), and telescoping range-count
-sampling is due to Monemizadeh~\cite{Monemizadeh23}.
+Xu~\cite{PSX25}; MST and clustering under strong and weak distance oracles were studied
+in~\cite{MetricOracleMST23}. Streaming Euclidean MST to a constant factor was given by Chen, Cohen-Addad,
+Jayaram, Levi, and Waingarten~\cite{ChenCAJLW23}; the contraction trick that keeps component counts
+robust to additive error, which we reuse in the support regularization, traces to dynamic-stream sampling
+of Frahling, Indyk, and Sohler~\cite{FrahlingIndykSohler05} and Indyk~\cite{Indyk04} and to
+relative-error $L_p$-sampling~\cite{MonemizadehWoodruff10}. Component counting and related sublinear
+estimators are part of the broader property-testing toolkit~\cite{CzumajSohler01,CzumajSohler10,
+EdenRonSeshadhri18,OnakEtal12,RubinfeldShapira11,BehnezhadRoghaniRubinstein23,CormodeEtal17}, with
+concentration via Chernoff bounds~\cite{Chernoff52}. The well-separated pair decomposition and geometric spanners are standard tools
+(Callahan--Kosaraju~\cite{CK95}, Har-Peled~\cite{HarPeled11}, Narasimhan--Smid~\cite{NarasimhanSmid07}),
+and telescoping range-count sampling is due to Monemizadeh~\cite{Monemizadeh23}.
 
 The paper is organized as the techniques above suggest: \cref{sec:prelim} fixes the model and the
 cluster-count integral; \cref{sec:support} states and uses the support-MST estimator; \cref{sec:dt}
