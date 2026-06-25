@@ -1,17 +1,37 @@
 \section{Open questions}\label{sec:open}
 
 \paragraph{Earth Mover's Distance.}
-The Earth Mover's Distance between two planar point sets sits in the same range-counting framework of
+The Earth Mover's Distance (EMD) between two planar point sets sits in the same range-counting framework of
 Driemel et al.~\cite{DMOSW25} as MST weight, and there too a polynomial gap separates the known upper
 bound from the lower bound. Sublinear and sketching algorithms for EMD have a long
 history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02}, as do near-linear geometric matching
 algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19}, but none operates under a pure
-range-counting oracle. The empty-cell spatial leader estimator of \cref{sec:support-estimator} is
-not specific to single-linkage clustering: it estimates the number of components of an implicitly defined
-geometric graph from a spatial sample, with variance governed by the component count. Identifying the
-analogue of the cluster-count integral for EMD, and the analogue of the active-cover packing inequality
-that collapses the per-scale cost, is the natural next target, and would test whether the spatial-sampling
-idea is the right primitive for this oracle in general.
+range-counting oracle.
+
+We believe the empty-cell spatial leader estimator of \cref{sec:support-estimator} is the right primitive
+here, and sketch why. The estimator is not specific to single-linkage clustering: at its core it estimates
+the number of connected components of an \emph{implicitly defined} geometric graph from a sample of cells
+drawn from a spatial universe that includes empty cells, with variance governed by the component count and
+not the occupied-cell count. EMD has a dyadic structure parallel to the cluster-count integral. Writing
+the two point sets as red and blue with equal mass, the cost of an optimal transport admits a quadtree
+approximation: at each dyadic level one pays, per cell, the absolute red-minus-blue mass imbalance times
+the cell diameter, and summing over levels approximates EMD within an $O(\log\Delta)$ factor
+(the source of the multiplicative $\log\Delta$ loss already present in~\cite{DMOSW25}). The analogue of
+the cluster-count curve is thus the imbalance profile across scales, and the analogue of estimating
+$c_S(t)$ at a scale is estimating the number of cells with nonzero imbalance, or more precisely the total
+imbalance, at that scale.
+
+Two ingredients would need EMD analogues. First, a \emph{spatial estimator} for the per-scale imbalance:
+the leader estimator counts components, while EMD needs a (signed) mass functional, so one would draw a
+candidate cell uniformly and return its red-minus-blue count scaled by the universe size, an unbiased
+estimator whose variance is again controlled by a spatial, not mass-proportional, sample; the heavy-tail
+difficulty (a few cells carrying most of the imbalance) is exactly the one the empty-cell view was built
+for. Second, a \emph{packing inequality} relating the number of imbalanced cells at a scale to the EMD
+itself, playing the role of $\Wq\ge b\delta/16$ and collapsing the geometric sum of per-scale costs.
+Establishing these two and balancing the resulting $\sqrt K+n/K$ trade-off would, we expect, bring planar
+EMD to the same $\Otil(n^{1/3})$ rate, matching the lower bound of~\cite{DMOSW25} up to the unavoidable
+$\log\Delta$ transport-approximation factor. Whether the spatial-sampling idea extends to the full
+matching cost, and not only to its dyadic approximation, is the deeper question.
 
 \paragraph{Higher dimensions.}
 For $P\subseteq[\Delta]^d$ with $d\ge3$ the WSPD spanner and the cluster-count integral both go through,

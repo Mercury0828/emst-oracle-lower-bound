@@ -19,11 +19,24 @@ true rate, and no further polynomial improvement in the query exponent is availa
 is the polylogarithmic and $\eps$-dependent overhead carried by the estimator of \cref{sec:support} and
 the death-time sampler of \cref{sec:dt}.
 
-It is worth noting why $n^{1/3}$, and not $\sqrt n$, is the right exponent, since our balance point makes
-this transparent. The lower bound of~\cite{DMOSW25} hides $\Theta(n^{2/3})$ clusters whose presence or
-absence each shifts the MST weight by a $\Theta(1)$ fraction, and distinguishing the two cases costs
-$\Omega(n^{1/3})$ range counts. Our algorithm spends its budget at exactly the matching granularity: it
-regularizes to a support of $K_0=\Theta(n^{2/3})$ cells, where the support estimator's two terms $\sqrt K$
-and $n/K$ are equal, and reads the cluster structure there with $\Otil(n^{1/3})$ queries. The spatial
-leader estimator is what lets the $\sqrt K$ term appear in place of a $K$ term; without it the same
-reduction would reproduce the $\Otil(\sqrt n)$ bound.
+\paragraph{Why $n^{1/3}$.}
+The exact lower-bound construction is that of~\cite{DMOSW25}, which we take as given; here we only record
+the conceptual reading that our balance point makes transparent, namely why the exponent is $1/3$ and not
+$1/2$. Estimating the MST weight to a constant factor amounts to resolving the cluster structure at the
+scale where it carries a constant fraction of the weight. At a grid scale with $K$ occupied cells, the
+weight lives in the number of \emph{components} the cells form, and a single range count returns a
+population, not a component count: it cannot, on its own, tell whether the points in a box form one
+cluster or many. The number of scales and cells at which the answer is genuinely in doubt is governed by
+the support size, which the regularization fixes at $K_0=\Theta(n^{2/3})$, and resolving a structure with
+$\Theta(n^{2/3})$ independently-uncertain pieces against an oracle that only counts has a
+$\sqrt{\,\cdot\,}$-type sampling cost, $\Theta(\sqrt{n^{2/3}})=\Theta(n^{1/3})$. This is the same $\sqrt K$
+that the leader estimator pays on the upper-bound side, and the coincidence is not accidental: $1/3=\tfrac12
+\cdot\tfrac23$ is the sampling exponent against an $n^{2/3}$-sized uncertain support.
+
+Our algorithm spends its budget at exactly this granularity. It regularizes to a support of
+$K_0=\Theta(n^{2/3})$ cells, where the support estimator's two terms $\sqrt K$ and $n/K$ are equal, and
+reads the cluster structure there in $\Otil(n^{1/3})$ queries. The spatial leader estimator is what lets
+the $\sqrt K$ term appear in place of a $K$ term; without it the same reduction would pay one query per
+occupied cell and reproduce the $\Otil(\sqrt n)$ bound. The leader estimator is in this sense the primitive
+matched to the lower bound: it pays the $\sqrt{\,\cdot\,}$ sampling rate against the uncertain support, and
+nothing in the range-counting model lets either side move.
