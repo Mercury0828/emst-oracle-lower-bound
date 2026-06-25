@@ -74,36 +74,24 @@ content of \cref{sec:dt,sec:main}.
 \paragraph{The barrier, and sampling space instead of mass.}
 By the Chazelle--Rubinfeld--Trevisan identity~\cite{CRT05}, the MST weight is the area under the
 cluster-count curve, $\wt(\MST(S))=\int_0^\infty(c_S(t)-1)\,dt$, where $c_S(t)$ counts the single-linkage
-clusters of $S$ at scale $t$ (\cref{sec:prelim}). Estimating the curve by sampling points and exploring
-their neighborhoods is the natural approach, and it is exactly what costs $\Omega(\sqrt n)$: a few far-flung
-points can carry a constant fraction of the weight while occupying a vanishing fraction of the mass, so a
-mass sample misses them with high probability and undercounts. Our estimator samples \emph{space} rather
-than mass. At each scale we impose a fine grid and draw candidate cells uniformly from a spatial universe
-that \emph{includes empty cells}; emptiness is one cheap range count, and on an occupied cell we run a
-min-rank exploration that returns a nonzero value only at the unique \emph{leader} of its component. A
-heavy outlier occupies its own cell and is therefore sampled with the right probability, not with
-probability proportional to its (tiny) mass. This \emph{empty-cell spatial leader estimator}
-(\cref{sec:support-estimator}) is the one new primitive of the paper: it has expectation equal to the
-component count and variance bounded by $M\cdot c$, with $M$ the universe size and $c$ the component count,
-so the trial count is governed by the number of components and not by the number of occupied cells. An
-active-cover packing inequality, $\Wq\ge b\delta/16$ (\cref{lem:packing}), then collapses the geometric
-sum of per-scale costs to $\Otil(\sqrt K)$.
+clusters of $S$ at scale $t$ (\cref{sec:prelim}). Estimating the curve by sampling \emph{points} and
+exploring their neighborhoods is the natural approach, and it is exactly what costs $\Omega(\sqrt n)$: a
+few far-flung points can carry a constant fraction of the weight while occupying a vanishing fraction of
+the mass, so a mass sample misses them and undercounts. The one new primitive of the paper samples
+\emph{space} instead of mass. At each scale we draw candidate grid cells uniformly from a universe that
+\emph{includes empty cells} and, on an occupied cell, run a min-rank exploration that returns a nonzero
+value only at the unique \emph{leader} of its component. This \emph{empty-cell spatial leader estimator}
+(\cref{sec:support-estimator}) has expectation equal to the component count $c$ and variance at most $Mc$,
+with $M$ the universe size, so its cost is governed by the number of components and not by the number of
+occupied cells, and a heavy outlier is sampled with the right probability regardless of its tiny mass.
 
-\paragraph{From a support back to the point set.}
-\Cref{lem:support} estimates a grid support, not $P$. To recover $W=\wt(\MST(P))$ we split the MST weight
-at a clip level $L$ into a bulk part (edges up to $L$) and a tail part (the excess of long edges). The
-bulk is estimated directly on $P$ by a \emph{clipped death-time sampler}: assigning random ranks to
-vertices and reading off, for a sampled vertex, the bottleneck distance to the nearest lower-ranked
-vertex recovers the MST edge weights as a multiset (\cref{sec:dt-sampler}), and clipping at $L$ controls
-the variance. The tail is routed through a grid support obtained by \emph{regularization and snapping}
-(\cref{sec:dt-regularize,sec:dt-snap}): we choose a grid scale whose support has $\Theta(n^{2/3})$ cells,
-snap $P$ to cell centers, and bound the weight distortion by a packing argument and an interleaving of
-threshold graphs. The three estimable pieces, the bulk of $P$, the support weight $\Wq$, and the bulk of
-the support, assemble into $\widehat W=\widehat A_P+\widehat\Wq-\widehat A_Q$ with a controlled error
-budget and a geometric search for the unknown scale of $W$ (\cref{sec:main}). The death-time sampler runs
-on a locally navigable $(1+\rho)$-spanner realized implicitly under the oracle by a well-separated pair
-decomposition; we give the full range-counting implementation, including the neighbor oracle and the
-bottleneck search, in \cref{sec:wspd}.
+This estimator drives a support-MST routine (\cref{lem:support}); the reduction from $P$ to a grid support
+of size $\Theta(n^{2/3})$ uses a clipped death-time sampler for the bulk of $P$, support regularization
+and snapping for the tail, and an assembly $\widehat W=\widehat A_P+\widehat\Wq-\widehat A_Q$ with a
+geometric search for the scale of $W$. The death-time sampler runs on a locally navigable
+$(1+\rho)$-spanner realized under the oracle by a well-separated pair decomposition~\cite{CK95,HarPeled11}.
+\Cref{sec:overview} develops all of this as a connected story; the formal statements and proofs follow in
+\cref{sec:support,sec:dt,sec:main} and the appendices.
 
 \subsection{Related work}\label{sec:intro-related}
 
