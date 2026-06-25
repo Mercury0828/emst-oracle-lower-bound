@@ -47,14 +47,25 @@ $c_S(t)=1$ for $t\ge\diam(S)$. The Euclidean MST weight is the area under this c
   \wt(\MST(S))=\int_0^\infty\bigl(c_S(t)-1\bigr)\,dt .
 \end{equation}
 Equation~\eqref{eq:cluster-integral} is the Euclidean instance of the Chazelle--Rubinfeld--Trevisan
-identity~\cite{CRT05}: an MST edge of length $\ell$ is the unique edge that merges two clusters as the
-threshold crosses $\ell$, so for every $t$,
+identity~\cite{CRT05}, and we recall its one-line proof since the same threshold-graph view recurs
+throughout. The key fact is
 \begin{equation}\label{eq:components-edges}
   c_S(t)-1=\abs{\set{e\in\MST(S):\abs{e}>t}},\qquad\text{hence}\qquad c_S(t)-1\le \frac{\wt(\MST(S))}{t}.
 \end{equation}
-The right inequality (Markov on the edge lengths) is used repeatedly to bound component counts at large
-thresholds. Estimating $W$ thus reduces to estimating the cluster-count curve $c_P(\cdot)$, which is what
-the oracle must support.
+To see the left identity, run Kruskal's algorithm on $S$ in increasing edge length: it builds $\MST(S)$,
+and at the moment it considers an edge $e$ of length $\abs e$, the components present are exactly the
+clusters of $S$ at threshold just below $\abs e$, so adding the MST edges of length $>t$ is what reduces
+the cluster count from $c_S(t)$ down to $1$. Each such edge lowers the count by one (it joins two distinct
+clusters, by the cut property), so the number of MST edges longer than $t$ is $c_S(t)-1$. Integrating this
+identity over $t\in[0,\infty)$ and exchanging sum and integral,
+\[
+  \int_0^\infty(c_S(t)-1)\,dt=\int_0^\infty\abs{\set{e\in\MST(S):\abs e>t}}\,dt
+   =\sum_{e\in\MST(S)}\int_0^{\abs e}dt=\sum_{e\in\MST(S)}\abs e=\wt(\MST(S)),
+\]
+which is \eqref{eq:cluster-integral}. The right inequality of \eqref{eq:components-edges} is Markov on the
+edge lengths ($t\cdot\abs{\{e:\abs e>t\}}\le\sum_e\abs e$) and is used repeatedly to bound component counts
+at large thresholds. Estimating $W$ thus reduces to estimating the cluster-count curve $c_P(\cdot)$, which
+is what the oracle must support.
 
 \paragraph{Spanners and the death-time view.}
 We will not estimate $c_P$ directly from points; instead we sample from $P$ and explore a locally
