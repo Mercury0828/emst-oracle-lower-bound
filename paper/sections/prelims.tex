@@ -109,6 +109,30 @@ $A_L,\,B_L$ & $L$-clipped and $L$-tail MST weight\\
 \label{tab:notation}
 \end{table}
 
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+parameter & meaning & setting\\
+\midrule
+$\eps$ & target relative accuracy & input\\
+$\zeta$ & per-call normalized accuracy & $\eps/32$ (final call)\\
+$\xi$ & internal accuracy of one call & $\zeta/C_*$\\
+$\rho$ & spanner stretch $1+\rho$ & $\Theta(\xi)$\\
+$\eta$ & relative accuracy of \cref{lem:support} & $\Theta(\xi)$\\
+$\beta$ & additive-call accuracy (support) & $\Theta(\eta)$\\
+$\sigma$ & scale-graph fineness & $\beta/32$\\
+$K_0$ & target support size & $\ceil{n^{2/3}}$\\
+$L$ & clip level & $G/K_0$\\
+\bottomrule
+\end{tabular}
+\caption{Accuracy parameters and their dependencies. Each is a fixed $\Theta(\cdot)$ multiple of the one
+above it, so all are $\Theta(\eps)$ and every cost is $\Otil_\eps(\cdot)$; $C_*$ is the absolute constant
+of the assembly bound \eqref{eq:guess-accuracy}.}
+\label{tab:params}
+\end{table}
+
 \paragraph{Probabilistic tools.}
 We use two standard facts repeatedly. The first is the multiplicative Chernoff bound: if $Y$ is a sum of
 independent $[0,1]$ variables with mean $\mu$, then $\Pr[\abs{Y-\mu}\ge\gamma\mu]\le 2e^{-\gamma^2\mu/3}$
