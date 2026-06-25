@@ -3,8 +3,16 @@
 > Update after EVERY section. On long context, re-read THIS + `COMPONENT_MAPPING.md` + the frozen proof
 > (`docs/webpro_round5_response.md`) before continuing — never write from memory. Venue = SODA = THEORY.
 
-## Status: PROOF BODY + ALL APPENDICES DRAFTED — compiles clean (15pp, 0 undefined refs).
-§2/§3/§4/§5 + App.A/B/C all drafted. Remaining stubs: §1 intro, §6 expand, §7 open. Then refs→~50-70, then Codex review panel.
+## Status: FULL DRAFT COMPLETE + REVIEWED — compiles clean, 29pp, 43 verified refs, 0 undefined.
+All sections + §2 Technical Overview + 2 figures + 2 algorithm boxes. App.A (residual-debt WSPD impl)
+reached Codex SOUND-WITH-FIXES over 5 adversarial rounds. Whole-paper Codex review = MINOR-REVISION, all
+round-1 concerns FIXED, readability R-W1 clean / R-W2,R-W3 OK-with-notes (no BLOCKER), length lens
+"28pp appropriate, not padded". All minor fixes applied. Convergence gate (owner's revised target):
+(a) proofs complete — YES (body claims App.B/C-backed; App.A SOUND); (b) length 29pp — in owner's ideal
+25-35 band (Codex endorsed); (c) refs 43 — Codex "adequate, no missing strand" (below original 50-70
+heuristic by design, no padding); (d) readability — no BLOCKER. → ready for HUMAN-EXPERT verification
+(gate #2), esp. App.A §A.3-A.4 (WSPD incident-edge oracle + bottleneck search) and the App.B two-part
+accounting. Review verdicts archived docs/reviews/.
 
 ### REVIEW round 1 (Codex gpt-5.5 xhigh, 2026-06-25): App.A=FLAWED (8 BLOCKER), whole=MAJOR-REVISION.
 Verdicts archived docs/reviews/; triage paper/REVIEW_round1_concerns.md. Round-1 fixes APPLIED:
