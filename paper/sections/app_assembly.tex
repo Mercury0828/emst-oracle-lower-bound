@@ -1,6 +1,77 @@
-\section{Full proofs for the death-time primitive and the assembly}\label{sec:app-assembly}
+\section{Full proofs for the death-time primitive and the reduction}\label{sec:app-assembly}
 
-% death-time multiset identity; (1+rho)-spanner stretch A_L(X) <= A_L(H) <= (1+rho)A_L(X); packing
-% K_h <= 8W/h+4; snapping c_P(t+delta_s) <= c_Q(t) <= c_P(t-delta_s); |B_L(Q)-B_L(P)| <= O(gamma xi W);
-% W_Q <= C_W W; the assembly error budget |hat W(G)-W| <= C_* xi G; the geometric W-search.
-% Source: docs/webpro_round5_response.md, sections 2--7. [TODO]
+\subsection{The death-time sampler}\label{sec:app-dt}
+
+\begin{proof}[Proof of \eqref{eq:death-multiset} and \eqref{eq:dt-var}]
+Fix a rank assignment and a threshold $t$. A vertex $v$ has $\tau(v)>t$ iff every path from $v$ to the
+root or to a lower-ranked vertex uses an edge of weight $>t$, i.e.\ iff the component of $v$ in the
+threshold graph $G_H(t)$ contains no lower-ranked vertex and not the root; equivalently $v$ is the
+minimum-rank vertex of a non-root component of $G_H(t)$. There is exactly one such vertex per non-root
+component, so $\abs{\{v:\tau(v)>t\}}=c_H(t)-1$, which by \eqref{eq:components-edges} is the number of MST
+edges of weight $>t$. Two nonnegative integer measures with equal tails are equal, giving
+\eqref{eq:death-multiset}. Integrating $\abs{\{v:\tau(v)>t\}}=c_H(t)-1$ over $t\in[0,L]$ and adding the
+clip gives $\sum_v\min\{\tau(v),L\}=\sum_{e\in\MST(H)}\min\{\wt(e),L\}=A_L(H)$, so
+$\abs V\cdot\E X_L=A_L(H)$ for a uniform $v$. Since $0\le X_L\le L$ we have $X_L^2\le L X_L$, hence
+$\Var(X_L)\le\E X_L^2\le L\,\E X_L=L\,A_L(H)/\abs V\le L\,\wt(\MST(H))/\abs V$; averaging $s$ independent
+samples and scaling by $\abs V$ gives \eqref{eq:dt-var}.
+\end{proof}
+
+\begin{proof}[Proof of \eqref{eq:spanner-stretch}]
+$H_X$ is a Euclidean graph on $X$, so $c_{H_X}(t)\ge c_X(t)$ (it has at most the threshold-$t$ edges of the
+complete graph); and it is a $(1+\rho)$-spanner, so an edge of length $\le t/(1+\rho)$ in the complete
+graph is matched by an $H_X$-path of bottleneck $\le t$, giving $c_{H_X}(t)\le c_X(t/(1+\rho))$.
+Integrating $c-1$ against the clip kernel $\mathbf 1[t\le L]$ and substituting yields
+$A_L(X)\le A_L(H_X)\le(1+\rho)A_L(X)$, where the right factor absorbs the $t\mapsto(1+\rho)t$ rescaling and
+$A_L\le\wt(\MST(X))$.
+\end{proof}
+
+\subsection{Support regularization and snapping}\label{sec:app-snap}
+
+\begin{proof}[Proof of \eqref{eq:Kh-packing}]
+Choose one point of $P$ in each nonempty $h$-cell and four-color the cells by index parities. In each
+color class the chosen points are pairwise at distance $\ge h$, so the class has $\le 1+\wt(\MST(\text{class}))/h
+\le 1+2W/h$ points by \eqref{eq:doubling} applied to $P$. Summing the four classes,
+$K_h\le 4+8W/h$.
+\end{proof}
+
+\begin{proof}[Proof of \eqref{eq:snap-interleave}--\eqref{eq:tail-transfer} and $\Wq\le C_W W$]
+Snapping moves each point by at most $\delta_s=\sqrt2\,h$. If two points are within $t$ before snapping,
+their centers are within $t+\delta_s$; if two centers are within $t$, the original points are within
+$t+\delta_s$. Hence a connected component at threshold $t$ for one set is connected at threshold
+$t+\delta_s$ for the other, giving $c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)$, which is
+\eqref{eq:snap-interleave}. Integrating over $[L,\infty)$ and using
+$B_L(X)=\int_L^\infty(c_X-1)=\sum_e(\abs e-L)_+$,
+\[
+  B_{L+\delta_s}(P)\le B_L(Q)\le B_{L-\delta_s}(P),
+\]
+so $\abs{B_L(Q)-B_L(P)}\le\int_{L-\delta_s}^{L+\delta_s}(c_P(t)-1)\,dt\le\int_{L-\delta_s}^{L+\delta_s}
+\frac Wt\,dt\le\frac{2\delta_s}{L-\delta_s}W\le\frac{3\delta_s}{L}W$ for $\delta_s\le L/2$, which is
+\eqref{eq:tail-transfer} since $\delta_s=\sqrt2\,h=\Theta(\xi L)$. For the last bound, contract $\MST(P)$
+by the $h$-cells and keep a spanning tree of the resulting graph on $Q$; each retained edge grows by at
+most $\delta_s$ under snapping, so $\Wq\le W+\delta_s(K-1)$. By \eqref{eq:Kh-packing} and $K=\Omega(K_0)$,
+$\delta_s K=O(hW/h)=O(W)$, giving $\Wq\le C_W W$.
+\end{proof}
+
+\subsection{The assembly bound (\texorpdfstring{\eqref{eq:guess-accuracy}}{guess accuracy})}\label{sec:app-combine}
+
+\begin{proof}[Proof of \eqref{eq:guess-accuracy}]
+Assume $G\ge W$, so $L=G/K_0\ge W/K_0$ and $\delta_s=\Theta(\xi L)$ satisfies $\delta_s\le L/2$ for small
+$\xi$. The four error terms are bounded as follows. The bulk estimate has bias $\le\rho W=O(\xi G)$ from
+\eqref{eq:spanner-stretch} and standard deviation $O(\xi G)$ from \eqref{eq:dt-var} with the stated
+$s_P$, so $\abs{\widehat A_P-A_L(P)}=O(\xi G)$ with constant probability; similarly
+$\abs{\widehat A_Q-A_L(Q)}=O(\xi G)$ with the stated $s_Q$. The support-weight estimate has
+$\abs{\widehat\Wq-\Wq}\le(\xi/C_W)\Wq\le\xi G$ by \cref{lem:support} and $\Wq\le C_W W\le C_W G$. The tail
+transfer $\abs{B_L(Q)-B_L(P)}=O(\xi G)$ is \eqref{eq:tail-transfer}. Summing the four and using
+\eqref{eq:decomp},
+\[
+  \abs{\widehat W(G)-W}=\bigl|(\widehat A_P-A_L(P))+(\widehat\Wq-\Wq)-(\widehat A_Q-A_L(Q))
+    +(B_L(P)-B_L(Q))\bigr|=O(\xi G).
+\]
+Choosing the hidden constants so the total is at most $C_*\xi G$ gives \eqref{eq:guess-accuracy}. The
+median-of-$O(\log n)$ trick boosts each per-guess call to failure probability $o(1/\log n)$, so all
+$O(\log n)$ guesses in \cref{sec:main-combine} are simultaneously correct with constant probability.
+\end{proof}
+
+The cost of one per-guess call is $\Otil_\xi(n^{1/3})$ (the maximum of the three pieces in
+\cref{sec:main-pieces}), and the $O(\log n)$-guess search multiplies this by $O(\log n)$, so
+\cref{thm:main} runs in $\Otil_\eps(n^{1/3})$ range-counting queries. \qed

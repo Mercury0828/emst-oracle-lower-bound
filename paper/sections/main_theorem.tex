@@ -1,6 +1,6 @@
 \section{Estimating the MST weight of \texorpdfstring{$P$}{P}}\label{sec:main}
 
-% Assembly: support regularization -> snapping -> A_L(P) + W_Q - A_L(Q) -> W-search.  [DRAFT IN PROGRESS]
+We now assemble the pieces of \cref{sec:dt} into the main result.
 
 \begin{theorem}[Main]\label{thm:main}
 For every fixed $\eps\in(0,1)$ and every $P\subseteq[\Delta]^2$ with $\abs P=n$ and $\Delta=O(n)$, there
@@ -11,6 +11,53 @@ is a randomized algorithm that, with probability at least $2/3$, outputs $\wideh
 using $\Otil_\eps\!\bigl(n^{1/3}\bigr)$ range-counting queries to $P$.
 \end{theorem}
 
-% [TODO: K_0 = n^{2/3} regularization; L=G/K_0; snapping transfer; W = A_L(P)+B_L(P);
-%  B_L(Q)=W_Q-A_L(Q); hat W(G)=hat A_P + hat W_Q - hat A_Q; error budget; geometric W-search.
-%  Full proofs in App.~\ref{sec:app-assembly}.]
+\subsection{Estimating the three pieces under a guess}\label{sec:main-pieces}
+
+Fix a guess $G\ge W$ and an internal accuracy $\xi$, and set $K_0=\ceil{n^{2/3}}$, $L=G/K_0$, with the
+regularized support $Q$ of \cref{sec:dt-regularize} ($K=\Theta(K_0)$). Each target is estimated to additive
+error $O(\xi G)$:
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+\item \emph{Bulk $A_L(P)$.} Run the death-time sampler on a $(1+\rho)$-spanner of $P$ with
+  $\rho=\Theta(\xi)$. By \eqref{eq:dt-var} with $\abs V=n$, $L=G/K_0$ and $\wt(\MST(P))=W\le G$, the
+  variance is $O(nG^2/(K_0 s_P))$, so $s_P=O(\xi^{-2}n/K_0)=O(\xi^{-2}n^{1/3})$ samples suffice; with
+  $\Otil(1)$ queries per sample this is $\Otil_\xi(n^{1/3})$ queries (the spanner bias is
+  $\le\rho W=O(\xi G)$ by \eqref{eq:spanner-stretch}).
+\item \emph{Support weight $\Wq$.} Apply \cref{lem:support} with relative error $\Theta(\xi/C_W)$; since
+  $\Wq\le C_W W\le C_W G$ this gives additive error $O(\xi G)$ in $\Otil_\xi(\sqrt K+n/K)=\Otil_\xi(n^{1/3})$
+  queries.
+\item \emph{Support bulk $A_L(Q)$.} Run the death-time sampler on a $(1+\rho)$-spanner of $Q$. Here
+  $\abs V=K=\Theta(K_0)$, $L=G/K_0$ and $\wt(\MST(Q))=\Wq=O(G)$, so \eqref{eq:dt-var} makes the variance
+  $O(G^2/s_Q)$ and $s_Q=O_\xi(1)$ support samples suffice; each uniform support sample costs $\Otil(n/K)
+  =\Otil_\xi(n^{1/3})$ queries (\cref{sec:support-oracle}).
+\end{itemize}
+No sample seed is reused across thresholds or across the three estimators, so the three errors are
+independent.
+
+\subsection{Combining and removing the guess}\label{sec:main-combine}
+
+Output
+\begin{equation}\label{eq:combine}
+  \widehat W(G)=\widehat A_P+\widehat\Wq-\widehat A_Q .
+\end{equation}
+By the decomposition \eqref{eq:decomp} and the tail transfer \eqref{eq:tail-transfer},
+\[
+  \abs{\widehat W(G)-W}\le\abs{\widehat A_P-A_L(P)}+\abs{\widehat\Wq-\Wq}+\abs{\widehat A_Q-A_L(Q)}
+    +\abs{B_L(Q)-B_L(P)},
+\]
+and each of the four terms is $O(\xi G)$, so for a suitable constant $C_*$,
+\begin{equation}\label{eq:guess-accuracy}
+  \abs{\widehat W(G)-W}\le C_*\xi G\qquad\text{whenever }G\ge W .
+\end{equation}
+Rescaling the internal accuracy to $\zeta=C_*\xi$ gives $\abs{\widehat W(G)-W}\le\zeta G$ in
+$\Otil_\zeta(n^{1/3})$ queries per call, with a predetermined query cap enforced by aborting (a guess
+$G<W$ that requests a larger budget returns \textsc{fail}).
+
+A deterministic upper bound is $U=\sqrt2(n-1)\Delta\ge W$, and $W\ge n-1$ since the points are distinct
+integer-grid points, so $U/W=O(\Delta)=O(n)$ and only $O(\log n)$ guesses are needed. Run the per-guess
+estimator with $\zeta_0=\tfrac1{64}$ on $G=U,U/2,U/4,\dots$, amplified so that with constant probability
+every call with $G\ge W$ is correct, and stop at the first $G$ with $\widehat W(G)\ge G/8$. If $G\ge16W$
+then $\widehat W(G)\le W+G/64\le G/16+G/64<G/8$, so the search does not stop; if $G\in[W,2W)$ then
+$\widehat W(G)\ge W-G/64>G/8$, so it stops while $G\ge W$. Hence the selected $G_0$ satisfies $W\le
+G_0<16W$. A final call with $\zeta=\eps/32$ gives $\abs{\widehat W-W}\le(\eps/32)G_0<(\eps/2)W$, and the
+$O(\log n)$ guesses keep the total cost $\Otil_\eps(n^{1/3})$. This proves \cref{thm:main}; the deferred
+variance, packing, and snapping calculations are completed in \cref{sec:app-assembly}.

@@ -1,4 +1,74 @@
 \section{The clipped death-time primitive and the reduction for \texorpdfstring{$P$}{P}}\label{sec:dt}
 
-% death-time multiset identity; (1+rho)-spanner stretch; support regularization (packing K_h<=8W/h+4);
-% snapping interleaving; A_L / B_L decomposition.  Full proofs in App.~\ref{sec:app-assembly}. [TODO]
+\Cref{lem:support} estimates the MST weight of a grid support. To estimate $W=\wt(\MST(P))$ itself we
+split the MST weight at a clip level $L$ into a \emph{bulk} part (edges up to $L$) and a \emph{tail} part
+(the excess of long edges), estimate the bulk directly on $P$ by a death-time sampler, and route the tail
+through a snapped support handled by \cref{lem:support}. This section states the two ingredients; the
+proofs are in \cref{sec:app-assembly}.
+
+\subsection{The clipped death-time sampler}\label{sec:dt-sampler}
+
+Let $H$ be a connected weighted graph on $V$ with a fixed root $r$. Assign independent uniform ranks to
+$V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ as the bottleneck (min--max-edge) distance
+from $v$ to the root or to any lower-ranked vertex. The death times recover the MST edge weights as a
+multiset:
+\begin{equation}\label{eq:death-multiset}
+  \set{\tau(v):v\in V}=\set 0\cup\set{\wt(e):e\in\MST(H)},
+\end{equation}
+because for every $t$ the count $\abs{\{v:\tau(v)>t\}}$ equals $c_H(t)-1$, the number of MST edges heavier
+than $t$. A bottleneck Dijkstra search from $v$ that halts at the first lower-ranked vertex computes
+$\tau(v)$ while extracting $O(\log\abs V)$ vertices in expectation. For a clip level $L$ set
+$X_L(v)=\min\{\tau(v),L\}$. Then $\abs V\cdot\E X_L=A_L(H)\eqdef\sum_{e\in\MST(H)}\min\{\wt(e),L\}$, and
+$X_L^2\le L X_L$, so the average of $s$ independent samples has
+\begin{equation}\label{eq:dt-var}
+  \Var\Bigl[\tfrac{\abs V}{s}\textstyle\sum_i X_L(v_i)\Bigr]\le\frac{\abs V\,L\,\wt(\MST(H))}{s}.
+\end{equation}
+We apply this to a locally navigable Euclidean $(1+\rho)$-spanner $H_X$ of a point set $X$, realized under
+the oracle by a WSPD (\cref{sec:wspd}). Since $H_X$ is a Euclidean subgraph and a $(1+\rho)$-spanner,
+$c_X(t)\le c_{H_X}(t)\le c_X(t/(1+\rho))$, so integrating,
+\begin{equation}\label{eq:spanner-stretch}
+  A_L(X)\le A_L(H_X)\le(1+\rho)\,A_L(X),
+\end{equation}
+i.e.\ the spanner inflates the clipped weight by at most $\rho\,\wt(\MST(X))$.
+
+\subsection{Support regularization}\label{sec:dt-regularize}
+
+Fix a guess $G\ge W$, put $K_0=\ceil{n^{2/3}}$ and $L=G/K_0$. We choose a grid scale $h$ whose support
+$Q$ has $K=\Theta(K_0)$ cells. The number $K_h$ of nonempty $h$-cells obeys a packing bound analogous to
+\cref{lem:packing}:
+\begin{equation}\label{eq:Kh-packing}
+  K_h\le\frac{8W}{h}+4 .
+\end{equation}
+Starting from a scale $h_0=\Theta(\xi L)$ and halving until $K_h$ first reaches a constant multiple of
+$K_0$ (which is detected by the inverse-Bernoulli estimator of \cref{sec:support-oracle}, since halving
+$h$ at most quadruples $K_h$) yields a scale with
+\begin{equation}\label{eq:K-window}
+  cK_0\le K\le C_\xi K_0 ,
+\end{equation}
+in $\Otil_\xi(n/K_0)=\Otil_\xi(n^{1/3})$ queries. Fix this $h$ and its support $Q$.
+
+\subsection{Snapping}\label{sec:dt-snap}
+
+Snapping each point of $P$ to its $h$-cell center moves it by at most $\delta_s=\sqrt2\,h$, so the
+threshold graphs interleave:
+\begin{equation}\label{eq:snap-interleave}
+  c_P(t+\delta_s)\le\cQ(t)\le c_P(t-\delta_s)\qquad(t\ge\delta_s).
+\end{equation}
+Writing $B_L(X)=\int_L^\infty(c_X(t)-1)\,dt=\sum_{e\in\MST(X)}(\abs e-L)_+$ for the tail weight,
+\eqref{eq:snap-interleave} together with $c_P(t)-1\le W/t$ gives, for $\delta_s\le L/2$,
+\begin{equation}\label{eq:tail-transfer}
+  \abs{B_L(Q)-B_L(P)}\le\int_{L-\delta_s}^{L+\delta_s}\frac Wt\,dt\le\frac{3\delta_s}{L}W=O(\xi W),
+\end{equation}
+by $h=\Theta(\xi L)$. Finally, contracting $\MST(P)$ onto the $h$-cells and using \eqref{eq:Kh-packing}
+with $K=\Omega(K_0)$ gives $\Wq\le W+\delta_s(K-1)\le C_W W$ for an absolute constant $C_W$.
+
+\subsection{The decomposition}\label{sec:dt-decomp}
+
+Write $A_L(X)=\sum_{e\in\MST(X)}\min\{\abs e,L\}$, so $\wt(\MST(X))=A_L(X)+B_L(X)$. We use the bulk of $P$
+and the tail of the snapped support:
+\begin{equation}\label{eq:decomp}
+  W=A_L(P)+B_L(P),\qquad B_L(Q)=\Wq-A_L(Q),
+\end{equation}
+and transfer the tail by \eqref{eq:tail-transfer}. The three estimable pieces are $A_L(P)$ (death-time
+sampler on $P$), $\Wq$ (\cref{lem:support}), and $A_L(Q)$ (death-time sampler on $Q$); we assemble them in
+\cref{sec:main}.
