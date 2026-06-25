@@ -29,6 +29,14 @@ a median. Driemel, Monemizadeh, Oh, Staals, and Woodruff~\cite{DMOSW25} give an 
 algorithm for \cref{prob:main} and an $\Omega(n^{1/3})$-query lower bound, leaving a polynomial gap. We
 close it from above.
 
+The range-counting oracle is the weakest of the geometric oracles used for this problem and the one a
+spatial index supports natively: it returns a cardinality, not a witness, so the algorithm never learns
+the identity or location of any individual point except through the $O(\log\Delta)$-query sampling
+primitive of \cref{sec:prelim-sample}. It is in particular weaker than the range-emptiness-with-nearest-
+neighbor model of~\cite{Czumaj05}, which can locate points. Every quantity we estimate is ultimately a
+function of the counts $\rcount R$ over a family of aligned rectangles, and the cost is the number of
+distinct such queries.
+
 \paragraph{The cluster-count integral.}
 For a finite $S\subset\R^2$ and a threshold $t\ge 0$, let $G_S(t)$ be the graph on $S$ with an edge
 between every pair of points at distance at most $t$, and let $c_S(t)$ be its number of connected

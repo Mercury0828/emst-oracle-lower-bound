@@ -92,6 +92,18 @@ ranks to occupied cells (lazily) and explore the component of $X$ in $\Gamma$, s
 of smaller rank than $X$ is met. Output $Z=M$ if no such cell exists (so $X$ is the minimum-rank cell, the
 \emph{leader}, of its component), and $Z=0$ otherwise.
 
+\begin{algorithm}[t]
+\caption{One trial of the empty-cell leader estimator}\label{alg:leader}
+\KwIn{candidate universe $\mathcal U$ of $M$ cells; graph $\Gamma$ on the occupied cells}
+\KwOut{$Z\in\{0,M\}$ with $\E Z=c$, the component count of $\Gamma$}
+draw $X$ uniformly from $\mathcal U$\;
+\lIf{$X$ is empty (one range count)}{\Return $Z=0$}
+assign $X$ and the cells it reaches independent uniform ranks (lazily)\;
+explore the component of $X$ in $\Gamma$ in increasing distance, halting once a cell of rank $<\mathrm{rank}(X)$ appears\;
+\lIf{no smaller-rank cell was met ($X$ is the leader)}{\Return $Z=M$}
+\lElse{\Return $Z=0$}
+\end{algorithm}
+
 \begin{lemma}[Leader estimator]\label{lem:leader}
 $\E Z=c$ and $\Var(Z)=Mc-c^2\le Mc$.
 \end{lemma}

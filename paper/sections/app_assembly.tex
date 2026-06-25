@@ -96,20 +96,37 @@ $\delta_s K=O(hW/h)=O(W)$, giving $\Wq\le C_W W$.
 
 \begin{proof}[Proof of \eqref{eq:guess-accuracy}]
 Assume $G\ge W$, so $L=G/K_0\ge W/K_0$ and $\delta_s=O(\xi L)$ satisfies $\delta_s\le L/2$ for small
-$\xi$. The four error terms are bounded as follows. The bulk estimate has bias $\le\rho W=O(\xi G)$ from
-\eqref{eq:spanner-stretch} and standard deviation $O(\xi G)$ from \eqref{eq:dt-var} with the stated
-$s_P$, so $\abs{\widehat A_P-A_L(P)}=O(\xi G)$ with constant probability; similarly
-$\abs{\widehat A_Q-A_L(Q)}=O(\xi G)$ with the stated $s_Q$. The support-weight estimate has
-$\abs{\widehat\Wq-\Wq}\le(\xi/C_W)\Wq\le\xi G$ by \cref{lem:support} and $\Wq\le C_W W\le C_W G$. The tail
-transfer $\abs{B_L(Q)-B_L(P)}=O(\xi G)$ is \eqref{eq:tail-transfer}. Summing the four and using
-\eqref{eq:decomp},
+$\xi$. We give each of the four contributions to \eqref{eq:combine}--\eqref{eq:decomp} a budget of
+$\tfrac{C_*}{4}\xi G$ and verify each in turn; set $\rho=\Theta(\xi)$ and recall $W\le G$ and $\Wq\le C_W
+W\le C_W G$.
+
+\emph{(i) Bulk of $P$, $\widehat A_P$.} Two errors enter. The spanner bias is one-sided and at most $\rho
+W$ by \eqref{eq:spanner-stretch}, which is $\le\tfrac{C_*}{12}\xi G$ for $\rho$ a small enough multiple of
+$\xi$. The sampling error: by \eqref{eq:dt-var} with $\abs V=n$, $L=G/K_0$, and $\wt(\MST(H_P))\le(1+\rho)W
+\le 2G$, the variance of the $s_P$-sample mean (scaled by $n$) is at most $nL\cdot 2G/s_P=2nG^2/(K_0 s_P)$;
+with $s_P=C\xi^{-2}n/K_0$ this is $\tfrac{2}{C}\xi^2G^2$, so Chebyshev gives deviation $\le\tfrac{C_*}{12}
+\xi G$ with probability $\ge 1-\tfrac1{100}$ for $C$ large. Hence $\abs{\widehat A_P-A_L(P)}\le\tfrac{C_*}
+4\xi G$.
+
+\emph{(ii) Support weight, $\widehat\Wq$.} \Cref{lem:support} with relative accuracy $\eta=\xi/(4C_WC_*^{-1})
+=\Theta(\xi)$ gives $\abs{\widehat\Wq-\Wq}\le\eta\Wq\le\eta C_W G\le\tfrac{C_*}4\xi G$.
+
+\emph{(iii) Bulk of $Q$, $\widehat A_Q$.} Identical to (i) with $\abs V=K=\Theta(K_0)$ and $\wt(\MST(H_Q))
+\le(1+\rho)\Wq=O(G)$: the variance is $O(K L G/s_Q)=O(G^2/s_Q)$, so $s_Q=O(\xi^{-2})$ samples give
+$\abs{\widehat A_Q-A_L(Q)}\le\tfrac{C_*}4\xi G$ with probability $\ge 1-\tfrac1{100}$.
+
+\emph{(iv) Tail transfer.} $\abs{B_L(Q)-B_L(P)}\le\tfrac{C_*}4\xi G$ is \eqref{eq:tail-transfer}, which
+gave $O(\xi W)$.
+
+Summing the four through \eqref{eq:decomp} (note $W=A_L(P)+B_L(P)$ and $B_L(Q)=\Wq-A_L(Q)$),
 \[
   \abs{\widehat W(G)-W}=\bigl|(\widehat A_P-A_L(P))+(\widehat\Wq-\Wq)-(\widehat A_Q-A_L(Q))
-    +(B_L(P)-B_L(Q))\bigr|=O(\xi G).
+    +(B_L(P)-B_L(Q))\bigr|\le C_*\xi G,
 \]
-Choosing the hidden constants so the total is at most $C_*\xi G$ gives \eqref{eq:guess-accuracy}. The
-median-of-$O(\log n)$ trick boosts each per-guess call to failure probability $o(1/\log n)$, so all
-$O(\log n)$ guesses in \cref{sec:main-combine} are simultaneously correct with constant probability.
+which is \eqref{eq:guess-accuracy}. Each piece fails with probability $\le\tfrac1{50}$, so one call is
+within $C_*\xi G$ with probability $\ge\tfrac{9}{10}$; the median of $O(\log n)$ calls (\cref{sec:main-combine})
+then makes every guess with $G\ge W$ correct simultaneously with constant probability, an aborted call
+counting as a failed one.
 \end{proof}
 
 The cost of one per-guess call is $\Otil_\xi(n^{1/3})$ (the maximum of the three pieces in

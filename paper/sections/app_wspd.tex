@@ -15,6 +15,19 @@ exactly when the aligned $P$-region is nonempty, so every emptiness test is one 
 pair is well separated when its cells are at distance $\ge\max\{r(c),r(c')\}/\rho$), chosen so that the
 spanner stretch below is $1+\rho$.
 
+\paragraph{The construction at a glance.}
+The plan has four layers, each a lemma below. (1) A uniform vertex of $X$, and the representative of any
+cell, are drawn with $O(\log\Delta)$ counts by telescoping sampling (\cref{lem:telescoping}). (2) The
+spanner $S$ has one edge per well-separated pair, joining the two representatives at their exact Euclidean
+distance; because we know representative coordinates, edge weights are free and $S$ is a genuine Euclidean
+subgraph (\cref{sec:wspd-spanner}). (3) From a vertex $u$, its incident spanner edges below a length are
+enumerated by scanning $u$'s $O(\log\Delta)$ quadtree ancestors and, for each, its $O(\rho^{-2})$
+well-separated partner cells (\cref{lem:incident}). (4) The clipped death time of a seed is computed by an
+exact bottleneck Dijkstra (\cref{alg:deathtime}) that halts at the first lower-ranked or root vertex after
+$O(\log\abs V)$ expansions in expectation. A single global query budget, rather than a per-search cap,
+controls the worst case without biasing any estimate. Nothing here reveals a point's location beyond what
+a representative computation already costs, and every line is a range count.
+
 \subsection{Uniform point sampling under the oracle}\label{sec:prelim-sample}
 
 We first record the sampling primitive used here and in \cref{sec:support} (referenced from
@@ -147,10 +160,24 @@ vertex has one rank no matter through which cell it is reached, and ranks are a.
 probability zero and are broken by $z$-order). As in \cref{sec:dt-sampler}, $\tau(v)$ is the bottleneck
 (min--max-edge) distance from $v$ to the root or to any lower-ranked vertex.
 
+\begin{algorithm}[t]
+\caption{Clipped death time $X_L(v)$ on the WSPD spanner $S$}\label{alg:deathtime}
+\KwIn{seed $v$; clip level $L$; ranks (root $r_X$ has rank $-\infty$)}
+\KwOut{$\min\{\tau(v),L\}$}
+$\beta(v)\leftarrow 0$; push $v$ on a min-priority queue keyed by $\beta$\;
+\While{the queue is nonempty}{
+  extract the minimum-$\beta$ vertex $u$\;
+  \lIf{$u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$}{\Return $\beta(u)$}
+  enumerate all incident edges $\{u,u'\}$ of weight $\le L$ (\cref{lem:incident})\;
+  \lForEach{such edge of weight $\omega$}{$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$}
+}
+\Return $L$\tcp*{queue emptied: $\tau(v)>L$}
+\end{algorithm}
+
 \paragraph{The search.}
-Run a bottleneck variant of Dijkstra from $v$: maintain, for each reached vertex, the smallest value
-$\beta(\cdot)$ such that $v$ reaches it by a path whose every edge is $\le\beta(\cdot)$, in a priority
-queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the queue-minimum vertex $u$.
+Run a bottleneck variant of Dijkstra from $v$ (\cref{alg:deathtime}): maintain, for each reached vertex,
+the smallest value $\beta(\cdot)$ such that $v$ reaches it by a path whose every edge is $\le\beta(\cdot)$,
+in a priority queue keyed by $\beta$ over \emph{exact} edge weights. Repeatedly extract the queue-minimum vertex $u$.
 If $u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$, output $\tau(v)=\beta(u)$ and stop. Otherwise expand
 $u$ by enumerating, via \cref{lem:incident} with length bound $L$, \emph{all} its incident edges of weight
 at most $L$, and relax each edge $\{u,u'\}$ of weight $\omega$ by

@@ -50,7 +50,10 @@ This is the bound on the \emph{component} count used by the leader estimator.
 
 \subsection{Query accounting: both sums are \texorpdfstring{$\Otil(\sqrt K)$}{O(sqrt K)}}\label{sec:app-accounting}
 
-This is the heart of \cref{lem:support}. One additive call runs the leader estimator at each fine scale
+This is the heart of \cref{lem:support}, and the place the round-5 separation of the two cost drivers pays
+off: the number of trials is set by the variance, which sees only the component count, while the work per
+trial sees the occupied-cell count, and the two are summed against different parts of the packing bound so
+that neither alone forces $\Omega(K)$. One additive call runs the leader estimator at each fine scale
 $r_j$ ($a(r_j)\le\delta$) with candidate universe $M_j=M(r_j)$ from \eqref{eq:Msize}, accuracy
 $\alpha_j=\beta G/(32\,T\sigma r_j)$, and bound $U_j=1+G/r_j$. By \cref{lem:leader} and the median-of-means
 guarantee, the trial count at scale $j$ is

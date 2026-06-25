@@ -8,6 +8,41 @@ proofs are in \cref{sec:app-assembly}.
 
 \subsection{The clipped death-time sampler}\label{sec:dt-sampler}
 
+The support estimator integrates the cluster-count curve directly. For $P$ itself we instead sample the
+MST edge weights through a device that turns ``how heavy is the MST'' into ``how far must a random vertex
+travel to reach someone more senior,'' which a spanner lets us answer with a local search. The staircase
+picture is \cref{fig:deathtime}: $c_S(t)-1$ counts the MST edges heavier than $t$, its area is the MST
+weight, and the death times read that staircase off one vertex at a time.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=0.95, every node/.style={font=\footnotesize}]
+  \draw[->] (0,0) -- (6.3,0) node[right] {$t$};
+  \draw[->] (0,0) -- (0,3.2) node[above] {$c_S(t)-1$};
+  % staircase, decreasing
+  \draw[blue!60!black, very thick]
+    (0,2.6) -- (1.2,2.6) -- (1.2,2.0) -- (2.1,2.0) -- (2.1,1.4) -- (3.3,1.4)
+    -- (3.3,0.8) -- (4.4,0.8) -- (4.4,0.4) -- (5.4,0.4) -- (5.4,0) -- (6.0,0);
+  % shaded area = MST weight
+  \begin{scope}
+    \clip (0,0) -- (0,2.6) -- (1.2,2.6) -- (1.2,2.0) -- (2.1,2.0) -- (2.1,1.4) -- (3.3,1.4)
+      -- (3.3,0.8) -- (4.4,0.8) -- (4.4,0.4) -- (5.4,0.4) -- (5.4,0) -- cycle;
+    \fill[blue!8] (0,0) rectangle (6,3);
+  \end{scope}
+  % clip level L
+  \draw[red, dashed] (3.3,0) -- (3.3,1.7); \node[red] at (3.3,1.95) {$L$};
+  \node[blue!50!black] at (1.9,2.85) {area $=\wt(\MST(S))$};
+  \node at (1.5,0.9) {$A_L$}; \node at (4.6,0.55) {$B_L$};
+  \draw[<->] (0,-0.35) -- (3.3,-0.35); \node at (1.65,-0.62) {bulk (clipped)};
+  \draw[<->] (3.3,-0.35) -- (5.4,-0.35); \node at (4.35,-0.62) {tail};
+\end{tikzpicture}
+\caption{The cluster-count staircase. Each downward step is one MST edge, of width equal to its length, so
+the shaded area is $\wt(\MST(S))=\int_0^\infty(c_S(t)-1)\,dt$. The clip at $L$ splits it into the bulk
+$A_L=\sum_e\min\{\abs e,L\}$ (estimated on $P$ by the death-time sampler) and the tail $B_L=\sum_e(\abs
+e-L)_+$ (routed through a snapped support).}
+\label{fig:deathtime}
+\end{figure}
+
 Let $H$ be a connected weighted graph on $V$ with a fixed root $r$. Assign independent uniform ranks to
 $V\setminus\{r\}$ and define the \emph{death time} $\tau(v)$ as the bottleneck (min--max-edge) distance
 from $v$ to the root or to any lower-ranked vertex. The death times recover the MST edge weights as a
@@ -32,6 +67,12 @@ $c_X(t)\le c_{H_X}(t)\le c_X(t/(1+\rho))$, so integrating,
 i.e.\ the spanner inflates the clipped weight by at most $\rho\,\wt(\MST(X))$.
 
 \subsection{Support regularization}\label{sec:dt-regularize}
+
+The death-time sampler handles the bulk of $P$, but its variance \eqref{eq:dt-var} grows with the clip
+level, so it is efficient only up to $L$; the long edges beyond $L$ are rare and heavy, exactly the regime
+the support estimator was built for. To hand them over we need a support whose size is the balance point
+$K_0=\Theta(n^{2/3})$ and whose snapping error is controlled. Choosing the grid scale is the one place a
+search is needed, because the right scale depends on how the (unseen) points are spread.
 
 Fix a guess $G\ge W$, put $K_0=\ceil{n^{2/3}}$ and $L=G/K_0$. We choose a grid scale $h$ whose support
 $Q$ has $K=\Theta(K_0)$ cells. The number $K_h$ of nonempty $h$-cells obeys a packing bound analogous to
@@ -64,6 +105,11 @@ by $\delta_s=\sqrt2\,h=O(\xi L)$ (\cref{lem:kwindow} gives $h\le h_0=\Theta(\xi 
 with $K=\Omega(K_0)$ gives $\Wq\le W+\delta_s(K-1)\le C_W W$ for an absolute constant $C_W$.
 
 \subsection{The decomposition}\label{sec:dt-decomp}
+
+We can now state precisely which three quantities the algorithm estimates and how they combine. The
+guiding identity is that the MST weight splits as bulk plus tail at the clip level, and that the tail of
+$P$ equals the tail of the snapped support up to the transfer error \eqref{eq:tail-transfer}; the support
+tail in turn is its total weight minus its own bulk, both of which we can estimate.
 
 Write $A_L(X)=\sum_{e\in\MST(X)}\min\{\abs e,L\}$, so $\wt(\MST(X))=A_L(X)+B_L(X)$. We use the bulk of $P$
 and the tail of the snapped support:
