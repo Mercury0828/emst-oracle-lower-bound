@@ -191,3 +191,37 @@ counting as a failed one.
 The cost of one per-guess call is $\Otil_\xi(n^{1/3})$ (the maximum of the three pieces in
 \cref{sec:main-pieces}), and the $O(\log n)$-guess search multiplies this by $O(\log n)$, so
 \cref{thm:main} runs in $\Otil_\eps(n^{1/3})$ range-counting queries. \qed
+
+\subsection{Tracking the constants}\label{sec:app-constants}
+
+For completeness we trace the dependence on the accuracy parameters through the whole pipeline, so that
+the $\Otil_\eps(\cdot)$ notation can be unfolded. The chain of parameters (\cref{tab:params}) is
+\[
+  \eps\;\xrightarrow{\;/32\;}\;\zeta\;\xrightarrow{\;/C_*\;}\;\xi\;\xrightarrow{\;\Theta\;}\;
+  \rho,\,\eta\;\xrightarrow{\;\Theta\;}\;\beta\;\xrightarrow{\;/32\;}\;\sigma,
+\]
+each a fixed constant multiple of its predecessor, so all are $\Theta(\eps)$ and $1/\sigma,1/\beta,1/\eta,
+1/\rho,1/\xi,1/\zeta=\Theta(1/\eps)$. Write $\Lambda=\log(n\Delta/(h\eta))=\Theta(\log n)$ for the
+amplification factor (using $\Delta=O(n)$ and $h\ge 1$).
+
+\emph{Support estimator (\cref{lem:support}).} One additive call makes $\Otil_\beta(\sqrt K)$ queries; the
+proof of \cref{sec:app-accounting} exhibited the explicit form $O(\beta^{-8}\sqrt K\,\Lambda^{O(1)})$,
+coming from $\sigma=\beta/32$ (a $\beta^{-2}$ from the scale-graph degree), $T=O(\beta^{-1}\log(\Delta/h))$
+scales, the two $T^2/\beta^2$ prefactors of \eqref{eq:cand-per-scale} and \eqref{eq:expl-per-scale}, and
+the median amplification $\Lambda$. The guess-removal multiplies by the $O(\log(\Delta/h))$ guesses, and
+adding the inverse-Bernoulli cost gives $\Otil_\eta(\sqrt K+n/K)=O\!\bigl(\eta^{-O(1)}(\sqrt K+n/K)
+\Lambda^{O(1)}\bigr)$.
+
+\emph{Death-time samplers.} The bulk sampler uses $s_P=C\xi^{-2}n/K_0$ seeds, each search $O(\rho^{-2}
+\log^2\Delta\cdot\log n)=O(\xi^{-2}\poly\log n)$ queries by \cref{lem:incident} and the harmonic extraction
+bound, for $O(\xi^{-4}(n/K_0)\poly\log n)$ queries; the support sampler uses $s_Q=O(\xi^{-2})$ seeds at
+$\Otil(n/K)$ each. Both are $O(\eps^{-O(1)}n^{1/3}\poly\log n)$.
+
+\emph{Total.} With $K=\Theta_\xi(K_0)=\Theta(n^{2/3})$ each per-guess call is $O(\eps^{-O(1)}n^{1/3}
+\poly\log n)$, and the $O(\log n)$ guesses and the final median keep the overall bound at
+\[
+  O\!\bigl(\eps^{-O(1)}\,n^{1/3}\,\poly\log n\bigr)=\Otil_\eps(n^{1/3}).
+\]
+The exponent of $1/\eps$ is a fixed constant; we have not optimized it, as the contribution of the paper is
+the $n^{1/3}$ rate. For fixed $\eps$ the bound is $\Otil(n^{1/3})$, and the lower bound of \cref{cor:tight}
+shows the $n^{1/3}$ cannot be reduced.
