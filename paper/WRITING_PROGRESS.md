@@ -3,8 +3,20 @@
 > Update after EVERY section. On long context, re-read THIS + `COMPONENT_MAPPING.md` + the frozen proof
 > (`docs/webpro_round5_response.md`) before continuing — never write from memory. Venue = SODA = THEORY.
 
-## Status: SCAFFOLD UP + PRELIMS DRAFTED — compiles clean (4pp). Owner signed off on structure
-(full writeup now; §6 standalone). Next = the proof-heavy sections (§3 + App.B, then §4/§5 + App.C, then App.A WSPD).
+## Status: PROOF BODY + ALL APPENDICES DRAFTED — compiles clean (15pp, 0 undefined refs).
+§2/§3/§4/§5 + App.A/B/C all drafted. Remaining stubs: §1 intro, §6 expand, §7 open. Then refs→~50-70, then Codex review panel.
+
+### App.A (WSPD death-time impl) — DRAFTED 2026-06-25; residual-debt discharge. Confidence flags (honesty rail):
+- ~90% (matches Pro's 0.89): the bottleneck-search expected-extraction = O(log|V|) coupling to the rank
+  order ON THE SPANNER (re-used the leader-estimator harmonic argument; a referee should check the
+  ordering is by bottleneck distance from v, not graph-BFS order).
+- ~90%: the extraction-cap → additive-error absorption (capped searches report X_L=L; argued one-sided +
+  Markov, δ' = const·target accuracy). Folded into §5 budget by assertion, NOT re-derived in App.C.
+- ~95%: per-search cost O(ρ^{-3} log Δ)·O(log|V|): conservative (expand every reached vertex at every
+  scale via Lemma navigate). Could be tightened but the bound suffices for Õ_ε(n^{1/3}).
+- Lemma 24 (neighbor oracle) restated from source verbatim-faithfully; correctness of the 2^{i*}
+  truncation cited to [DMOSW25 Lemma 24] not re-proved.
+HUMAN-VERIFY TARGET: App.A §A.4 (bottleneck search + cap) is the place a referee will attack hardest.
 
 ### Owner decisions (2026-06-22)
 - Proceed with full writeup NOW (writeup = the human-verification vehicle); paper stays AI-level until human sign-off.
@@ -42,9 +54,9 @@ Macro note: range-count macro is `\rcount` (`\count` is a TeX primitive — do n
 | 5 | Main theorem (assembly) | ☑ draft | App. C ☑ FULL | ☐ | 3 pieces + error budget + W-search |
 | 6 | Optimality (tightness) | ☐ | — | ☐ | owner: standalone vs folded |
 | 7 | Open questions | ☐ | — | ☐ | EMD extension as headline |
-| A | WSPD death-time impl (FULL) | ☐ | — | ☐ | 🔴 residual-debt discharge |
-| B | proof of Lemma 3 | ☐ | — | ☐ | |
-| C | proofs of §4–§5 | ☐ | — | ☐ | |
+| A | WSPD death-time impl (FULL) | ☑ draft | — | ☐ | 🔴 residual-debt discharge; telescoping+spanner+navigate+bottleneck-search+global cap; conf flags above |
+| B | proof of Lemma 3 | ☑ draft | — | ☐ | committed f4837ae |
+| C | proofs of §4–§5 | ☑ draft | — | ☐ | committed f4837ae |
 
 ## Frozen-source pointer
 All theorem/bound text copied from `docs/webpro_round5_response.md` (Pro round-5 consolidated proof) +
