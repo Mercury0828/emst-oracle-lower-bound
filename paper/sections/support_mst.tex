@@ -237,13 +237,15 @@ then tests whether that $a$-cell is occupied. This is exactly the spatial sampli
 the universe is known offline, empties are cheap, and an occupied cell is found in proportion to its share
 of $\mathcal U$, independent of how many points it holds. At a coarse scale ($a>\delta$) there is nothing
 to sample: the occupied $a$-cells are precisely the $\le b$ distinct $a$-ancestors of the active blocks,
-so $\Gamma_r$ and its component count $\cG(r)$ are read off the cover directly, with no further queries
-and no recursion into the points.
+so $\Gamma_r$ and its component count $\cG(r)$ are read off the cover directly, with no further queries and
+no recursion into the points. Computing $\cG(r)$ takes $O(b\sigma^{-2})$ time, not $O(b^2)$: hash the
+occupied $a$-cells by coordinates and, for each, probe its $O(\sigma^{-2})$ neighbor positions in the
+hash table to build the adjacency of $\Gamma_r$, then count components by union-find.
 
 \subsection{The additive call and removing the guess}\label{sec:support-call}
 
 Assume a guess $G\ge\Wq$. Set $r_0=\max\set{h,\beta G/(32K)}$, $r_j=r_0(1+\sigma)^j$, and $d_j=\sigma
-r_j$, stopping at $r_T>\diam(Q)$, so $T=O(\sigma^{-1}\log(\Delta/h))$. At each fine scale ($a(r_j)\le
+r_j$, stopping at $r_T>\sqrt2\Delta\ge\diam(Q)$, so $T=O(\sigma^{-1}\log(\Delta/h))$. At each fine scale ($a(r_j)\le
 \delta$) estimate $c_j\eqdef\cG(r_j)$ to additive accuracy $\alpha_j=\beta G/(32\,T\,\sigma r_j)$ with the
 leader estimator over the candidate universe of \cref{sec:support-cand}, using $U_j=1+G/r_j$; coarse
 scales are computed exactly from the cover with no further queries. Output
@@ -269,7 +271,8 @@ c_j-c_j}\le\sum_j d_j\alpha_j$ telescopes to $\beta G/32$ because $d_j\alpha_j=\
 $\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both the accuracy and the cost are carried out in full in
 \cref{sec:app-lemma3}.
 
-To remove the guess, start from the valid bound $U_Q=(K-1)\diam(Q)\ge\Wq$ and run \cref{lem:additive} with
+To remove the guess, start from the valid bound $U_Q=\sqrt2(K-1)\Delta\ge(K-1)\diam(Q)\ge\Wq$ (computable
+without knowing $\diam(Q)$, since $\diam(Q)\le\sqrt2\Delta$) and run \cref{lem:additive} with
 $\beta_0=\tfrac1{32}$ on $G=U_Q,U_Q/2,U_Q/4,\dots$, stopping at the first $G$ with $\widehat W(G)\ge G/4$.
 A short calculation (\cref{sec:app-lemma3}) shows the selected $G_0$ satisfies $\Wq\le G_0<8\Wq$; a final
 call with $\beta=\eta/16$ then yields $\abs{\widehat\Wq-\Wq}\le\tfrac\eta2\Wq$, and amplification over the

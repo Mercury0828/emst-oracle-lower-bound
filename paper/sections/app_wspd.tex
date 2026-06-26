@@ -34,23 +34,22 @@ We first record the sampling primitive used here and in \cref{sec:support} (refe
 \cref{sec:support-oracle}). It is \emph{telescoping sampling}~\cite{Monemizadeh23}.
 
 \begin{lemma}[Uniform sampling]\label{lem:telescoping}
-Given a query region $R$ that is a union of quadtree cells with $\rcount R>0$, one can return a point of
-$P\cap R$ drawn uniformly at random using $O(\log\Delta)$ range-counting queries.
+Given a single quadtree cell $c$ with $\rcount c>0$ (in particular the root $[\Delta]^2$), one can return a
+point of $P\cap c$ drawn uniformly at random using $O(\log\Delta)$ range-counting queries.
 \end{lemma}
 
 \begin{proof}
-If $R$ is a union of several quadtree cells, first pick one of them with probability proportional to its
-count (one count per cell). Then walk down $\mathcal T$ from the chosen cell: at a cell $c$ with children
-$c_1,\dots,c_4$, query the four counts $\rcount{c_i}$ (which sum to $\rcount c$) and descend into $c_i$
-with probability $\rcount{c_i}/\rcount c$. After $O(\log\Delta)$ levels the walk reaches a single grid
-point $p$. The probability of reaching $p$ is the product of the conditional probabilities along its
-root-to-leaf path, which telescopes:
+Walk down $\mathcal T$ from $c$: at a cell with children $c_1,\dots,c_4$, query the four counts
+$\rcount{c_i}$ (which sum to the current count) and descend into $c_i$ with probability proportional to
+$\rcount{c_i}$. After $O(\log\Delta)$ levels the walk reaches a single grid point $p$. The probability of
+reaching $p$ is the product of the conditional probabilities along its root-to-leaf path within $c$, which
+telescopes:
 \[
   \Pr[\text{reach }p]=\prod_{\text{levels}}\frac{\rcount{c^{(\ell+1)}}}{\rcount{c^{(\ell)}}}
-   =\frac{\rcount{\{p\}}}{\rcount R}=\frac1{\abs{P\cap R}},
+   =\frac{\rcount{\{p\}}}{\rcount c}=\frac1{\abs{P\cap c}},
 \]
-where $c^{(\ell)}$ are the cells on $p$'s path; so $p$ is uniform on $P\cap R$. Each level spends $O(1)$
-counts and there are $O(\log\Delta)$ of them.
+where $c^{(\ell)}$ are the cells on $p$'s path from $c$; so $p$ is uniform on $P\cap c$. Each level spends
+$O(1)$ counts and there are $O(\log\Delta)$ of them.
 \end{proof}
 
 Sampling a uniform \emph{vertex} of $X$ has two costs. For $X=P$ a uniform vertex is a uniform point,

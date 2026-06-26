@@ -51,9 +51,11 @@ edges the support handles. Each estimate:
   $\Wq\le C_W W\le C_W G$ this gives additive error $O(\xi G)$ in $\Otil_\xi(\sqrt K+n/K)=\Otil_\xi(n^{1/3})$
   queries.
 \item \emph{Support bulk $A_L(Q)$.} Run the death-time sampler on a $(1+\rho)$-spanner of $Q$. Here
-  $\abs V=K=\Theta(K_0)$, $L=G/K_0$ and $\wt(\MST(Q))=\Wq=O(G)$, so \eqref{eq:dt-var} makes the variance
-  $O(G^2/s_Q)$ and $s_Q=O_\xi(1)$ support samples suffice; each uniform support sample costs $\Otil(n/K)
-  =\Otil_\xi(n^{1/3})$ queries (\cref{sec:support-oracle}).
+  $\abs V=K=\Theta_\xi(K_0)$ (\cref{lem:kwindow}; $K$ may be as large as $C_\xi K_0=\Theta(K_0/\xi)$),
+  $L=G/K_0$ and $\wt(\MST(Q))=\Wq=O(G)$, so \eqref{eq:dt-var} makes the variance $O(\tfrac{K}{K_0}G^2/s_Q)
+  =O(\xi^{-1}G^2/s_Q)$; thus $s_Q=O(\xi^{-3})=O_\xi(1)$ support samples suffice, the extra $K/K_0=O(1/\xi)$
+  factor absorbed in $O_\xi(\cdot)$. Each uniform support sample costs $\Otil(n/K)=\Otil_\xi(n^{1/3})$
+  queries (\cref{sec:support-oracle}).
 \end{itemize}
 The assembly does not need the three errors to be independent: we only bound each by $O(\xi G)$ with
 constant probability and apply a union bound, so even though the regularized support $Q$ enters both

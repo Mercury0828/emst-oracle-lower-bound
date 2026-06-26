@@ -170,9 +170,11 @@ with $s_P=C\xi^{-2}n/K_0$ this is $\tfrac{2}{C}\xi^2G^2$, so Chebyshev gives dev
 $\eta=\dfrac{C_*\xi}{4C_W}=\Theta(\xi)$ gives $\abs{\widehat\Wq-\Wq}\le\eta\Wq\le\eta C_W G=\tfrac{C_*}4\xi
 G$.
 
-\emph{(iii) Bulk of $Q$, $\widehat A_Q$.} Identical to (i) with $\abs V=K=\Theta(K_0)$ and $\wt(\MST(H_Q))
-\le(1+\rho)\Wq=O(G)$: the variance is $O(K L G/s_Q)=O(G^2/s_Q)$, so $s_Q=O(\xi^{-2})$ samples give
-$\abs{\widehat A_Q-A_L(Q)}\le\tfrac{C_*}4\xi G$ with probability $\ge 1-\tfrac1{100}$.
+\emph{(iii) Bulk of $Q$, $\widehat A_Q$.} Identical to (i) with $\abs V=K=\Theta_\xi(K_0)$ ($K\le C_\xi K_0
+=O(K_0/\xi)$ by \cref{lem:kwindow}) and $\wt(\MST(H_Q))\le(1+\rho)\Wq=O(G)$: the variance is $O(K L G/s_Q)
+=O(\tfrac{K}{K_0}G^2/s_Q)=O(\xi^{-1}G^2/s_Q)$, so $s_Q=O(\xi^{-3})$ samples give $\abs{\widehat A_Q-A_L(Q)}
+\le\tfrac{C_*}4\xi G$ with probability $\ge 1-\tfrac1{100}$. The extra $K/K_0=O(1/\xi)$ factor, from the
+window being $\Theta_\xi$ and not $\Theta$, is what raises $s_Q$ from $O(\xi^{-2})$ to $O(\xi^{-3})$.
 
 \emph{(iv) Tail transfer.} $\abs{B_L(Q)-B_L(P)}\le\tfrac{C_*}4\xi G$ is \eqref{eq:tail-transfer}, which
 gave $O(\xi W)$.
@@ -214,8 +216,9 @@ adding the inverse-Bernoulli cost gives $\Otil_\eta(\sqrt K+n/K)=O\!\bigl(\eta^{
 
 \emph{Death-time samplers.} The bulk sampler uses $s_P=C\xi^{-2}n/K_0$ seeds, each search $O(\rho^{-2}
 \log^2\Delta\cdot\log n)=O(\xi^{-2}\poly\log n)$ queries by \cref{lem:incident} and the harmonic extraction
-bound, for $O(\xi^{-4}(n/K_0)\poly\log n)$ queries; the support sampler uses $s_Q=O(\xi^{-2})$ seeds at
-$\Otil(n/K)$ each. Both are $O(\eps^{-O(1)}n^{1/3}\poly\log n)$.
+bound, for $O(\xi^{-4}(n/K_0)\poly\log n)$ queries; the support sampler uses $s_Q=O(\xi^{-3})$ seeds (the
+$\xi^{-3}$, not $\xi^{-2}$, accounts for $K=\Theta_\xi(K_0)$) at $\Otil(n/K)$ each. Both are
+$O(\eps^{-O(1)}n^{1/3}\poly\log n)$.
 
 \emph{Total.} With $K=\Theta_\xi(K_0)=\Theta(n^{2/3})$ each per-guess call is $O(\eps^{-O(1)}n^{1/3}
 \poly\log n)$, and the $O(\log n)$ guesses and the final median keep the overall bound at

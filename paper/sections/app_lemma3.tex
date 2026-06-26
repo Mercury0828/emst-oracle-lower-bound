@@ -215,7 +215,7 @@ included in the cost of \cref{sec:app-accounting}.
 \subsection{Removing the guess and approximate \texorpdfstring{$K$}{K}}\label{sec:app-guess}
 
 Run \cref{lem:additive} with $\beta_0=\tfrac1{32}$ on the decreasing guesses $G=U_Q,U_Q/2,\dots$, where
-$U_Q=(K-1)\diam(Q)\ge\Wq$, amplified so that with constant probability every call with $G\ge\Wq$ is
+$U_Q=\sqrt2(K-1)\Delta\ge(K-1)\diam(Q)\ge\Wq$ (using $\diam(Q)\le\sqrt2\Delta$), amplified so that with constant probability every call with $G\ge\Wq$ is
 correct, and stop at the first $G$ with $\widehat W(G)\ge G/4$. If $G\ge8\Wq$ then $\widehat W(G)\le
 \Wq+G/32\le G/8+G/32<G/4$, so no such $G$ stops the search; if $G\in[\Wq,2\Wq)$ then $\widehat W(G)\ge
 \Wq-G/32>G/4$, so the search stops while $G\ge\Wq$. Hence the selected $G_0$ obeys $\Wq\le G_0<8\Wq$. A
