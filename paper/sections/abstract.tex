@@ -11,8 +11,7 @@ The improvement comes from one new primitive, an \emph{empty-cell spatial leader
 of connected components of an implicitly defined geometric graph. Where the natural approach samples points
 and pays $\Omega(\sqrt n)$ to see the rare heavy clusters that carry most of the weight, our estimator
 samples grid cells from a universe that includes empty ones, so a heavy cluster is found in proportion to
-the space it occupies and not its (small) mass; its variance is governed by the component count, and an
-active-cover packing inequality then collapses the per-scale costs to $\Otil(\sqrt K)$ on a support of $K$
-cells. Combined with a clipped death-time sampler for the bulk of the weight and a support
-regularization that routes the heavy tail through a snapped grid, balancing at $K=\Theta(n^{2/3})$ yields
-the $n^{1/3}$ rate.
+the space it occupies and not its small mass; its variance is governed by the component count, and an
+active-cover packing inequality collapses the per-scale costs to $\Otil(\sqrt K)$ on a $K$-cell support.
+With a clipped death-time sampler for the bulk and a regularization that routes the heavy tail through a
+snapped grid, balancing at $K=\Theta(n^{2/3})$ gives the $n^{1/3}$ rate.
