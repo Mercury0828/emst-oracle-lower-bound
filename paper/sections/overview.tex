@@ -1,8 +1,9 @@
 \section{Technical overview}\label{sec:overview}
 
-This section walks through the whole argument at the level of ideas, so that the formal development in
-\cref{sec:support,sec:dt,sec:main} and the proofs in the appendices can be read against a map. Nothing
-here is used later; the reader who prefers to start from definitions may skip to \cref{sec:prelim}.
+This section is the intended entry point to the paper: it walks through the whole argument at the level of
+ideas, giving a map for the formal development in \cref{sec:support,sec:dt,sec:main} and the appendix
+proofs. It is self-contained and nothing in it is relied on later, so a reader who prefers to begin from
+definitions may skip to \cref{sec:prelim} and refer back.
 
 \subsection{The cluster-count integral and where the cost hides}\label{sec:ov-integral}
 
@@ -95,6 +96,16 @@ death-time search.
 \subsection{Two costs, one packing inequality, and the \texorpdfstring{$\sqrt K$}{sqrt K} bound}
 \label{sec:ov-twopart}
 
+The accounting that follows turns on five quantities, gathered here for reference.
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+  $M$ & size of the sampled cell universe (empty cells included)\\
+  $U\ge c$ & a-priori upper bound on the component count $c=c_\Gamma(r)$\\
+  $N$ & occupied cells a single exploration may touch\\
+  $\alpha_r$ & additive accuracy target at scale $r$\\
+  $b,\delta$ & active-cover parameters (packing inequality below)\\
+\end{tabular}
+\end{center}
 To turn \eqref{eq:ov-var} into an algorithm we estimate $c=c_\Gamma(r)$ at each scale $r$ to an additive
 accuracy $\alpha_r$ tuned so the scale-by-scale errors sum to $\eps\Wq$. A median-of-means average of the
 one-bit experiment needs $O(MU/\alpha_r^2)$ trials, where $U\ge c$ is an a-priori bound on the component
