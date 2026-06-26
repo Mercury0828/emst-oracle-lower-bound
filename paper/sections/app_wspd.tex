@@ -304,24 +304,12 @@ and reproducibly by hashing the vertex identity, so a vertex reached through two
 different searches still carries one rank; no global random tape is materialized.
 \end{remark}
 
-\begin{remark}[What a human verifier should check first]\label{rem:verify}
-The two places where the implementation is most easily mis-stated, and which a careful reading should
-target, are the local pair family (\cref{sec:wspd-spanner}) and the budget mechanism (\cref{sec:wspd-cap}).
-For the former, the key point is that we do \emph{not} claim the locally testable family $\widehat{\mathcal
-W}$ equals the recursion-generated WSPD $\mathcal W$; we claim only $\mathcal W\subseteq\widehat{\mathcal
-W}$, so the spanner $S$ \emph{contains} a standard WSPD spanner (hence has stretch $1+\rho$) while every
-extra edge of $S$ is still a true Euclidean pair (hence $c_X(t)\le c_S(t)$ is unharmed). The partner-count
-bound, and so the per-vertex degree, comes from the predecessor pair being not well separated, not from
-well-separation itself. For the latter, the point is that capping is global, not per-search, so that no individual
-death-time value is ever imputed or conditioned on, which is what keeps the averages unbiased. These two
-points are the substance of realizing the source's WSPD machinery under a counting oracle.
-
-A third, more mechanical item worth checking is the support case $X=Q$ throughout: every operation that is
-stated for points of $P$ has a parallel for cell centers, and the only difference is the cost of a uniform
-seed, $O(\log\Delta)$ for $P$ versus $\Otil(n/K)$ for $Q$ by rejection. The representative of a support
-cell is the $z$-first occupied $h$-subcell center, found by an emptiness descent that is identical in form
-to the descent for $P$; the WSPD, the navigability, and the bottleneck search then run on $Q$ unchanged,
-because a support $h$-cell is a quadtree cell and every region they query is a union of such cells. We have
-verified that no step of the search ever needs a point of $P$ once the support is fixed, so the two
-death-time samplers, on $P$ and on $Q$, are the same procedure run on two different vertex sets.
+\begin{remark}[Two load-bearing points]\label{rem:verify}
+Two points carry the construction. First, $\widehat{\mathcal W}$ is only a \emph{superset} of the standard
+WSPD ($\mathcal W\subseteq\widehat{\mathcal W}$, never equality): the spanner $S$ therefore contains a WSPD
+spanner (so has stretch $1+\rho$) while its extra edges are true Euclidean pairs (so $c_X(t)\le c_S(t)$ is
+unharmed), and the degree bound comes from the non-well-separated parent-pair, not from well-separation.
+Second, the query cap is \emph{global}, not per-search, so no individual death-time value is imputed or
+conditioned on, which keeps the averages unbiased. The support case $X=Q$ is the same procedure on cell
+centers, differing only in the uniform-seed cost ($\Otil(n/K)$ by rejection, not $O(\log\Delta)$).
 \end{remark}

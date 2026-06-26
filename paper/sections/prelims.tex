@@ -168,3 +168,24 @@ probability $1-\delta$. We invoke this both for the leader estimator (\cref{lem:
 and for the death-time averages (\cref{sec:dt-sampler}). When several estimates must hold at once we set
 each block's $\delta$ to a $1/\poly$ fraction and union-bound, absorbing the $O(\log)$ overhead into
 $\Otil(\cdot)$.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+random object & shared across? & concentration & failure handling\\
+\midrule
+leader-trial ranks (\cref{lem:leader}) & fresh per trial & variance $\le Mc$ & median-of-means\\
+death-time ranks (\cref{sec:dt-sampler}) & fixed within a run & cond.\ on ranking & median-of-means\\
+uniform seeds ($P$ or $Q$) & fresh per sample & i.i.d.\ given ranking & median-of-means\\
+$K$-estimation batch (\cref{sec:support-oracle}) & fresh after fixing $h$ & negative-binomial & part of global budget\\
+scale-test batches (\cref{lem:kwindow}) & one per scale & Chernoff, union over scales & part of global budget\\
+global query budget (\cref{sec:wspd-cap}) & per call & Markov on total cost & abort $\to$ \textsc{fail}\\
+median amplification (\cref{sec:main-combine}) & across runs & majority of $O(\log n)$ runs & \textsc{fail}=bad run\\
+\bottomrule
+\end{tabular}
+\caption{The random objects and how each is concentrated and protected. Errors are combined by union
+bounds, never by an assumed independence between estimators.}
+\label{tab:random}
+\end{table}

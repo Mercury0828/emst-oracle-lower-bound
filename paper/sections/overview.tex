@@ -193,18 +193,12 @@ of~\cite{DMOSW25} (\cref{sec:optimality}) shows the exponent cannot be improved.
 \subsection{What is new, against the \texorpdfstring{$\Otil(\sqrt n)$}{Otil(sqrt n)} approach}
 \label{sec:ov-compare}
 
-It is worth saying precisely where the improvement over Driemel et al.~\cite{DMOSW25} comes from, since the
-two algorithms share most of their scaffolding. Both reduce the MST weight to counting connected components
-of threshold graphs through the cluster-count integral, both realize a navigable $(1+\rho)$-spanner from
-the same WSPD construction, and both navigate it with range counts. They differ at a single step: how a
-component count at one scale is estimated. The component-counting subroutine of~\cite{DMOSW25} follows the
-classical sublinear scheme, sampling vertices and exploring their components, and at a scale with $K$
-occupied cells this pays $\Theta(\sqrt K)$ \emph{per scale just to see the heavy outliers}, because an
-outlier is a vanishing fraction of the mass; summed over the reduction this is $\Theta(\sqrt n)$. Our
-empty-cell leader estimator replaces vertex sampling with cell sampling over a universe that includes empty
-cells, so an outlier is one cell among $M$ and is found with probability $1/M$ regardless of its mass; the
-variance then sees the component count, and the packing inequality collapses the per-scale costs to
-$\Otil(\sqrt K)$ \emph{total}, not per scale. Balancing $\sqrt K$ against the $n/K$ cost of learning $K$
-moves the rate from $\Otil(\sqrt n)$ to $\Otil(n^{1/3})$. Everything else, the spanner, the death-time
-view, the snapping, is inherited or adapted; the empty-cell leader estimator is the entire source of the
-polynomial improvement.
+Our algorithm shares its scaffolding with Driemel et al.~\cite{DMOSW25} -- the cluster-count reduction, the
+WSPD spanner, range-count navigation -- and differs at a single step: estimating a component count at one
+scale. Their subroutine samples vertices and explores components, paying $\Theta(\sqrt K)$ \emph{per scale}
+just to see the heavy outliers (a vanishing fraction of the mass), which sums to $\Theta(\sqrt n)$. The
+empty-cell leader estimator samples cells from a universe including empty ones, so an outlier is one cell
+among $M$ found with probability $1/M$ regardless of its mass; its variance sees the component count, and
+the packing inequality collapses the per-scale costs to $\Otil(\sqrt K)$ \emph{total}. Balancing against
+the $n/K$ cost of learning $K$ moves the rate to $\Otil(n^{1/3})$: the leader estimator is the entire
+source of the polynomial improvement.

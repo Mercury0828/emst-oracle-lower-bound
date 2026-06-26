@@ -155,22 +155,13 @@ $\Theta(n)$ to the MST weight (each point joins a neighbor at distance $\Theta(1
 contributes $\Theta(\sum_{i\le s}2^i)=\Theta(2^s)=\Theta(n)$, so $W=\Theta(n)$, with a constant fraction of
 it living in the few long satellite edges.
 
-The geometric search calibrates a guess $G_0\in[W,16W)$, fixing $L=G_0/K_0=\Theta(n^{1/3})$ with
-$K_0=\Theta(n^{2/3})$. Regularization (\cref{lem:kwindow}) starts at scale $\Theta(\xi L)$ and halves to
-the first scale with $\Theta(K_0)$ occupied cells; for this carpet that scale is $\Theta(n^{1/6})$, at
-which the carpet collapses to $\Theta(K_0)$ cells and each of the $s$ far-apart satellites still occupies
-its own cell. The point of the instance is the contrast at the support: the satellites are a vanishing
-fraction $s/K_0=\Theta(\log n/n^{2/3})$ of the support cells, so a sample of $\poly\log$ \emph{support
-points} would miss them, yet the long satellite edges carry a constant fraction of $\Wq$. The empty-cell
-leader estimator instead samples cells from each scale's candidate universe, where a satellite cell is one
-candidate like any other and so is detected at the right rate; the two-part accounting of \cref{lem:support}
-then reads the full $\Wq=\Theta(n)$, heavy tail included, in $\Otil(\sqrt{K_0})=\Otil(n^{1/3})$ queries,
-without the per-scale $\Omega(\sqrt{K_0})$ that point sampling would pay to find the satellites.
-
-The three estimators then combine through $W=A_L(P)+B_L(P)$ with $B_L(P)\approx B_L(Q)=\Wq-A_L(Q)$. The
-death-time samplers estimate the two clipped bulks $A_L(P)$ and $A_L(Q)$ directly (each dominated by the
-short edges its set carries), and $\widehat\Wq$ supplies the heavy tail; in the assembly $\widehat W=
-\widehat A_P+\widehat\Wq-\widehat A_Q$ the support's own bulk $A_L(Q)$ is subtracted off and the satellite
-tail survives, returning $\Theta(n)=\Theta(W)$. A purely point-mass algorithm at the same budget never
-samples a satellite and reports only the carpet weight, missing the constant-fraction tail; the spatial
-leader estimator is exactly what averts that failure.
+Regularization fixes $K_0=\Theta(n^{2/3})$ and a grid at which the carpet collapses to $\Theta(K_0)$ cells
+while each of the $s$ far-apart satellites still occupies its own. The contrast is now sharp at the
+support: the satellites are a $s/K_0=\Theta(\log n/n^{2/3})$ fraction of the support cells, so a sample of
+$\poly\log$ support \emph{points} misses them, yet the long satellite edges carry a constant fraction of
+$\Wq$. The leader estimator samples cells instead, where a satellite cell is one candidate among $M$ and is
+detected at the right rate, so \cref{lem:support} reads the full $\Wq=\Theta(n)$ -- heavy tail included --
+in $\Otil(n^{1/3})$ queries. Assembling $\widehat W=\widehat A_P+\widehat\Wq-\widehat A_Q$ keeps the
+satellite tail (carried by $\widehat\Wq$) and cancels the duplicated bulk, returning $\Theta(W)$. A
+point-mass algorithm at the same budget never samples a satellite and reports only the carpet weight,
+missing the constant-fraction tail; the spatial leader estimator is exactly what averts that failure.

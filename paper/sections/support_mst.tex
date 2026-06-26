@@ -13,7 +13,7 @@ $\Wq=\wt(\MST(Q))$ in a number of queries sublinear in $K$.
 For every $\eta\in(0,\tfrac14)$ there is a randomized algorithm that, with probability at least $2/3$,
 outputs $\widehat\Wq$ with $\abs{\widehat\Wq-\Wq}\le\eta\,\Wq$ while making $\Otil_\eta\!\bigl(\sqrt
 K+\tfrac nK\bigr)$ range-counting queries to $P$. The query count is a high-probability bound (the $n/K$
-term comes from inverse-binomial sampling, whose length is $\Otil(n/K)$ with high probability rather than
+term comes from inverse-binomial sampling, whose length is $\Otil(n/K)$ with high probability, not
 deterministically); if $K$ is supplied to relative error $O(\eta)$, the $n/K$ term is unnecessary and the
 $\Otil_\eta(\sqrt K)$ bound is deterministic.
 \end{lemma}
