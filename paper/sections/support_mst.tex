@@ -43,12 +43,13 @@ $a=\Theta(\kappa^{-2}\log(1/\delta))$ and draw trials until $a$ of them have acc
 of trials used, output $\widehat K=a\,n/T$. The count $T$ is a negative-binomial variable with mean
 $a\,n/K$, and by its concentration $T\in(1\pm\kappa)a\,n/K$ with probability $1-\delta$, so $\widehat K\in
 (1\pm O(\kappa))K$ with probability $1-\delta$; on that event the procedure made $T=O(\kappa^{-2}(n/K)
-\log(1/\delta))$ trials, an \emph{$\Otil(n/K)$ query bound that holds with high probability}, not only in
-expectation. We run this under the same global budget as the rest of the call (\cref{sec:support-call}): if
-$T$ exceeds $C\cdot\kappa^{-2}(n/K_{\min})\log(1/\delta)$ for the smallest support size $K_{\min}\ge 1$ of
-interest the call aborts, an event of probability $\le\delta$ by the same concentration. For $K=O(1)$ the
-cover construction has already found all support cells explicitly (\cref{lem:packing}'s small-$b$ case),
-and $K$ is known exactly with no sampling. Until \cref{sec:support-call} we treat $K$ as known exactly and
+\log(1/\delta))$ trials. The query bound is therefore $\Otil(n/K)$ \emph{with high probability}, which is
+exactly the form in which \cref{lem:support} states its $n/K$ term -- a high-probability query complexity,
+not a deterministic one. (The deterministic global cap of \cref{sec:support-call} belongs to the main
+algorithm, where the target support size $K_0$ is known and the cap is set from $K_0$, not from the unknown
+$K$.) Since the active cover already exhibits $b=\Theta(\sqrt K)$ occupied cells, $K\ge b=\Omega(1)$, and
+when $b<8$ the cover has listed all support cells explicitly (\cref{lem:packing}'s small-$b$ case), so $K$
+is then known exactly with no sampling. Until \cref{sec:support-call} we treat $K$ as known exactly and
 account for the $\kappa$-perturbation at the end.
 
 \subsection{Overview}\label{sec:support-overview}
@@ -271,8 +272,9 @@ c_j-c_j}\le\sum_j d_j\alpha_j$ telescopes to $\beta G/32$ because $d_j\alpha_j=\
 $\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both the accuracy and the cost are carried out in full in
 \cref{sec:app-lemma3}.
 
-To remove the guess, start from the valid bound $U_Q=\sqrt2(K-1)\Delta\ge(K-1)\diam(Q)\ge\Wq$ (computable
-without knowing $\diam(Q)$, since $\diam(Q)\le\sqrt2\Delta$) and run \cref{lem:additive} with
+To remove the guess, start from the valid bound $U_Q=\sqrt2(n-1)\Delta\ge\Wq$ (computable from $n$ alone,
+since $\Wq\le(K-1)\diam(Q)\le(n-1)\sqrt2\Delta$ as $K\le n$ and $\diam(Q)\le\sqrt2\Delta$) and run
+\cref{lem:additive} with
 $\beta_0=\tfrac1{32}$ on $G=U_Q,U_Q/2,U_Q/4,\dots$, stopping at the first $G$ with $\widehat W(G)\ge G/4$.
 A short calculation (\cref{sec:app-lemma3}) shows the selected $G_0$ satisfies $\Wq\le G_0<8\Wq$; a final
 call with $\beta=\eta/16$ then yields $\abs{\widehat\Wq-\Wq}\le\tfrac\eta2\Wq$, and amplification over the

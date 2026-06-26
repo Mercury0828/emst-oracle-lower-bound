@@ -18,7 +18,7 @@ spanner stretch below is $1+\rho$.
 \paragraph{The construction at a glance.}
 The plan has four layers, each a lemma below. (1) A uniform vertex of $X$, and the representative of any
 cell, are drawn with $O(\log\Delta)$ counts by telescoping sampling (\cref{lem:telescoping}). (2) The
-spanner $S$ has one edge per well-separated pair, joining the two representatives at their exact Euclidean
+spanner $S$ has one edge per pair of a local family $\widehat{\mathcal W}$, joining the two representatives at their exact Euclidean
 distance; because we know representative coordinates, edge weights are free and $S$ is a genuine Euclidean
 subgraph (\cref{sec:wspd-spanner}). (3) From a vertex $u$, its incident spanner edges below a length are
 enumerated by scanning $u$'s $O(\log\Delta)$ quadtree ancestors and, for each, its $O(\rho^{-2})$
@@ -76,30 +76,34 @@ $d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The Callahan--Kosaraju recursion~\cite{CK95
 well-separated pair decomposition $\mathcal W$ of $X$, but its membership is a property of the whole
 recursion, not of a pair in isolation, so we do not enumerate $\mathcal W$ directly. Instead we enumerate a
 \emph{larger}, locally testable family $\widehat{\mathcal W}$ and show that the spanner built from it
-contains a standard WSPD spanner; the extra pairs are harmless. Orient every pair so that $r(c)\le r(c')$,
-breaking a tie $r(c)=r(c')$ by the $z$-order of the cell centers, and let $p(c')$ be the quadtree parent of
-the larger cell. Define
+contains a standard WSPD spanner; the extra pairs are harmless. Write $p(c)$ for the quadtree parent of a
+cell $c$, and call a pair $(c,c')$ a \emph{parent-pair} of itself if one of its cells is replaced by its
+parent, i.e.\ $(p(c),c')$ or $(c,p(c'))$. Define the symmetric, unordered family
 \[
-  \widehat{\mathcal W}=\bigl\{(c,c'):\ \text{$c,c'$ nonempty},\ \tfrac12 r(c')\le r(c)\le r(c'),\
-   \text{$(c,c')$ well separated},\ \text{$(c,p(c'))$ \emph{not} well separated}\bigr\}.
+  \widehat{\mathcal W}=\bigl\{\{c,c'\}:\ \text{$c,c'$ nonempty},\ \tfrac12\le r(c)/r(c')\le 2,\
+   \text{$(c,c')$ well separated},\ \text{at least one parent-pair is \emph{not} well separated}\bigr\}.
 \]
-Membership $(c,c')\in\widehat{\mathcal W}$ is decided in $O(1)$ counts: the three separation/size conditions
-are geometric, and the two emptiness tests are $O(1)$ counts; the parent $p(c')$ is unique. Two facts
-about $\widehat{\mathcal W}$ are all we use.
+Membership $\{c,c'\}\in\widehat{\mathcal W}$ is decided in $O(1)$ counts: the size and separation tests are
+geometric, the two parent-pairs are tested in $O(1)$ time, and the two emptiness tests are $O(1)$ counts.
+Two facts about $\widehat{\mathcal W}$ are all we use.
 
 \begin{enumerate}
-\item \emph{$\widehat{\mathcal W}$ contains a WSPD.} The standard recursion outputs a pair $(c,c')$ only
-after descending strictly past its predecessor $(c,p(c'))$, which it would not have done had $(c,p(c'))$
-been well separated; the output pair is itself well separated, and its two cells satisfy $r(c')/2\le r(c)
-\le 2r(c')$ by~\cite[Lem.~22]{DMOSW25}. Hence every pair of $\mathcal W$ satisfies the predicate (after the
-orientation), so $\mathcal W\subseteq\widehat{\mathcal W}$. (The converse fails: the recursion may stop at a
-well-separated ancestor pair and never visit a well-separated descendant pair that nonetheless satisfies
-the predicate. We do not claim equality.)
+\item \emph{$\widehat{\mathcal W}$ contains a WSPD.} Whatever orientation and tie-breaking the standard
+recursion uses, a pair $(c,c')$ it outputs is well separated, has comparable cells $r(c')/2\le r(c)\le
+2r(c')$ by~\cite[Lem.~22]{DMOSW25}, and was reached by one final subdivision of its immediate predecessor
+in the recursion; that predecessor is exactly one of the parent-pairs $(p(c),c')$ or $(c,p(c'))$, and it
+is \emph{not} well separated (else the recursion would have output it and stopped before subdividing).
+Hence every pair of $\mathcal W$ satisfies the symmetric predicate, so $\mathcal W\subseteq\widehat{\mathcal
+W}$, and this holds for either split side and for equal-size ties. (The converse fails -- the recursion may
+stop at a well-separated ancestor pair and never visit a qualifying descendant -- so we claim only
+containment, never equality.)
 \item \emph{Bounded partner count.} Fix a cell $c$ of side $s$. Any $\widehat{\mathcal W}$-partner $c'$ has
-$r(c')\in[s,2s]$ and, since $(c,p(c'))$ is not well separated, $d(c,p(c'))<r(p(c'))/\rho=O(s/\rho)$, so
-$d(c,c')=O(s/\rho)$. The cells of side in $[s,2s]$ within center-distance $O(s/\rho)$ of $c$ number
-$O(\rho^{-2})$, so $c$ has $O(\rho^{-2})$ partners; a vertex is the representative of $O(\log\Delta)$
-ancestor cells, so it has $O(\rho^{-2}\log\Delta)$ incident edges in the spanner below.
+$r(c')\in[s/2,2s]$, and some parent-pair is not well separated: if $(c,p(c'))$ is not well separated then
+$d(c,p(c'))<r(p(c'))/\rho=O(s/\rho)$, and if $(p(c),c')$ is not well separated then $d(p(c),c')<
+r(p(c))/\rho=O(s/\rho)$; either way $d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$ within
+center-distance $O(s/\rho)$ of $c$ number $O(\rho^{-2})$, so $c$ has $O(\rho^{-2})$ partners; a vertex is
+the representative of $O(\log\Delta)$ ancestor cells, so it has $O(\rho^{-2}\log\Delta)$ incident edges in
+the spanner below.
 \end{enumerate}
 
 The \emph{spanner} $S=(X,E(S))$ has, for each $(c,c')\in\widehat{\mathcal W}$, the edge
@@ -190,18 +194,18 @@ $O(\log\Delta)$ quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\lo
 for each, one representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both
 finds the relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its
 $\widehat{\mathcal W}$-partners $c'$ have side in $[s/2,2s]$, and their distance is bounded \emph{above} by
-the predicate's non-well-separated predecessor: $d(c,p(c'))<r(p(c'))/\rho=O(s/\rho)$, and since
-$c'\subseteq p(c')$, $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p(c'))=O(s/\rho)$. The cells of side in $[s/2,2s]$
+the predicate's non-well-separated parent-pair (\cref{sec:wspd-spanner}, fact~(2)): whichever of
+$(c,p(c'))$ or $(p(c),c')$ is not well separated gives $d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$
 within center-distance $O(s/\rho)$ of $c$ therefore number $O(\rho^{-2})$ and are enumerated from $c$'s
-coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the
-$\widehat{\mathcal W}$-predicate ($O(1)$ counts, trying both orientations), compute $\rep(c')$
-($O(\log\Delta)$ counts), and, when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight.
-Each ancestor thus costs $O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are
-$O(\log\Delta)$ ancestors, for $O(\rho^{-2}\log^2\Delta)$ counts; the emitted edge set is deduplicated by
-vertex identity. Every incident edge of length $\le r$ is found, since its defining $\widehat{\mathcal W}$-pair
-has $u$ as the representative of one of its two cells, an ancestor of $u$ scanned above and tested in both
-orientations; only genuine edges are emitted, each checked against the predicate and the exact length. The
-distinct-edge count $O(\rho^{-2}\log\Delta)$ is the partner bound above.
+coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the (symmetric,
+unordered) $\widehat{\mathcal W}$-predicate ($O(1)$ counts), compute $\rep(c')$ ($O(\log\Delta)$ counts),
+and, when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
+$O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are $O(\log\Delta)$ ancestors, for
+$O(\rho^{-2}\log^2\Delta)$ counts; the emitted edge set is deduplicated by vertex identity. Every incident
+edge of length $\le r$ is found, since its defining $\widehat{\mathcal W}$-pair has $u$ as the
+representative of one of its two cells, an ancestor of $u$ scanned above; only genuine edges are emitted,
+each checked against the predicate and the exact length. The distinct-edge count $O(\rho^{-2}\log\Delta)$ is
+the partner bound above.
 \end{proof}
 
 \subsection{The exact bottleneck death-time search}\label{sec:wspd-search}
@@ -245,10 +249,10 @@ returns exactly $\min\{\tau(v),L\}$; no rounding enters.
 
 \paragraph{Per-search cost in expectation.}
 Order the vertices by bottleneck distance from $v$, ties broken by vertex identity; this order is fixed
-before the ranks are revealed and is the order in which the queue extracts them. The search halts at the
-first root/lower-ranked vertex in this order, so it extracts the $j$-th vertex only if none of the first
-$j-1$ is the root and $v$ has smaller rank than all of them, an event of probability $\le 1/(j-1)$ for
-$j\ge2$ (the ranks of the first $j-1$ vertices and $v$ are exchangeable, being independent and uniform). The expected number of extractions is thus at most
+before the ranks are revealed and is the order in which the queue extracts them. Let $v=w_1,w_2,\dots$ be this order. The search halts at the first $w_i$ ($i\ge2$) that is the root or has
+rank below $\mathrm{rank}(v)$, so it extracts $w_j$ only if none of $w_1,\dots,w_{j-1}$ is the root and $v$
+has the smallest rank among the $j-1$ vertices $w_1,\dots,w_{j-1}$ (which include $v$). The latter has
+probability $1/(j-1)$ for $j\ge2$, the $j-1$ ranks being independent and uniform, hence exchangeable. The expected number of extractions is thus at most
 $1+\sum_{j\ge2}1/(j-1)=1+H_{\abs V-1}=O(\log\abs V)$. Each extraction expands one vertex by
 \cref{lem:incident} at $O(\rho^{-2}\log^2\Delta)$ counts, so a search costs
 $O(\rho^{-2}\log^2\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in
