@@ -31,6 +31,36 @@ $\widehat A_Q\leftarrow$ clipped death-time sampler on a $(1{+}\rho)$-spanner of
 \Return $\widehat A_P+\widehat\Wq-\widehat A_Q$ (or \textsc{fail} if the global query budget is exceeded)\;
 \end{algorithm}
 
+\paragraph{Probability and budget, in one place.}
+Three notions of cost appear in the analysis and we state how they fit together. The estimators are
+randomized and their natural query counts are bounds in expectation or with high probability; the algorithm
+converts these into a \emph{deterministic} per-run bound by carrying a global query budget $B$ and aborting
+once it is spent (\cref{sec:wspd-cap}), and an aborted run is counted as a failed sample inside the median
+amplification. The following lemma packages the guarantee of one call; \cref{thm:main} then follows by the
+geometric search over guesses.
+
+\begin{lemma}[Per-call guarantee]\label{lem:percall}
+Fix a guess $G$ and set $\zeta=C_*\xi$. One run of $\textsc{Estimate}(G,\zeta)$ makes at most a
+\emph{deterministic} $B=\Otil_\zeta(n^{1/3})$ range counts, and its expected count is also
+$\Otil_\zeta(n^{1/3})$. If $G\ge W$ then with probability at least $9/10$ the run completes within $B$ and
+returns $\widehat W(G)$ with $\abs{\widehat W(G)-W}\le\zeta G$; the complementary \emph{bad} event, of
+probability at most $1/10$, is that the run either overruns $B$ (returning \textsc{fail}) or completes with
+an inaccurate value.
+\end{lemma}
+
+\begin{proof}
+A run estimates the three pieces of \cref{sec:main-pieces}, each to additive error $O(\xi G)$ on the
+$\poly\log n$ internal estimates (the $T=\Otil(1)$ scales of the support call and the death-time means),
+which we amplify to failure probability $o(1/\log n)$ each by a median of $O(\log n)$ blocks and union-
+bound; this gives $\abs{\widehat W(G)-W}\le C_*\xi G=\zeta G$ with probability $\ge 1-\tfrac1{20}$ whenever
+$G\ge W$ (\cref{sec:app-combine}, \eqref{eq:guess-accuracy}). The total expected query count of the four
+parts -- regularization and $K$-estimation, the support estimator, and the two death-time samplers -- is
+$\Otil_\zeta(n^{1/3})$ (\cref{sec:app-constants}). Setting the deterministic budget $B$ to a large constant
+times this expectation and aborting on overrun makes every run cost at most $B$, and by Markov a run
+overruns with probability $\le\tfrac1{20}$; folding the two failure modes gives the stated $9/10$ and
+$1/10$.
+\end{proof}
+
 \subsection{Estimating the three pieces under a guess}\label{sec:main-pieces}
 
 Fix a guess $G\ge W$ and an internal accuracy $\xi$, and set $K_0=\ceil{n^{2/3}}$, $L=G/K_0$, with the
@@ -61,17 +91,6 @@ The assembly does not need the three errors to be independent: we only bound eac
 constant probability and apply a union bound, so even though the regularized support $Q$ enters both
 $\widehat\Wq$ and $\widehat A_Q$, no independence is assumed.
 
-\begin{remark}[Amplification and failure bookkeeping]\label{rem:amp}
-Every estimate above is correct only with constant probability, and the algorithm makes $\poly\log n$ of
-them (the $T=\Otil(1)$ scales of each support call, the $O(\log n)$ guesses, the two death-time samplers).
-We boost each to failure probability $1/\poly(n)$ by the median trick of \cref{sec:prelim} and union-bound:
-since there are $\poly\log n$ estimates and each fails with probability $n^{-\Omega(1)}$, all hold
-simultaneously with probability $1-n^{-\Omega(1)}$, well inside the constant slack of \cref{thm:main}. Each
-amplification multiplies the relevant cost by $O(\log n)$, absorbed in $\Otil(\cdot)$. The one nonstandard
-point is the global query budget: a call that overruns its deterministic budget returns \textsc{fail},
-which the median over runs treats as one bad sample, so the budget caps the worst-case query count without
-biasing the surviving estimates (\cref{sec:wspd-cap}).
-\end{remark}
 
 \begin{remark}[The choice $K_0=n^{2/3}$]\label{rem:k0}
 The support size $K_0$ is the only free knob, and the three costs above pin it down. The support estimator
@@ -97,17 +116,14 @@ and each of the four terms is $O(\xi G)$, so for a suitable constant $C_*$,
 \begin{equation}\label{eq:guess-accuracy}
   \abs{\widehat W(G)-W}\le C_*\xi G\qquad\text{whenever }G\ge W .
 \end{equation}
-Rescaling the internal accuracy to $\zeta=C_*\xi$ gives $\abs{\widehat W(G)-W}\le\zeta G$ in
-$\Otil_\zeta(n^{1/3})$ queries per call. A single run of the call carries the deterministic budget
-$B=\Otil_\zeta(n^{1/3})$ of \cref{sec:wspd-cap} and returns \textsc{fail} if it aborts. We amplify each
-guess into a reliable estimate by taking the median of $t=O(\log n)$ independent runs, where an aborted run
-contributes $+\infty$ to the median. For a guess with $G\ge W$, one run is \emph{bad} if it aborts
-(probability $\le 1/C$) or is inaccurate (probability $\le 1/6$); choosing the budget constant $C$ large
-makes the bad probability less than $1/3$, so fewer than half of the $t$ runs are bad with probability
-$1-n^{-\Omega(1)}$, and the median is then an accurate, finite estimate. A union bound over the $O(\log
-n)$ guesses keeps all guesses with $G\ge W$ simultaneously accurate with constant probability; guesses
-with $G<W$ need no guarantee beyond not stopping the search prematurely, which the accurate guesses above
-already enforce.
+This is \eqref{eq:guess-accuracy}, the per-run accuracy that \cref{lem:percall} packages with the
+deterministic budget. We amplify each guess by taking the median $\widehat W(G)$ of $t=O(\log n)$
+independent runs, an aborted run contributing $+\infty$. By \cref{lem:percall}, for $G\ge W$ a run is
+\emph{bad} -- it aborts or is inaccurate -- with probability at most $\tfrac1{10}<\tfrac12$, so fewer than
+half the runs are bad with probability $1-n^{-\Omega(1)}$ and the median is accurate and finite.
+A union bound over the $O(\log n)$ guesses keeps all guesses with $G\ge W$ simultaneously accurate;
+guesses with $G<W$ need no guarantee beyond not stopping the search early, which the accurate guesses
+enforce.
 
 The estimator needs a guess $G\ge W$ to set its clip level $L=G/K_0$ and its budgets, but $W$ is what we
 are computing. The way out is that the guarantee \eqref{eq:guess-accuracy} is one-sided in a useful way:
