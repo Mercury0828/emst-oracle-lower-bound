@@ -31,7 +31,7 @@ $\Omega(\sqrt K)$ of them, and paying this at every scale is the $\sqrt n$ barri
 
 \subsection{The empty-cell spatial leader estimator}\label{sec:ov-leader}
 
-Our one new primitive removes that barrier by sampling \emph{space} instead of mass. Fix a scale and lay
+The new primitive removes that barrier by sampling \emph{space} instead of mass. Fix a scale and lay
 down a fine grid. Form the \emph{scale graph} whose vertices are the nonempty cells and whose edges join
 cells that are close, so that its component count brackets $c_S$ at nearby thresholds
 (\cref{sec:support-filtration}). To estimate the number of components $c$ of a graph $\Gamma$ on a known
@@ -178,8 +178,8 @@ of $u$ at which $u$ is the representative and, for each, its $O(\rho^{-2})$ well
 A bottleneck Dijkstra over exact edge weights then computes $\tau(v)$ exactly, halting at the first
 lower-ranked vertex after $O(\log\abs V)$ expansions in expectation. The full implementation, including a
 global query budget that makes the whole call abort rarely instead of biasing any single search, is
-\cref{sec:wspd}. This is the part inherited from~\cite{DMOSW25} and the one a verifier should read most
-closely.
+\cref{sec:wspd}; it is the step inherited from~\cite{DMOSW25}, adapted to the local family of
+\cref{sec:wspd-spanner}.
 
 \subsection{The balance point}\label{sec:ov-balance}
 
@@ -200,5 +200,5 @@ just to see the heavy outliers (a vanishing fraction of the mass), which sums to
 empty-cell leader estimator samples cells from a universe including empty ones, so an outlier is one cell
 among $M$ found with probability $1/M$ regardless of its mass; its variance sees the component count, and
 the packing inequality collapses the per-scale costs to $\Otil(\sqrt K)$ \emph{total}. Balancing against
-the $n/K$ cost of learning $K$ moves the rate to $\Otil(n^{1/3})$: the leader estimator is the entire
-source of the polynomial improvement.
+the $n/K$ cost of learning $K$ moves the rate to $\Otil(n^{1/3})$, with the leader estimator the step that
+yields the polynomial improvement.

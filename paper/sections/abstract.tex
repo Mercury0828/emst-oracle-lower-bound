@@ -8,10 +8,9 @@ Euclidean MST-weight estimation in this model and improving the previous $\Otil(
 the tight rate.
 
 The improvement comes from one new primitive, an \emph{empty-cell spatial leader estimator} for the number
-of connected components of an implicitly defined geometric graph. Where the natural approach samples points
-and pays $\Omega(\sqrt n)$ to see the rare heavy clusters that carry most of the weight, our estimator
-samples grid cells from a universe that includes empty ones, so a heavy cluster is found in proportion to
-the space it occupies and not its small mass; its variance is governed by the component count, and an
-active-cover packing inequality collapses the per-scale costs to $\Otil(\sqrt K)$ on a $K$-cell support.
-With a clipped death-time sampler for the bulk and a regularization that routes the heavy tail through a
-snapped grid, balancing at $K=\Theta(n^{2/3})$ gives the $n^{1/3}$ rate.
+of connected components of an implicitly defined geometric graph. Where sampling points pays $\Omega(\sqrt
+n)$ to find the rare heavy clusters that carry most of the weight, this estimator samples grid cells from a
+universe that includes empty ones, so a heavy cluster is found in proportion to the space it occupies and
+not its small mass; its variance is governed by the component count, which lets a support of $K$ cells be
+handled in $\Otil(\sqrt K)$ queries. Balancing this against the cost of reducing the input to a support of
+the right size yields the $n^{1/3}$ rate at $K=\Theta(n^{2/3})$.

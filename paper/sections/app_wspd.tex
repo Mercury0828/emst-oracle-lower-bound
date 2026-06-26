@@ -88,13 +88,17 @@ geometric, the two parent-pairs are tested in $O(1)$ time, and the two emptiness
 Two facts about $\widehat{\mathcal W}$ are all we use.
 
 \begin{enumerate}
-\item \emph{$\widehat{\mathcal W}$ contains a WSPD.} Whatever orientation and tie-breaking the standard
-recursion uses, a pair $(c,c')$ it outputs is well separated, has comparable cells $r(c')/2\le r(c)\le
-2r(c')$ by~\cite[Lem.~22]{DMOSW25}, and was reached by one final subdivision of its immediate predecessor
-in the recursion; that predecessor is exactly one of the parent-pairs $(p(c),c')$ or $(c,p(c'))$, and it
-is \emph{not} well separated (else the recursion would have output it and stopped before subdividing).
-Hence every pair of $\mathcal W$ satisfies the symmetric predicate, so $\mathcal W\subseteq\widehat{\mathcal
-W}$, and this holds for either split side and for equal-size ties. (The converse fails -- the recursion may
+\item \emph{$\widehat{\mathcal W}$ contains a WSPD.} We use the standard Callahan--Kosaraju recursion in
+the form of \cite[Algorithm~2]{DMOSW25}: a call on a current pair returns it if it is well separated, and
+otherwise subdivides one of its two cells (the larger, ties broken by a fixed rule) into quadtree children
+and recurses on each child paired with the unchanged cell. Consider a pair $(c,c')$ the recursion outputs.
+It is well separated, and its cells satisfy $r(c')/2\le r(c)\le 2r(c')$ by~\cite[Lem.~22]{DMOSW25}, so it
+has comparable side. Its \emph{immediate predecessor} -- the pair on which the call that produced $(c,c')$
+was made -- is obtained by replacing whichever of $c,c'$ was the just-subdivided child with its quadtree
+parent, hence it is one of the two parent-pairs $(p(c),c')$ or $(c,p(c'))$; and it is \emph{not} well
+separated, since otherwise that call would have returned it and never subdivided. So $(c,c')$ satisfies the
+symmetric predicate, and as this argument is blind to which cell was subdivided and to the tie rule, it
+covers either split side and equal-size ties. Hence $\mathcal W\subseteq\widehat{\mathcal W}$. (The converse fails -- the recursion may
 stop at a well-separated ancestor pair and never visit a qualifying descendant -- so we claim only
 containment, never equality.)
 \item \emph{Bounded partner count.} Fix a cell $c$ of side $s$. Any $\widehat{\mathcal W}$-partner $c'$ has
