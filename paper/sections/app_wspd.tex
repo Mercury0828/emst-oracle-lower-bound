@@ -71,36 +71,50 @@ unique and every search returns the same representative for the same cell; this 
 computation returns the \emph{coordinates} of $\rep(c)$, so exact Euclidean distances between
 representatives are available with no further queries.
 
-\paragraph{Well-separated pairs.}
+\paragraph{A locally testable pair family.}
 A pair of cells $(c,c')$ is \emph{well-separated} if $\max\{r(c),r(c')\}\le\rho\,d(c,c')$, equivalently
-$d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The WSPD $\mathcal W$ of $X$ is the family produced by the Callahan--Kosaraju
-recursion~\cite{CK95} on $\mathcal T$. We never materialize $\mathcal W$; two facts let us use it locally.
+$d(c,c')\ge\max\{r(c),r(c')\}/\rho$. The Callahan--Kosaraju recursion~\cite{CK95} on $\mathcal T$ produces a
+well-separated pair decomposition $\mathcal W$ of $X$, but its membership is a property of the whole
+recursion, not of a pair in isolation, so we do not enumerate $\mathcal W$ directly. Instead we enumerate a
+\emph{larger}, locally testable family $\widehat{\mathcal W}$ and show that the spanner built from it
+contains a standard WSPD spanner; the extra pairs are harmless. Orient every pair so that $r(c)\le r(c')$,
+breaking a tie $r(c)=r(c')$ by the $z$-order of the cell centers, and let $p(c')$ be the quadtree parent of
+the larger cell. Define
+\[
+  \widehat{\mathcal W}=\bigl\{(c,c'):\ \text{$c,c'$ nonempty},\ \tfrac12 r(c')\le r(c)\le r(c'),\
+   \text{$(c,c')$ well separated},\ \text{$(c,p(c'))$ \emph{not} well separated}\bigr\}.
+\]
+Membership $(c,c')\in\widehat{\mathcal W}$ is decided in $O(1)$ counts: the three separation/size conditions
+are geometric, and the two emptiness tests are $O(1)$ counts; the parent $p(c')$ is unique. Two facts
+about $\widehat{\mathcal W}$ are all we use.
+
 \begin{enumerate}
-\item Membership $(c,c')\in\mathcal W$ is decided in $O(1)$ counts. We use a deterministic tie-broken
-variant of the Callahan--Kosaraju recursion (\cite{CK95}; Algorithm~2 of \cite{DMOSW25}, which swaps only
-under strict size inequality): orient the pair so that $r(c)\le r(c')$, breaking a tie $r(c)=r(c')$ by the
-$z$-order of the cell centers; the recursion always subdivides the larger cell $c'$. Then $(c,c')\in\mathcal W$ exactly when both cells are nonempty, the pair is well-separated
-($r(c')\le\rho\,d(c,c')$), and its \emph{predecessor} $(c,p(c'))$ -- obtained by replacing the larger cell
-$c'$ with its quadtree parent $p(c')$ -- is \emph{not} well-separated ($r(p(c'))>\rho\,d(c,p(c'))$). Both
-conditions are geometric except the two emptiness tests, which are $O(1)$ counts; the predecessor is
-unique because the recursion subdivides only the larger cell, so the test is well defined.
-\item (\cite{HarPeled11}, restated in \cite{DMOSW25}.) For every $(c,c')\in\mathcal W$, $r(c')/2\le
-r(c)\le 2r(c')$, and every point of $[\Delta]^2$ lies in $O(\rho^{-2}\log\Delta)$ pairs of $\mathcal W$.
+\item \emph{$\widehat{\mathcal W}$ contains a WSPD.} The standard recursion outputs a pair $(c,c')$ only
+after descending strictly past its predecessor $(c,p(c'))$, which it would not have done had $(c,p(c'))$
+been well separated; the output pair is itself well separated, and its two cells satisfy $r(c')/2\le r(c)
+\le 2r(c')$ by~\cite[Lem.~22]{DMOSW25}. Hence every pair of $\mathcal W$ satisfies the predicate (after the
+orientation), so $\mathcal W\subseteq\widehat{\mathcal W}$. (The converse fails: the recursion may stop at a
+well-separated ancestor pair and never visit a well-separated descendant pair that nonetheless satisfies
+the predicate. We do not claim equality.)
+\item \emph{Bounded partner count.} Fix a cell $c$ of side $s$. Any $\widehat{\mathcal W}$-partner $c'$ has
+$r(c')\in[s,2s]$ and, since $(c,p(c'))$ is not well separated, $d(c,p(c'))<r(p(c'))/\rho=O(s/\rho)$, so
+$d(c,c')=O(s/\rho)$. The cells of side in $[s,2s]$ within center-distance $O(s/\rho)$ of $c$ number
+$O(\rho^{-2})$, so $c$ has $O(\rho^{-2})$ partners; a vertex is the representative of $O(\log\Delta)$
+ancestor cells, so it has $O(\rho^{-2}\log\Delta)$ incident edges in the spanner below.
 \end{enumerate}
-The \emph{spanner} $S=(X,E(S))$ has, for each $(c,c')\in\mathcal W$, the edge $\{\rep(c),\rep(c')\}$ whose
-weight is the \emph{exact Euclidean length} $\norm{\rep(c)-\rep(c')}$. We take $E(S)$ to be the \emph{set}
-of these edges, so $S$ is well defined directly from the recursion's membership predicate; no
-canonical-survivor rule is needed, since duplicate pairs (which arise only for nested cells with equal
-point sets, hence the same $z$-first representatives) produce the identical edge and collapse in the set.
-Every edge of $S$ is a genuine pair of points of $X$ carrying its true distance, so $S$ is a Euclidean
-subgraph of the complete graph on $X$; this is what \cref{sec:dt} needs. By fact~(2), each vertex is a
-representative of $O(\log\Delta)$ cells and each such cell lies in $O(\rho^{-2})$ pairs (below), so a
-vertex has $O(\rho^{-2}\log\Delta)$ distinct incident edges.
+
+The \emph{spanner} $S=(X,E(S))$ has, for each $(c,c')\in\widehat{\mathcal W}$, the edge
+$\{\rep(c),\rep(c')\}$ of \emph{exact Euclidean length} $\norm{\rep(c)-\rep(c')}$; $E(S)$ is the \emph{set}
+of these edges, so identical edges from different pairs collapse. Every edge of $S$ is a genuine pair of
+points of $X$ at its true distance, so $S$ is a Euclidean subgraph of the complete graph on $X$, giving the
+left inequality $c_X(t)\le c_S(t)$ for every threshold. Because $\mathcal W\subseteq\widehat{\mathcal W}$,
+$S$ \emph{contains} the standard WSPD spanner $S_{\mathcal W}$ as a subgraph, and a supergraph of a
+$(1+\rho)$-spanner is a $(1+\rho)$-spanner; this is what \cref{sec:dt} needs, and it does not depend on
+$\widehat{\mathcal W}$ equaling $\mathcal W$.
 
 \paragraph{Stretch.}
-With geometric separation $1/\rho$ the WSPD spanner has stretch $1+O(\rho)$; we absorb the constant by
-taking the separation parameter a suitable constant multiple of $1/\rho$, so the stretch is at most
-$1+\rho$ (and downstream $\rho=\Theta(\xi)=\Theta(\eps)$).
+We take the geometric separation a suitable constant multiple of $1/\rho$, so the standard WSPD spanner has
+stretch at most $1+\rho$ (downstream $\rho=\Theta(\xi)=\Theta(\eps)$).
 
 \begin{lemma}[Spanner stretch \cite{HarPeled11,DMOSW25}]\label{lem:stretch}
 $S$ is a $(1+\rho)$-spanner of $X$: for all $x,y\in X$ there is an $x$--$y$ path in $S$ of length at most
@@ -111,22 +125,20 @@ $(1+\rho)\norm{x-y}$. Consequently $\wt(\MST(S))\le(1+\rho)\,\wt(\MST(X))$, and 
 \end{lemma}
 
 \begin{proof}
-The spanner property is the WSPD spanner theorem~\cite[Thm.~on WSPD spanners]{HarPeled11} at geometric
-separation $\Theta(1/\rho)$; we recall the argument. Fix $x,y\in X$ and induct on the rank of
-$\norm{x-y}$ among all pairwise distances. Let $(c,c')$ be the unique WSPD pair with $x\in c$, $y\in c'$,
-and put $u=\rep(c)$, $u'=\rep(c')$, so $\{u,u'\}\in E(S)$. Well-separation gives $\max\{r(c),r(c')\}\le\rho
-\,d(c,c')$, hence $\norm{x-u}\le\sqrt2\,r(c)\le 2\rho\norm{x-y}$ and likewise $\norm{y-u'}\le 2\rho
-\norm{x-y}$ for small $\rho$ (the cells have diameter $\le\sqrt2 r$ and $d(c,c')\le\norm{x-y}+\sqrt2(r(c)
-+r(c'))$). Each of $\norm{x-u}$ and $\norm{y-u'}$ is a strictly shorter pairwise distance, so by induction
-$S$ contains an $x$--$u$ path and a $y$--$u'$ path of stretch $1+\rho$; concatenating them with the edge
-$\{u,u'\}$ yields an $x$--$y$ path of length $\le(1+O(\rho))\norm{x-y}$. Choosing the separation a suitable
-multiple of $1/\rho$ makes the constant $1$, i.e.\ stretch $1+\rho$. Summing the spanner paths over
-$\MST(X)$ and taking a spanning subgraph gives $\wt(\MST(S))\le(1+\rho)\wt(\MST(X))$, which is Lemma~23 of
-\cite{DMOSW25}. For \eqref{eq:appA-stretch}: every
-$S$-edge is a true $X$-pair, so the graph of $S$-edges of length $\le t$ is a subgraph of the $X$-pairs of
-length $\le t$, giving $c_X(t)\le c_S(t)$. Conversely, if $\norm{x-y}\le t/(1+\rho)$ then the spanner path
-between $x,y$ has every edge of length $\le(1+\rho)\norm{x-y}\le t$, so $x,y$ lie in one component of the
-$S$-edges of length $\le t$; hence $c_S(t)\le c_X(t/(1+\rho))$.
+Let $S_{\mathcal W}$ be the spanner built from the standard WSPD $\mathcal W$ in the same way (one edge
+$\{\rep(c),\rep(c')\}$ per pair). It is a $(1+\rho)$-spanner of $X$ by the WSPD spanner
+theorem~\cite[Thm.~on WSPD spanners]{HarPeled11}: for $x,y\in X$, induct on the rank of $\norm{x-y}$ among
+pairwise distances; the unique WSPD pair $(c,c')$ separating $x,y$ contributes the edge $\{\rep(c),
+\rep(c')\}$, and well-separation gives $\norm{x-\rep(c)},\norm{y-\rep(c')}\le 2\rho\norm{x-y}$, each a
+strictly shorter distance, so by induction $S_{\mathcal W}$ has short $x$--$\rep(c)$ and $y$--$\rep(c')$
+paths whose concatenation with the edge has length $\le(1+\rho)\norm{x-y}$. Since $\mathcal W\subseteq
+\widehat{\mathcal W}$ we have $S_{\mathcal W}\subseteq S$, and a supergraph of a $(1+\rho)$-spanner is a
+$(1+\rho)$-spanner, so $S$ is a $(1+\rho)$-spanner; this is the spanner property. The MST bound follows
+because $\MST(S)$ is no heavier than $\MST(S_{\mathcal W})\le(1+\rho)\wt(\MST(X))$ (Lemma~23
+of~\cite{DMOSW25}; a supergraph has a no-heavier MST). For \eqref{eq:appA-stretch}: every $S$-edge is a
+true $X$-pair, so the $S$-edges of length $\le t$ form a subgraph of the $X$-pairs of length $\le t$,
+giving $c_X(t)\le c_S(t)$; conversely, if $\norm{x-y}\le t/(1+\rho)$ then the spanner path between $x,y$ has
+every edge of length $\le(1+\rho)\norm{x-y}\le t$, so $c_S(t)\le c_X(t/(1+\rho))$.
 \end{proof}
 
 Integrating \eqref{eq:appA-stretch} against \eqref{eq:cluster-integral} yields the additive spanner bias
@@ -135,9 +147,9 @@ $A_L(X)\le A_L(H_X)\le(1+\rho)A_L(X)$ of \eqref{eq:spanner-stretch}.
 \subsection{Local navigability}\label{sec:wspd-nav}
 
 The death-time search needs, from a vertex $u$ of $S$, all its incident spanner edges of length at most a
-given $r$, with their exact weights. We obtain these by enumerating WSPD pairs directly, without the
-contracted-graph oracle of \cite[Lemma~24]{DMOSW25} (which navigates a threshold graph after cell
-contraction and does not return a vertex's defining pairs).
+given $r$, with their exact weights. We obtain these by enumerating the pairs of $\widehat{\mathcal W}$
+incident to $u$ directly, without the contracted-graph oracle of \cite[Lemma~24]{DMOSW25} (which navigates
+a threshold graph after cell contraction and does not return a vertex's defining pairs).
 
 \begin{figure}[t]
 \centering
@@ -159,10 +171,10 @@ contraction and does not return a vertex's defining pairs).
   \node[red!70] at (3.25,0.0) {$\rep(c')$};
 \end{tikzpicture}
 \caption{The incident-edge oracle (\cref{lem:incident}). For a cell $c$ of side $s$ with $\rep(c)=u$, its
-WSPD partners $c'$ lie in an annulus at center-distance $\Theta(s/\rho)$ and have comparable side; there are
-$O(\rho^{-2})$ of them, enumerated from $c$'s coordinates. Each surviving pair contributes a spanner edge
-$\{u,\rep(c')\}$ of exact Euclidean length. Scanning $u$'s $O(\log\Delta)$ ancestor cells where $u$ is the
-representative finds all incident edges.}
+$\widehat{\mathcal W}$-partners $c'$ lie in an annulus at center-distance $\Theta(s/\rho)$ and have
+comparable side; there are $O(\rho^{-2})$ of them, enumerated from $c$'s coordinates. Each partner
+contributes a spanner edge $\{u,\rep(c')\}$ of exact Euclidean length. Scanning $u$'s $O(\log\Delta)$
+ancestor cells where $u$ is the representative finds all incident edges.}
 \label{fig:wspd}
 \end{figure}
 
@@ -173,24 +185,24 @@ exact weights, can be enumerated using $O(\rho^{-2}\log^2\Delta)$ range-counting
 \end{lemma}
 
 \begin{proof}
-An edge $\{u,u'\}\in E(S)$ comes from a pair $\{c,c'\}\in\mathcal W$ with $\{\rep(c),\rep(c')\}=\{u,u'\}$;
-say $\rep(c)=u$, so $u\in c$ and $u$ is the $z$-first vertex of $c$. Hence $c$ is one of the $O(\log\Delta)$
-quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\log\Delta)$ ancestor cells; for each, one
-representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both finds the
-relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its WSPD partners
-$c'$ have $r(c')\in[s/2,2s]$ (fact~(2)). Their distance is bounded \emph{above} by the membership
-predicate, not by well-separation: the predecessor pair is not well-separated, so $d(c,p(c'))<
-r(p(c'))/\rho=O(s/\rho)$, and since $c'\subseteq p(c')$ has $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p(c'))$, also
-$d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$ within center-distance $O(s/\rho)$ of $c$ therefore
-number $O(\rho^{-2})$ and are enumerated from $c$'s coordinates with no query. For each
-such candidate $c'$ we test nonemptiness ($1$ count) and recursion membership $(c,c')\in\mathcal W$
-($O(1)$ counts, fact~(1), trying both orientations), compute $\rep(c')$ ($O(\log\Delta)$ counts), and,
-when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
-$O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are $O(\log\Delta)$ ancestors, for
-$O(\rho^{-2}\log^2\Delta)$ counts; the emitted edge set is deduplicated by vertex identity. Every incident
-edge of length $\le r$ is found, since its defining pair has $u$ as the representative of one of its two
-cells, an ancestor of $u$ scanned above and tested in both orientations; only genuine edges are emitted,
-each checked for membership and exact length. The distinct-edge count $O(\rho^{-2}\log\Delta)$ is fact~(2).
+An edge $\{u,u'\}\in E(S)$ comes from a pair $\{c,c'\}\in\widehat{\mathcal W}$ with $\{\rep(c),\rep(c')\}=
+\{u,u'\}$; say $\rep(c)=u$, so $u\in c$ and $u$ is the $z$-first vertex of $c$. Hence $c$ is one of the
+$O(\log\Delta)$ quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\log\Delta)$ ancestor cells;
+for each, one representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both
+finds the relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its
+$\widehat{\mathcal W}$-partners $c'$ have side in $[s/2,2s]$, and their distance is bounded \emph{above} by
+the predicate's non-well-separated predecessor: $d(c,p(c'))<r(p(c'))/\rho=O(s/\rho)$, and since
+$c'\subseteq p(c')$, $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p(c'))=O(s/\rho)$. The cells of side in $[s/2,2s]$
+within center-distance $O(s/\rho)$ of $c$ therefore number $O(\rho^{-2})$ and are enumerated from $c$'s
+coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the
+$\widehat{\mathcal W}$-predicate ($O(1)$ counts, trying both orientations), compute $\rep(c')$
+($O(\log\Delta)$ counts), and, when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight.
+Each ancestor thus costs $O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are
+$O(\log\Delta)$ ancestors, for $O(\rho^{-2}\log^2\Delta)$ counts; the emitted edge set is deduplicated by
+vertex identity. Every incident edge of length $\le r$ is found, since its defining $\widehat{\mathcal W}$-pair
+has $u$ as the representative of one of its two cells, an ancestor of $u$ scanned above and tested in both
+orientations; only genuine edges are emitted, each checked against the predicate and the exact length. The
+distinct-edge count $O(\rho^{-2}\log\Delta)$ is the partner bound above.
 \end{proof}
 
 \subsection{The exact bottleneck death-time search}\label{sec:wspd-search}
@@ -278,7 +290,7 @@ runs within the $\Otil_\eps(n^{1/3})$ budget claimed in \cref{sec:main}.
 \begin{remark}[Determinism of the construction]\label{rem:wspd-det}
 The only randomness in this appendix is the rank assignment used by the death-time search; everything else
 is a deterministic function of the input and the query history. In particular the representative of a cell,
-the membership of a pair in the WSPD, and the spanner edge set are fixed once and for all, so two searches
+the membership of a pair in $\widehat{\mathcal W}$, and the spanner edge set are fixed once and for all, so two searches
 that touch the same cell see the same representative and the same incident edges. This consistency is what
 makes the spanner a single well-defined graph $S$ and lets us reason about its death times as if $S$ were
 written down, even though it is only ever probed one neighborhood at a time. The ranks may be drawn lazily
@@ -288,11 +300,13 @@ different searches still carries one rank; no global random tape is materialized
 
 \begin{remark}[What a human verifier should check first]\label{rem:verify}
 The two places where the implementation is most easily mis-stated, and which a careful reading should
-target, are the incident-edge oracle (\cref{lem:incident}) and the budget mechanism (\cref{sec:wspd-cap}).
-For the former, the point to confirm is that scanning a vertex's $O(\log\Delta)$ ancestor cells and each
-cell's $O(\rho^{-2})$ partner candidates enumerates \emph{all} incident edges and only genuine ones; the
-partner-distance bound comes from the predecessor pair being not well separated, not from well-separation
-itself. For the latter, the point is that capping is global, not per-search, so that no individual
+target, are the local pair family (\cref{sec:wspd-spanner}) and the budget mechanism (\cref{sec:wspd-cap}).
+For the former, the key point is that we do \emph{not} claim the locally testable family $\widehat{\mathcal
+W}$ equals the recursion-generated WSPD $\mathcal W$; we claim only $\mathcal W\subseteq\widehat{\mathcal
+W}$, so the spanner $S$ \emph{contains} a standard WSPD spanner (hence has stretch $1+\rho$) while every
+extra edge of $S$ is still a true Euclidean pair (hence $c_X(t)\le c_S(t)$ is unharmed). The partner-count
+bound, and so the per-vertex degree, comes from the predecessor pair being not well separated, not from
+well-separation itself. For the latter, the point is that capping is global, not per-search, so that no individual
 death-time value is ever imputed or conditioned on, which is what keeps the averages unbiased. These two
 points are the substance of realizing the source's WSPD machinery under a counting oracle.
 
