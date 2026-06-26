@@ -1,8 +1,8 @@
 We study the estimation of the Euclidean minimum spanning tree (MST) weight of $n$ points in $[\Delta]^2$
 ($\Delta=O(n)$) under an orthogonal range-counting oracle, which returns the number of input points in a
 query rectangle and is the native primitive of a spatial index. We give a randomized algorithm that
-$(1\pm\eps)$-estimates the MST weight using $\Otil_\eps(n^{1/3})$ range-counting queries, and runs in time
-near-linear in its query count on a word RAM. This matches the $\Omega(n^{1/3})$ lower bound of Driemel et al.\ (SoCG
+$(1\pm\eps)$-estimates the MST weight, with probability at least $2/3$, using $\Otil_\eps(n^{1/3})$
+range-counting queries, and runs in time near-linear in its query count on a word RAM. This matches the $\Omega(n^{1/3})$ lower bound of Driemel et al.\ (SoCG
 2025) up to polylogarithmic and $\eps$-dependent factors, settling the polynomial query exponent of
 Euclidean MST-weight estimation in this model and improving the previous $\Otil(\sqrt n)$ upper bound to
 the tight rate.

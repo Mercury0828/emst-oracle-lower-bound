@@ -7,7 +7,7 @@ WSPD construction of Driemel et al.~\cite{DMOSW25} (whose spanner
 facts are from Har-Peled~\cite{HarPeled11} and whose sampling primitive is from
 Monemizadeh~\cite{Monemizadeh23}). We use \emph{cell} for a node of the quadtree $\mathcal T$ on
 $[\Delta]^2$; a cell $c$ has side length $r(c)$ and diameter $\sqrt2\,r(c)$, and $d(c,c')$ is the distance
-between cell centers. The vertex set is $X$; for $X=P$ a cell is nonempty when $\rcount\cdot>0$. For a
+between cell centers. The vertex set is $X$; for $X=P$ a cell $c$ is nonempty when $\rcount{c}>0$. For a
 snapped support $X=Q$ we take the grid side $h$ to be a dyadic quadtree scale, so each support $h$-cell is
 itself a quadtree cell and every region queried below is a union of $h$-cells; an $h$-cell is then nonempty
 exactly when the aligned $P$-region is nonempty, so every emptiness test is one count on $P$

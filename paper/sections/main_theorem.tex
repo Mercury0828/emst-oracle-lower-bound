@@ -1,6 +1,8 @@
 \section{Estimating the MST weight of \texorpdfstring{$P$}{P}}\label{sec:main}
 
-We now assemble the pieces of \cref{sec:dt} into the main result.
+We now assemble the pieces of \cref{sec:dt} into the main result. Throughout this section $C_*$ denotes the
+absolute constant from the assembly accuracy bound \eqref{eq:guess-accuracy}, fixed in
+\cref{sec:main-combine}, and the internal accuracy is rescaled as $\xi=\zeta/C_*$.
 
 \begin{theorem}[Main]\label{thm:main}
 For every fixed $\eps\in(0,1)$ and every $P\subseteq[\Delta]^2$ with $\abs P=n$ and $\Delta=O(n)$, there
@@ -171,7 +173,7 @@ $\Theta(n)$ to the MST weight (each point joins a neighbor at distance $\Theta(1
 contributes $\Theta(\sum_{i\le s}2^i)=\Theta(2^s)=\Theta(n)$, so $W=\Theta(n)$, with a constant fraction of
 it living in the few long satellite edges.
 
-Regularization fixes $K_0=\Theta(n^{2/3})$ and a grid at which the carpet collapses to $\Theta_xi(K_0)$ cells
+Regularization fixes $K_0=\Theta(n^{2/3})$ and a grid at which the carpet collapses to $\Theta_\xi(K_0)$ cells
 while each of the $s$ far-apart satellites still occupies its own. The contrast is now sharp at the
 support: the satellites are a $s/K_0=\Theta(\log n/n^{2/3})$ fraction of the support cells, so a sample of
 $\poly\log$ support \emph{points} misses them, yet the long satellite edges carry a constant fraction of

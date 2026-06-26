@@ -142,7 +142,7 @@ $A_L(H)$, with variance controlled by the clip. Running this on a locally naviga
 $P$ gives $A_L(P)$ up to a $(1+\rho)$ factor.
 
 \emph{The tail} is routed through a grid support. We regularize: choose a grid scale $h$ whose support has
-$\Theta_xi(K_0)$ cells (\cref{lem:kwindow}), and snap each point to its cell center. Snapping moves points by
+$\Theta_\xi(K_0)$ cells (\cref{lem:kwindow}), and snap each point to its cell center. Snapping moves points by
 $O(\xi L)$, which interleaves the threshold graphs of $P$ and of the support $Q$ and transfers the tail
 $B_L(P)$ to $B_L(Q)$ up to an $O(\xi W)$ error. The support tail is then $B_L(Q)=\Wq-A_L(Q)$, where $\Wq$
 is the support-MST weight from \cref{lem:support} and $A_L(Q)$ is another clipped death-time average, this

@@ -220,7 +220,9 @@ brackets the support's component-count curve: with $r^+=(1+\sigma)r$,
 \end{equation}
 The upper bound holds because every Euclidean $r$-edge of $Q$ induces an edge of $\Gamma_r$ (then
 intra-cell contraction only merges components); the lower bound because cells adjacent in $\Gamma_r$ hold
-points within $r+2\sqrt2\,a(r)<r^+$. Combined with~\eqref{eq:components-edges}, $\cG(r)\le 1+\Wq/r$, so
+points within $r+2\sqrt2\,a(r)<r^+$ (the boundary regime $a(r)=h$, where $\Gamma_r$ is the Euclidean
+threshold graph on the support itself, is included in the full case analysis of \cref{sec:app-interleave}).
+Combined with~\eqref{eq:components-edges}, $\cG(r)\le 1+\Wq/r$, so
 under any guess $G\ge\Wq$ the deterministic bound $U(r)=1+G/r$ satisfies $U(r)\ge\cG(r)$ -- a bound on the
 \emph{component} count, which is what \cref{lem:leader} needs.
 
@@ -274,7 +276,7 @@ c_j-c_j}\le\sum_j d_j\alpha_j$ telescopes to $\beta G/32$ because $d_j\alpha_j=\
 $\Otil_\beta(\sqrt K)$ via \cref{lem:packing}. Both the accuracy and the cost are carried out in full in
 \cref{sec:app-lemma3}.
 
-To remove the guess, start from the valid bound $U_Q=\sqrt2(n-1)\Delta\ge\Wq$ (computable from $n$ alone,
+To remove the guess, start from the valid bound $U_Q=\sqrt2(n-1)\Delta\ge\Wq$ (computable from the known parameters $n,\Delta$,
 since $\Wq\le(K-1)\diam(Q)\le(n-1)\sqrt2\Delta$ as $K\le n$ and $\diam(Q)\le\sqrt2\Delta$) and run
 \cref{lem:additive} with
 $\beta_0=\tfrac1{32}$ on $G=U_Q,U_Q/2,U_Q/4,\dots$, stopping at the first $G$ with $\widehat W(G)\ge G/4$.
