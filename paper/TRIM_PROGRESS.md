@@ -44,8 +44,19 @@
   ③lem:kwindow 的 window+cost 已 inline 在 §5（满足，无需重复 statement）。
 - **S2 still running**（refverify web）。
 
-## 待办
-- S2 出错误清单 → 修/删 refs（先于 trim）。然后 S4 下沉证明 → S5-S7 → S9 R3。
+- **S2 DONE** (commit 21dcd50)：Codex web 复查 68 refs = 65 对、**3 MAJOR 修正**
+  (SchiblerXueZhu26 title+author；Vaidya91 DOI；SharathkumarAgarwal12 venue/DOI)。归档 trim_S2_refverify.md。
+- **S4 DONE** (commit 0a8a1fd)：main.tex 纯 reorder，app_lemma3+app_assembly 下沉回附录；body 已有
+  "deferred to App." 指针，零 prose 改。Main Thm p23→p19；merits 前置 §1-§2（~p8 装下）。
+- **S5-S7 DONE** (commit b78529f)：无 overfull（图都在单栏宽内）；caption 1-3 句(SODA norm)+保 protect 标注；
+  abstract 收紧 ~200 词(保 2 个 protected 元素)。
+- **S9 DONE — 退出闸 PASS-WITH-NITS（无 BLOCKER）**：①前10pp merits MET；②附录指针 SOUND 无 dangling；
+  ③R-W1 clean / R-W2 OK / R-W3 clean；④protect-list INTACT。1 NIT（§5 opener 指明 reduction→App.C、
+  WSPD→App.A）已修。归档 trim_S9_R3_exitgate.md。JOINT 不动点同轮同绿。
+
+## TRIM 完成 (2026-06-25)
+42pp，0 undefined，68 refs（全部 web-verified，3 MAJOR 已修）。结构 SODA-correct：前~10pp merits +
+附录全证明。S1-S9 全部归档 docs/reviews/。下一步：human-expert 验证（gate #2）。
 
 ## protect-list 摘要（trim 红线，不许删/不许精炼掉）
 abstract 单行贡献+技术总结；intro §1.1 定理/tightness 单句/对比表+caption/support-lemma balance/scope;
