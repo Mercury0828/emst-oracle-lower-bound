@@ -224,8 +224,9 @@ $O(\log(\Delta/h))$ guesses, so the total cost is $\Otil_\eta(\sqrt K)$.
 
 It remains to replace the exact $K$ by $\widehat K=(1\pm\kappa)K$ with $\kappa=\eta/1000$
 (\cref{sec:support-oracle}). Then $q=\ceil{\smash{\sqrt{\widehat K}}}$ still gives $b=\Theta(\sqrt K)$; the
-baseline term $(K-1)h$ changes by at most $\kappa K h\le\kappa\Wq$ (since $\Wq\ge(K-1)h$ by
-\eqref{eq:cluster-integral}); $r_0$ changes by a $1+O(\kappa)$ factor; and every bound in
+baseline term $(K-1)h$ changes by at most $\kappa K h\le 2\kappa\Wq$ for $K\ge2$ (since $\Wq\ge(K-1)h\ge
+\tfrac12 Kh$ by \eqref{eq:cluster-integral}; for $K=1$ the term is $0$); $r_0$ changes by a $1+O(\kappa)$
+factor; and every bound in
 \cref{sec:app-accounting}--\cref{sec:app-accuracy} changes by a constant factor. The final error is thus
 at most $\eta\Wq$. Estimating $K$ costs $\Otil_\eta(n/K)$ queries, the only place the $n/K$ term arises.
 This completes the proof of \cref{lem:support}.\qed

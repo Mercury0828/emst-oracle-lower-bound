@@ -29,9 +29,18 @@ $X_L^2\le L\,X_L$, hence
 \[
   \Var(X_L)\le\E X_L^2\le L\,\E X_L=\frac{L\,A_L(H)}{\abs V}\le\frac{L\,\wt(\MST(H))}{\abs V}.
 \]
-Averaging $s$ independent samples divides the variance by $s$; scaling by $\abs V$ multiplies it by
-$\abs V^2$, giving $\Var[\tfrac{\abs V}{s}\sum_i X_L(v_i)]\le\abs V\,L\,\wt(\MST(H))/s$, which is
-\eqref{eq:dt-var}.
+We average over $s$ seeds drawn independently and uniformly from $V$. A single run shares one rank
+assignment across all seeds (the ranks are drawn once, lazily, keyed by vertex identity), so the
+$X_L(v_i)$ are not unconditionally independent; we therefore condition on the entire rank assignment. For
+any \emph{fixed} ranking, $X_L(\cdot)$ is a fixed function on $V$, the seeds $v_1,\dots,v_s$ are
+independent and uniform, so the $X_L(v_i)$ are i.i.d., with mean $\E[X_L\mid\text{ranking}]=\tfrac1{\abs V}
+\sum_{v}X_L(v)=A_L(H)/\abs V$ -- the \emph{same value for every ranking}, by the tail identity above which
+holds rank-by-rank. Hence the conditional mean of $\tfrac{\abs V}{s}\sum_i X_L(v_i)$ is $A_L(H)$
+regardless of the ranking (so the estimator is unbiased), and its conditional variance is
+$\tfrac{\abs V^2}{s}\Var[X_L\mid\text{ranking}]\le\abs V\,L\,\wt(\MST(H))/s$ by the display above, again
+uniformly over rankings; by the law of total variance the unconditional variance obeys the same bound.
+This is \eqref{eq:dt-var}, and it needs no independence between seeds beyond conditioning on the shared
+ranking.
 \end{proof}
 
 \begin{proof}[Proof of \eqref{eq:spanner-stretch}]
@@ -89,16 +98,20 @@ way $K\le C_\xi K_0$.
 n)$ rejection trials (\cref{sec:support-oracle}): a trial draws a uniform point of $P$ ($O(\log\Delta)$
 counts, \cref{lem:telescoping}) and accepts with probability $1/\abs{P\cap C}$, so it accepts with
 probability exactly $K_h/n$. A Chernoff bound on the accept count separates $K_h\ge cK_0$ from
-$K_h<\tfrac{c}{4}K_0$ with failure probability $n^{-\Omega(1)}$, so the threshold test ``accepts
-$\ge\tfrac{c}{2}K_0\,m/n$'' is correct at every scale with high probability. We stop at the first scale the
-test accepts; there $K_h\ge\tfrac{c}{4}K_0$ (else the test would have rejected). Combined with the upper
-bound, $K\in[\tfrac{c}{4}K_0,C_\xi K_0]$, i.e.\ $\Theta_\xi(K_0)$, which is \eqref{eq:K-window} with the
+$K_h<\tfrac{c}{4}K_0$ with failure probability $n^{-\Omega(1)}$. Since there are only $O(\log\Delta)$
+candidate scales, a union bound makes the threshold test ``accepts $\ge\tfrac{c}{2}K_0\,m/n$'' correct at
+\emph{all} of them simultaneously with probability $1-n^{-\Omega(1)}$; on that good event the adaptively
+chosen stopping scale -- the first the test accepts -- is also correct, so no separate argument for the
+data-dependent stop is needed. There $K_h\ge\tfrac{c}{4}K_0$ (else the test would have rejected), and with
+the upper bound $K\in[\tfrac{c}{4}K_0,C_\xi K_0]=\Theta_\xi(K_0)$, which is \eqref{eq:K-window} with the
 constants relabeled.
 
 \emph{Cost.} The test spends $\Otil(m)=\Otil_\xi(n/K_0)$ counts per scale regardless of how small $K_h$
-is, and runs at $O(\log\Delta)$ scales, for $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$ total. Once stopped, the
-same batch estimates $K$ to relative error $O(\xi)$ (its accept count concentrates at $K_h m/n$), the
-input to \cref{lem:support} required by \cref{sec:main-pieces}. Both the support estimator
+is, and runs at $O(\log\Delta)$ scales, for $\Otil_\xi(n/K_0)=\Otil(n^{1/3})$ total. After $h$ is fixed we
+estimate $K$ to relative error $O(\xi)$ with a \emph{fresh} inverse-binomial batch at scale $h$
+(\cref{sec:support-oracle}), so the estimate is independent of the adaptive stopping rule; this costs a
+further $\Otil_\xi(n/K)=\Otil_\xi(n^{1/3})$ and is the input to \cref{lem:support} required by
+\cref{sec:main-pieces}. Both the support estimator
 $\Otil_\eta(\sqrt K+n/K)$ and the support death-time sampler are run at this $K=\Theta_\xi(K_0)$, and
 since $\sqrt{C_\xi K_0}=\Otil_\xi(n^{1/3})$ and $n/(\tfrac{c}{4}K_0)=\Otil_\xi(n^{1/3})$, all three pieces
 of \cref{sec:main-pieces} remain $\Otil_\xi(n^{1/3})$.
@@ -170,11 +183,20 @@ with $s_P=C\xi^{-2}n/K_0$ this is $\tfrac{2}{C}\xi^2G^2$, so Chebyshev gives dev
 $\eta=\dfrac{C_*\xi}{4C_W}=\Theta(\xi)$ gives $\abs{\widehat\Wq-\Wq}\le\eta\Wq\le\eta C_W G=\tfrac{C_*}4\xi
 G$.
 
-\emph{(iii) Bulk of $Q$, $\widehat A_Q$.} Identical to (i) with $\abs V=K=\Theta_\xi(K_0)$ ($K\le C_\xi K_0
-=O(K_0/\xi)$ by \cref{lem:kwindow}) and $\wt(\MST(H_Q))\le(1+\rho)\Wq=O(G)$: the variance is $O(K L G/s_Q)
-=O(\tfrac{K}{K_0}G^2/s_Q)=O(\xi^{-1}G^2/s_Q)$, so $s_Q=O(\xi^{-3})$ samples give $\abs{\widehat A_Q-A_L(Q)}
-\le\tfrac{C_*}4\xi G$ with probability $\ge 1-\tfrac1{100}$. The extra $K/K_0=O(1/\xi)$ factor, from the
-window being $\Theta_\xi$ and not $\Theta$, is what raises $s_Q$ from $O(\xi^{-2})$ to $O(\xi^{-3})$.
+\emph{(iii) Bulk of $Q$, $\widehat A_Q$.} The support size $K=\abs V$ is not known exactly, so the estimator
+scales the sample mean $\bar X=\tfrac1{s_Q}\sum_i X_L(v_i)$ by the estimate $\widehat K=(1\pm O(\xi))K$ of
+\cref{sec:support-oracle}: $\widehat A_Q=\widehat K\,\bar X$. Writing $\mu=\E X_L=A_L(H_Q)/K$,
+\[
+  \abs{\widehat K\,\bar X-A_L(H_Q)}\le\Bigl|\tfrac{\widehat K}{K}-1\Bigr|A_L(H_Q)+\widehat K\,\abs{\bar X-\mu}
+   =O(\xi)\,A_L(H_Q)+\widehat K\,\abs{\bar X-\mu},
+\]
+and $A_L(H_Q)\le\wt(\MST(H_Q))\le(1+\rho)\Wq=O(G)$, so the first term is $O(\xi G)$. For the second, with
+$K=\Theta_\xi(K_0)$ ($K\le C_\xi K_0=O(K_0/\xi)$ by \cref{lem:kwindow}), $\Var(K\bar X)=K^2\Var(\bar X)\le
+K L\,\wt(\MST(H_Q))/s_Q=O(\tfrac{K}{K_0}G^2/s_Q)=O(\xi^{-1}G^2/s_Q)$ by \eqref{eq:dt-var}, so $s_Q=
+O(\xi^{-3})$ samples give $\widehat K\abs{\bar X-\mu}\le\tfrac{C_*}8\xi G$ with probability $\ge1-\tfrac1{100}$
+(using $\widehat K=O(K)$). Adding the two, $\abs{\widehat A_Q-A_L(Q)}\le\tfrac{C_*}4\xi G$. The extra
+$K/K_0=O(1/\xi)$ factor, from the window being $\Theta_\xi$ and not $\Theta$, is what raises $s_Q$ from
+$O(\xi^{-2})$ to $O(\xi^{-3})$.
 
 \emph{(iv) Tail transfer.} $\abs{B_L(Q)-B_L(P)}\le\tfrac{C_*}4\xi G$ is \eqref{eq:tail-transfer}, which
 gave $O(\xi W)$.

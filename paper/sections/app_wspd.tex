@@ -193,11 +193,13 @@ An edge $\{u,u'\}\in E(S)$ comes from a pair $\{c,c'\}\in\widehat{\mathcal W}$ w
 $O(\log\Delta)$ quadtree ancestor cells of (the leaf of) $u$. We scan all $O(\log\Delta)$ ancestor cells;
 for each, one representative computation ($O(\log\Delta)$ counts) decides whether $\rep(c)=u$, which both
 finds the relevant ancestors and accounts for testing them. For a relevant $c$ of side $s=r(c)$, its
-$\widehat{\mathcal W}$-partners $c'$ have side in $[s/2,2s]$, and their distance is bounded \emph{above} by
-the predicate's non-well-separated parent-pair (\cref{sec:wspd-spanner}, fact~(2)): whichever of
-$(c,p(c'))$ or $(p(c),c')$ is not well separated gives $d(c,c')=O(s/\rho)$. The cells of side in $[s/2,2s]$
-within center-distance $O(s/\rho)$ of $c$ therefore number $O(\rho^{-2})$ and are enumerated from $c$'s
-coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the (symmetric,
+$\widehat{\mathcal W}$-partners $c'$ have side $r(c')\in\{s/2,s,2s\}$ (a dyadic value in $[s/2,2s]$), and
+their distance is bounded \emph{above} explicitly: if $(c,p(c'))$ is not well separated then $d(c,p(c'))<
+r(p(c'))/\rho=2r(c')/\rho\le 4s/\rho$, whence $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p(c'))\le 8s/\rho$ (for
+$\rho\le1$), and symmetrically if $(p(c),c')$ is not well separated; so $d(c,c')\le 8s/\rho$ in either
+case. The candidate set is therefore the explicit finite list of all cells of side in $\{s/2,s,2s\}$ whose
+center is within $8s/\rho$ of $c$'s center, an $O(\rho^{-2})$-size list of grid positions computed from
+$c$'s coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the (symmetric,
 unordered) $\widehat{\mathcal W}$-predicate ($O(1)$ counts), compute $\rep(c')$ ($O(\log\Delta)$ counts),
 and, when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
 $O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are $O(\log\Delta)$ ancestors, for
