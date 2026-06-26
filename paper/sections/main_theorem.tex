@@ -55,8 +55,9 @@ edges the support handles. Each estimate:
   $O(G^2/s_Q)$ and $s_Q=O_\xi(1)$ support samples suffice; each uniform support sample costs $\Otil(n/K)
   =\Otil_\xi(n^{1/3})$ queries (\cref{sec:support-oracle}).
 \end{itemize}
-No sample seed is reused across thresholds or across the three estimators, so the three errors are
-independent.
+The assembly does not need the three errors to be independent: we only bound each by $O(\xi G)$ with
+constant probability and apply a union bound, so even though the regularized support $Q$ enters both
+$\widehat\Wq$ and $\widehat A_Q$, no independence is assumed.
 
 \begin{remark}[Amplification and failure bookkeeping]\label{rem:amp}
 Every estimate above is correct only with constant probability, and the algorithm makes $\poly\log n$ of

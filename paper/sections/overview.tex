@@ -86,9 +86,10 @@ variance bound
 Two features make this the right estimator. First, its variance is governed by the \emph{component count}
 $c$, not by the number of occupied cells: the satellite is one candidate among $M$ and is sampled with
 probability $1/M$ regardless of how few points it holds, so the heavy tail is no longer invisible.
-Second, an occupied exploration is cheap in expectation: the cell examined $j$-th in the rank order is
-examined only when the start has the smallest rank among the first $j$, an event of probability $1/(j-1)$,
-so an exploration touches $O(\log K)$ cells on average, the same harmonic bound that later controls the
+Second, an occupied exploration is cheap in expectation: the exploration visits the component in a
+\emph{fixed order independent of the ranks}, and the $j$-th cell in that order is examined only when the
+start has the smallest rank among the first $j-1$ cells, an event of probability $1/(j-1)$, so an
+exploration touches $O(\log K)$ cells on average, the same harmonic bound that later controls the
 death-time search.
 
 \subsection{Two costs, one packing inequality, and the \texorpdfstring{$\sqrt K$}{sqrt K} bound}
@@ -160,10 +161,10 @@ four are measured against the same guess scale $G$ they add to $O(\eps G)$. The 
 algorithm needs a guess $G\ge W$ to fix $L$ and the budgets, while $W$ is the unknown. This is handled by a
 geometric search: the per-guess output is accurate whenever $G\ge W$, so sweeping $G$ downward by halving
 and stopping at the first $G$ with $\widehat W(G)\ge G/8$ brackets $G_0\in[W,16W)$, after which a single
-calibrated call on $G_0$ delivers the $(1\pm\eps)$ estimate. The three estimators draw fresh samples, so
-their errors are independent, and no seed is reused across thresholds or across the three pieces; an
-aborted call (the global budget is a hard cap) is treated as a failed run inside the median amplification
-that protects all $O(\log n)$ guesses at once.
+calibrated call on $G_0$ delivers the $(1\pm\eps)$ estimate. Each of the three errors is bounded with
+constant probability and the three are combined by a union bound, so no independence between them is
+needed; an aborted call (the global budget is a hard cap) is treated as a failed run inside the median
+amplification that protects all $O(\log n)$ guesses at once.
 
 \subsection{Realizing the spanner under a counting oracle}\label{sec:ov-wspd}
 

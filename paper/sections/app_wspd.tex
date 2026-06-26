@@ -221,7 +221,7 @@ probability zero and are broken by $z$-order). As in \cref{sec:dt-sampler}, $\ta
 \KwOut{$\min\{\tau(v),L\}$}
 $\beta(v)\leftarrow 0$; push $v$ on a min-priority queue keyed by $\beta$\;
 \While{the queue is nonempty}{
-  extract the minimum-$\beta$ vertex $u$\;
+  extract the minimum-$\beta$ vertex $u$ (ties broken by vertex identity, independent of ranks)\;
   \lIf{$u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$}{\Return $\beta(u)$}
   enumerate all incident edges $\{u,u'\}$ of weight $\le L$ (\cref{lem:incident})\;
   \lForEach{such edge of weight $\omega$}{$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$}
@@ -245,10 +245,11 @@ extraction of a root or lower-ranked vertex is exactly $\tau(v)$ when $\tau(v)\l
 returns exactly $\min\{\tau(v),L\}$; no rounding enters.
 
 \paragraph{Per-search cost in expectation.}
-Order the vertices by bottleneck distance from $v$. The search halts at the first root/lower-ranked vertex
-in this order, so it extracts the $j$-th vertex only if none of the first $j-1$ is the root and $v$ has
-smaller rank than all of them, an event of probability $\le 1/(j-1)$ for $j\ge2$ (the ranks of the first
-$j-1$ vertices and $v$ are exchangeable). The expected number of extractions is thus at most
+Order the vertices by bottleneck distance from $v$, ties broken by vertex identity; this order is fixed
+before the ranks are revealed and is the order in which the queue extracts them. The search halts at the
+first root/lower-ranked vertex in this order, so it extracts the $j$-th vertex only if none of the first
+$j-1$ is the root and $v$ has smaller rank than all of them, an event of probability $\le 1/(j-1)$ for
+$j\ge2$ (the ranks of the first $j-1$ vertices and $v$ are exchangeable, being independent and uniform). The expected number of extractions is thus at most
 $1+\sum_{j\ge2}1/(j-1)=1+H_{\abs V-1}=O(\log\abs V)$. Each extraction expands one vertex by
 \cref{lem:incident} at $O(\rho^{-2}\log^2\Delta)$ counts, so a search costs
 $O(\rho^{-2}\log^2\Delta)\cdot O(\log\abs V)=\poly(\rho^{-1})\poly\log(n,\Delta)$ range counts in

@@ -37,10 +37,18 @@ proportional to $\sum_{p\in P\cap C}\Pr[p\text{ sampled}]\cdot\tfrac1{\abs{P\cap
 uniform over the $K$ support cells. The acceptance probability is $\sum_{C}\abs{P\cap C}\cdot\tfrac1n\cdot
 \tfrac1{\abs{P\cap C}}=K/n$.
 
-\emph{Estimating $K$.} Since each rejection trial accepts independently with probability $K/n$, the number
-of accepts in $m$ trials is $\mathrm{Bin}(m,K/n)$ with mean $mK/n$; taking $m=\Theta(\kappa^{-2}(n/K)\log)$
-and a Chernoff bound, the empirical accept rate times $n$ estimates $K$ to relative error $\kappa$, at a
-cost of $O(\kappa^{-2}(n/K)\log)$ counts. Until \cref{sec:support-call} we treat $K$ as known exactly and
+\emph{Estimating $K$.} Each rejection trial accepts independently with probability $K/n$, so $K$ is
+recovered by \emph{inverse-binomial} sampling, which needs no a-priori knowledge of $K$. Fix a target
+$a=\Theta(\kappa^{-2}\log(1/\delta))$ and draw trials until $a$ of them have accepted; if $T$ is the number
+of trials used, output $\widehat K=a\,n/T$. The count $T$ is a negative-binomial variable with mean
+$a\,n/K$, and by its concentration $T\in(1\pm\kappa)a\,n/K$ with probability $1-\delta$, so $\widehat K\in
+(1\pm O(\kappa))K$ with probability $1-\delta$; on that event the procedure made $T=O(\kappa^{-2}(n/K)
+\log(1/\delta))$ trials, an \emph{$\Otil(n/K)$ query bound that holds with high probability}, not only in
+expectation. We run this under the same global budget as the rest of the call (\cref{sec:support-call}): if
+$T$ exceeds $C\cdot\kappa^{-2}(n/K_{\min})\log(1/\delta)$ for the smallest support size $K_{\min}\ge 1$ of
+interest the call aborts, an event of probability $\le\delta$ by the same concentration. For $K=O(1)$ the
+cover construction has already found all support cells explicitly (\cref{lem:packing}'s small-$b$ case),
+and $K$ is known exactly with no sampling. Until \cref{sec:support-call} we treat $K$ as known exactly and
 account for the $\kappa$-perturbation at the end.
 
 \subsection{Overview}\label{sec:support-overview}
@@ -133,7 +141,7 @@ of smaller rank than $X$ is met. Output $Z=M$ if no such cell exists (so $X$ is 
 draw $X$ uniformly from $\mathcal U$\;
 \lIf{$X$ is empty (one range count)}{\Return $Z=0$}
 assign $X$ and the cells it reaches independent uniform ranks (lazily)\;
-explore the component of $X$ in $\Gamma$ in increasing distance, halting once a cell of rank $<\mathrm{rank}(X)$ appears\;
+explore the component of $X$ in $\Gamma$ in a fixed order independent of the ranks (breadth-first, neighbors ordered by cell identifier), halting once a cell of rank $<\mathrm{rank}(X)$ appears\;
 \lIf{no smaller-rank cell was met ($X$ is the leader)}{\Return $Z=M$}
 \lElse{\Return $Z=0$}
 \end{algorithm}
@@ -151,9 +159,11 @@ $\E Z^2=M^2\cdot c/M=Mc$, so $\Var(Z)=Mc-c^2\le Mc$. The occupied-cell count nev
 Given an upper bound $U\ge c$, a median-of-means average of $k=O\!\bigl((MU/\alpha^2)\log(1/\delta)\bigr)$
 trials estimates $c$ to additive error $\alpha$ with probability $1-\delta$. The per-trial exploration is
 cheap: a sampled cell is occupied with probability $N/M$ (where $N$ is the number of occupied cells), and
-an occupied trial in a component of size $s$ examines in expectation at most $1+H_{s-1}=O(\log K)$ cells,
-because cell $v_j$ in the exploration order is examined only when $X$ has the smallest rank among the
-first $j$ cells, an event of probability $1/(j-1)$. Each examined cell costs one range count to test for
+an occupied trial in a component of size $s$ examines in expectation at most $1+H_{s-1}=O(\log K)$ cells.
+The exploration order $v_1=X,v_2,\dots$ is the breadth-first order of \cref{alg:leader}, fixed before the
+ranks are revealed; cell $v_j$ is examined only when $X$ has the smallest rank among $v_1,\dots,v_{j-1}$
+(otherwise a smaller-rank cell appeared earlier and stopped the search), an event of probability
+$1/(j-1)$ by exchangeability of the independent uniform ranks. Each examined cell costs one range count to test for
 occupancy and $O(\sigma^{-2})$ counts to find its neighbors (\cref{sec:support-filtration}). The two cost
 drivers -- the trial count $k$ (through the variance bound $MU$) and the expected number of explored cells
 (through $N$) -- are accounted separately in \cref{sec:app-lemma3}, using $U\ge c$ for the first and
