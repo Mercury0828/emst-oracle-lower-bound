@@ -127,11 +127,14 @@ next is not the reduction but the cost of estimating one component count, and th
 where the geometry, and our improvement, lives.
 
 \paragraph{Euclidean MST estimation and geometric oracles.}
-Czumaj, Erg\"un, Fortnow, Magen, Newman, Rubinfeld, and Sohler~\cite{Czumaj05} gave the first sublinear
-planar Euclidean MST-weight estimator, a $(1\pm\eps)$-approximation in $\Otil_\eps(\sqrt n)$ time, using
-range-emptiness queries together with approximate cone nearest-neighbor search; the same group's
-metric reduction~\cite{CzumajSohler04,CzumajSohler09} and the early sublinear geometric algorithms of
-Chazelle, Liu, and Magen~\cite{ChazelleLiuMagen03} set the stage. In general metrics given by a distance
+Computing the Euclidean MST exactly is classical: Yao~\cite{Yao82} gave the first subquadratic algorithms
+in fixed dimension, Agarwal, Edelsbrunner, Schwarzkopf, and Welzl~\cite{AESW91} tied it to bichromatic
+closest pairs, and fast practical variants are widely used~\cite{MarchRamGray10}. The sublinear
+\emph{estimation} of its weight begins with Czumaj, Erg\"un, Fortnow, Magen, Newman, Rubinfeld, and
+Sohler~\cite{Czumaj05}, who gave the first sublinear planar estimator, a $(1\pm\eps)$-approximation in
+$\Otil_\eps(\sqrt n)$ time, using range-emptiness queries together with approximate cone nearest-neighbor
+search; the same group's metric reduction~\cite{CzumajSohler04,CzumajSohler09} and the early sublinear
+geometric algorithms of Chazelle, Liu, and Magen~\cite{ChazelleLiuMagen03} set the stage. In general metrics given by a distance
 matrix, Chen, Khanna, and Tan~\cite{ChenKhannaTan23} settle the space/query trade-off for estimating MST
 and TSP cost; these bounds are for the distance-matrix oracle and do not transfer to range counting,
 where distances are never revealed. Arya, Mount, and
@@ -141,10 +144,13 @@ clustering queries were studied by Abrahamsen et al.~\cite{AbrahamsenEtal17} and
 Ahn~\cite{OhAhn18}. The range-counting oracle of Driemel et al.~\cite{DMOSW25} is the setting of the
 present paper; their $\Otil(\sqrt n)$ upper bound also reduces to component counting, via the
 Callahan--Kosaraju WSPD spanner~\cite{CK95,HarPeled11,NarasimhanSmid07}, but pays $\sqrt n$ at the
-component-counting step, which is the cost our spatial leader estimator removes. The oracle has since
-been applied to convex-hull and emptiness problems~\cite{SchiblerXueZhu26}. Orthogonal range counting is
-itself a heavily studied data-structuring primitive~\cite{AfshaniArgeLarsen09,ChanLarsenPatrascu11,
-ChanTsakalidis18,Chan19,ShengTao11,deBergEtal08}.
+component-counting step, which is the cost our spatial leader estimator removes. The Euclidean spanners we
+rely on descend from a long line~\cite{Vaidya91,ADMSS95}, surveyed in~\cite{BoseSmid13,NarasimhanSmid07}.
+The oracle has since been applied to convex-hull and emptiness problems~\cite{SchiblerXueZhu26}. Orthogonal
+range searching is itself a heavily studied data-structuring primitive, in both the reporting/counting
+data structures~\cite{Bentley75,Willard85,Chazelle90,ChanPatrascu10,JaJaMortensenShi04,
+AfshaniArgeLarsen09,ChanLarsenPatrascu11,ChanTsakalidis18,Chan19,ShengTao11} and the surveys and
+textbooks~\cite{Matousek94,AgarwalErickson99,deBergEtal08}.
 
 \paragraph{Single-linkage clustering and related primitives.}
 The components of the threshold graph are the single-linkage clusters, and the cost of single-linkage
@@ -155,10 +161,15 @@ and Khanna~\cite{ChenKhanna23Steiner}. Streaming Euclidean MST to a constant fac
 Jayaram, Levi, and Waingarten~\cite{ChenCAJLW23}; the contraction trick that keeps component counts
 robust to additive error, which we reuse in the support regularization, traces to dynamic-stream sampling
 of Frahling, Indyk, and Sohler~\cite{FrahlingIndykSohler05} and Indyk~\cite{Indyk04} and to
-relative-error $L_p$-sampling~\cite{MonemizadehWoodruff10}. Component counting and related sublinear
-estimators are part of the broader property-testing toolkit~\cite{CzumajSohler01,CzumajSohler10,
-EdenRonSeshadhri18,OnakEtal12,RubinfeldShapira11,BehnezhadRoghaniRubinstein23,CormodeEtal17}, with
-concentration via Chernoff bounds~\cite{Chernoff52}. The well-separated pair decomposition and geometric spanners are standard tools
+relative-error $L_p$-sampling~\cite{MonemizadehWoodruff10}. Estimating the number of connected components in sublinear time, the
+abstraction at the heart of all these reductions, was isolated by Berenbrink, Krayenhoff, and
+Mallmann-Trenn~\cite{BKM14} building on the bounded-degree property testing of Goldreich and
+Ron~\cite{GoldreichRon02} and the metric sublinear algorithms of Indyk~\cite{Indyk99}. Component counting
+and related sublinear estimators are part of the broader property-testing toolkit~\cite{CzumajSohler01,
+CzumajSohler10,EdenRonSeshadhri18,OnakEtal12,RubinfeldShapira11,BehnezhadRoghaniRubinstein23,CormodeEtal17},
+alongside sublinear algorithms for sequence and string problems~\cite{GoldenbergKrauthgamerSaha19,
+KociumakaSaha20,MitzenmacherSeddighin21} and for learning geometric
+shapes~\cite{HarPeledJonesRahul21}, with concentration via Chernoff bounds~\cite{Chernoff52}. The well-separated pair decomposition and geometric spanners are standard tools
 (Callahan--Kosaraju~\cite{CK95}, Har-Peled~\cite{HarPeled11}, Narasimhan--Smid~\cite{NarasimhanSmid07}),
 and telescoping range-count sampling is due to Monemizadeh~\cite{Monemizadeh23}.
 

@@ -29,7 +29,8 @@ population, not a component count: it cannot, on its own, tell whether the point
 cluster or many. The number of scales and cells at which the answer is genuinely in doubt is governed by
 the support size, which the regularization fixes at $K_0=\Theta(n^{2/3})$, and resolving a structure with
 $\Theta(n^{2/3})$ independently-uncertain pieces against an oracle that only counts has a
-$\sqrt{\,\cdot\,}$-type sampling cost, $\Theta(\sqrt{n^{2/3}})=\Theta(n^{1/3})$. This is the same $\sqrt K$
+$\sqrt{\,\cdot\,}$-type sampling cost in the standard query-complexity sense~\cite{AroraBarak09},
+$\Theta(\sqrt{n^{2/3}})=\Theta(n^{1/3})$. This is the same $\sqrt K$
 that the leader estimator pays on the upper-bound side, and the coincidence is not accidental: $1/3=\tfrac12
 \cdot\tfrac23$ is the sampling exponent against an $n^{2/3}$-sized uncertain support.
 

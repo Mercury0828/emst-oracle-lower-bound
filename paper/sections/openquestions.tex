@@ -6,9 +6,9 @@ Driemel et al.~\cite{DMOSW25} as MST weight. Their EMD results give an $O(\log\D
 approximation with an additive-error trade-off that is tight in its own regime; whether a near-$(1\pm\eps)$
 estimate of planar EMD is achievable under a pure range-counting oracle, and at what query rate, is open.
 Sublinear and sketching algorithms for EMD have a long
-history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02}, as do near-linear geometric matching
-algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19}, but none operates under a pure
-range-counting oracle.
+history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02,AndoniIndykKrauthgamer08}, as do near-linear geometric matching and
+transportation algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19,SharathkumarAgarwal12,
+AgarwalSharathkumar14,KhesinNikolovParamonov19}, but none operates under a pure range-counting oracle.
 
 We believe the empty-cell spatial leader estimator of \cref{sec:support-estimator} is the right primitive
 here, and sketch why. The estimator is not specific to single-linkage clustering: at its core it estimates
