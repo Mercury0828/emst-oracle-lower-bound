@@ -167,7 +167,7 @@ that protects all $O(\log n)$ guesses at once.
 \subsection{Realizing the spanner under a counting oracle}\label{sec:ov-wspd}
 
 The death-time sampler needs a Euclidean $(1+\rho)$-spanner that can be navigated from a sampled vertex
-using only range counts. We build it from the well-separated pair decomposition of the quadtree on
+using only range counts. We build it from the WSPD of the quadtree on
 $[\Delta]^2$~\cite{CK95,HarPeled11}. Each cell gets a representative, the $z$-first point inside it, found
 by binary search on counts; a spanner edge joins the representatives of each well-separated pair and
 carries their exact Euclidean length, which we know because we know the representatives' coordinates. From

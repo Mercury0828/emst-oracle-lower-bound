@@ -80,9 +80,9 @@ $(1\pm\eps)$-estimating the planar Euclidean MST weight is $n^{1/3}$, up to poly
 $\eps$-dependent factors.
 \end{corollary*}
 
-We make three remarks on the scope. First, the result is for the plane; the cluster-count integral and the
-WSPD spanner extend to any fixed dimension, but the balance point $K=\Theta(n^{2/3})$ and the packing
-exponent are two-dimensional, and we do not pursue $d\ge 3$ here. Second, the algorithm is randomized
+We make three remarks on the scope. First, the result is stated for the plane, where the balance point
+$K=\Theta(n^{2/3})$ and the packing exponent live; the cluster-count integral and the spanner construction
+themselves extend to any fixed dimension. Second, the algorithm is randomized
 Monte Carlo with constant success probability, amplified by repetition and a median as usual. Third, the
 running time on a word RAM matches the query bound up to polylogarithmic factors (\cref{rem:time}), so the
 result is an honest sublinear \emph{algorithm}, not only a query bound.
@@ -107,7 +107,7 @@ This estimator drives a support-MST routine (\cref{lem:support}); the reduction 
 of size $\Theta(n^{2/3})$ uses a clipped death-time sampler for the bulk of $P$, support regularization
 and snapping for the tail, and an assembly $\widehat W=\widehat A_P+\widehat\Wq-\widehat A_Q$ with a
 geometric search for the scale of $W$. The death-time sampler runs on a locally navigable
-$(1+\rho)$-spanner realized under the oracle by a well-separated pair decomposition~\cite{CK95,HarPeled11}.
+$(1+\rho)$-spanner realized under the oracle by a well-separated pair decomposition (WSPD)~\cite{CK95,HarPeled11}.
 \Cref{sec:overview} develops all of this as a connected story; the formal statements and proofs follow in
 \cref{sec:support,sec:dt,sec:main} and the appendices.
 
@@ -159,7 +159,7 @@ Xu~\cite{PSX25}; MST and clustering under strong and weak distance oracles were 
 in~\cite{MetricOracleMST23}, and the query complexity of the related metric Steiner tree problem by Chen
 and Khanna~\cite{ChenKhanna23Steiner}. Streaming Euclidean MST to a constant factor was given by Chen, Cohen-Addad,
 Jayaram, Levi, and Waingarten~\cite{ChenCAJLW23}; the contraction trick that keeps component counts
-robust to additive error, which we reuse in the support regularization, traces to dynamic-stream sampling
+stable under additive error, which we reuse in the support regularization, traces to dynamic-stream sampling
 of Frahling, Indyk, and Sohler~\cite{FrahlingIndykSohler05} and Indyk~\cite{Indyk04} and to
 relative-error $L_p$-sampling~\cite{MonemizadehWoodruff10}. Estimating the number of connected components in sublinear time, the
 abstraction at the heart of all these reductions, was isolated by Berenbrink, Krayenhoff, and
@@ -169,7 +169,7 @@ and related sublinear estimators are part of the broader property-testing toolki
 CzumajSohler10,EdenRonSeshadhri18,OnakEtal12,RubinfeldShapira11,BehnezhadRoghaniRubinstein23,CormodeEtal17},
 alongside sublinear algorithms for sequence and string problems~\cite{GoldenbergKrauthgamerSaha19,
 KociumakaSaha20,MitzenmacherSeddighin21} and for learning geometric
-shapes~\cite{HarPeledJonesRahul21}, with concentration via Chernoff bounds~\cite{Chernoff52}. The well-separated pair decomposition and geometric spanners are standard tools
+shapes~\cite{HarPeledJonesRahul21}, with concentration via Chernoff bounds~\cite{Chernoff52}. The WSPD and geometric spanners are standard tools
 (Callahan--Kosaraju~\cite{CK95}, Har-Peled~\cite{HarPeled11}, Narasimhan--Smid~\cite{NarasimhanSmid07}),
 and telescoping range-count sampling is due to Monemizadeh~\cite{Monemizadeh23}.
 

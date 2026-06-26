@@ -81,7 +81,7 @@ sample of vertices estimates that truncated weight without ever forming the MST.
 suffices is that the threshold graphs of $H$ bracket those of the points: because $H$ is a Euclidean
 $(1+\rho)$-spanner, $c_S(t)\le c_H(t)\le c_S(t/(1+\rho))$, so its death times approximate the point-set
 MST within a $(1+\rho)$ factor. The catch is that we cannot build $H$ explicitly under a counting oracle;
-we realize it implicitly with the well-separated pair decomposition (WSPD)~\cite{CK95,HarPeled11},
+we realize it implicitly with the WSPD~\cite{CK95,HarPeled11},
 navigating one vertex's spanner neighborhood at a time. The full implementation is \cref{sec:wspd}.
 
 We recall the two WSPD facts the implementation rests on. For a quadtree on $[\Delta]^2$ and a separation

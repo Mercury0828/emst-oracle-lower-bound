@@ -97,7 +97,7 @@ and each of the four terms is $O(\xi G)$, so for a suitable constant $C_*$,
 Rescaling the internal accuracy to $\zeta=C_*\xi$ gives $\abs{\widehat W(G)-W}\le\zeta G$ in
 $\Otil_\zeta(n^{1/3})$ queries per call. A single run of the call carries the deterministic budget
 $B=\Otil_\zeta(n^{1/3})$ of \cref{sec:wspd-cap} and returns \textsc{fail} if it aborts. We amplify each
-guess into a robust estimate by taking the median of $t=O(\log n)$ independent runs, where an aborted run
+guess into a reliable estimate by taking the median of $t=O(\log n)$ independent runs, where an aborted run
 contributes $+\infty$ to the median. For a guess with $G\ge W$, one run is \emph{bad} if it aborts
 (probability $\le 1/C$) or is inaccurate (probability $\le 1/6$); choosing the budget constant $C$ large
 makes the bad probability less than $1/3$, so fewer than half of the $t$ runs are bad with probability
@@ -138,7 +138,7 @@ additions of edge lengths in the bottleneck search and the integration: edge-len
 on \emph{squared} Euclidean distances, which are exact integers, and the clipped-weight sums need each
 length only to relative precision $\poly(\eps/\log n)$, supplied by $O(\log(n/\eps))$-bit approximations of
 the square roots. So no exact irrational arithmetic is required, and the algorithm runs in the standard
-integer word-RAM model.
+integer word RAM model.
 \end{remark}
 
 \subsection{The algorithm on a concrete instance}\label{sec:main-example}
