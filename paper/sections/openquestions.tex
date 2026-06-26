@@ -10,31 +10,20 @@ history~\cite{AndoniDoBaIndykWoodruff09,DoBaEtal11,Charikar02,AndoniIndykKrauthg
 transportation algorithms~\cite{AgarwalChangRaghvendraXiao22,AgarwalChangXiao19,SharathkumarAgarwal12,
 AgarwalSharathkumar14,KhesinNikolovParamonov19}, but none operates under a pure range-counting oracle.
 
-We believe the empty-cell spatial leader estimator of \cref{sec:support-estimator} is the right primitive
-here, and sketch why. The estimator is not specific to single-linkage clustering: at its core it estimates
-the number of connected components of an \emph{implicitly defined} geometric graph from a sample of cells
-drawn from a spatial universe that includes empty cells, with variance governed by the component count and
-not the occupied-cell count. EMD has a dyadic structure parallel to the cluster-count integral. Writing
-the two point sets as red and blue with equal mass, the cost of an optimal transport admits a quadtree
-approximation: at each dyadic level one pays, per cell, the absolute red-minus-blue mass imbalance times
-the cell diameter, and summing over levels approximates EMD within an $O(\log\Delta)$ factor
-(the source of the multiplicative $\log\Delta$ loss already present in~\cite{DMOSW25}). The analogue of
-the cluster-count curve is thus the imbalance profile across scales, and the analogue of estimating
-$c_S(t)$ at a scale is estimating the number of cells with nonzero imbalance, or more precisely the total
-imbalance, at that scale.
-
-Two ingredients would need EMD analogues, which we state as open problems, not claims. First, a
-\emph{spatial estimator} for the per-scale \emph{absolute} imbalance $\sum_{\text{cells}}\abs{\text{red}-
-\text{blue}}$ (the quantity the dyadic transport sum charges; the signed differences cancel over a level
-and are not what one wants). One would draw a candidate cell uniformly and return $\abs{\text{red}-
-\text{blue}}$ for that cell scaled by the universe size, an unbiased estimator of the level's absolute
-imbalance whose variance is governed by a spatial, not mass-proportional, sample; whether its variance and
-a packing control can be made to behave as well as the leader estimator's $Mc$ bound is the open point.
-Second, a \emph{packing inequality} relating the imbalance profile across scales to the EMD itself, playing
-the role of $\Wq\ge b\delta/16$ and collapsing the geometric sum of per-scale costs. We conjecture that
-establishing these and balancing the resulting $\sqrt K+n/K$ trade-off would give an $\Otil(n^{1/3})$-query
-estimate of the dyadic transport approximation of planar EMD, hence an $O(\log\Delta)$-approximation of EMD
-at that rate; whether the spatial-sampling idea reaches the true matching cost, and what the right
+EMD has a dyadic structure parallel to the cluster-count integral: writing the two point sets as red and
+blue of equal mass, an optimal transport is approximated within $O(\log\Delta)$ (the multiplicative loss
+already present in~\cite{DMOSW25}) by the quadtree sum that charges, per cell and dyadic level, the
+absolute red-minus-blue imbalance times the cell diameter. The analogue of estimating $c_S(t)$ is then
+estimating the per-scale \emph{total imbalance}. Our leader estimator is not specific to component
+counting, so two ingredients, which we state as open problems and not claims, would carry it over. First, a
+\emph{spatial estimator} for the absolute imbalance $\sum_{\text{cells}}\abs{\text{red}-\text{blue}}$ (the
+signed counts cancel over a level, so $\abs{\cdot}$ is what one wants): draw a candidate cell uniformly and
+return its $\abs{\text{red}-\text{blue}}$ scaled by the universe size; whether its variance admits a
+control as clean as the leader estimator's $Mc$ bound is open. Second, a \emph{packing inequality} relating
+the imbalance profile to the EMD, in the role of $\Wq\ge b\delta/16$. We conjecture that these, with the
+same $\sqrt K+n/K$ balance, would estimate the dyadic transport approximation in $\Otil(n^{1/3})$ queries,
+hence $O(\log\Delta)$-approximate EMD at that rate; whether the spatial-sampling idea reaches the true
+matching cost, and what the right
 range-counting lower bound for EMD is, are the deeper questions.
 
 \paragraph{Higher dimensions.}
