@@ -34,7 +34,23 @@
 - ⚠️ S4 下沉证明会 reverse 上一轮"40pp 正文证明"。SODA trim 明确要求证明在附录。已在 plan 模式请 owner 确认。
 
 ## 已做
-- (无 trim 动作；已完成 +25 refs，待 S2 Codex 验证)
+- +25 refs (68 total, cited, builds 42pp).
+- **S1 DONE** (commit 94845b8): banned tokens 0; WSPD acronym 定义一次(§1.2)、余处 bare、删 prelims/app_wspd
+  重复定义；d>=3 scope 改自信措辞；word RAM 统一。编译干净 42pp 0 undefined。
+- **S3 DONE**：R2 panel = R-W1 clean / R-W2,R-W3 OK-with-notes，**无 BLOCKER**。51-item
+  **protect-list 已冻结** → docs/reviews/trim_R2_panel_protectlist.md（下沉/trim 不许删这些）。
+  3 个 SHOULD-FIX 已修：①overview satellite count 显式化 s=Θ(√K)、point-sample 需 Θ(K/s)=Θ(√K)；
+  ②worked-example 去掉误导的 Θ(1/K0)，改用 scale candidate-universe + Lemma 3 accounting；
+  ③lem:kwindow 的 window+cost 已 inline 在 §5（满足，无需重复 statement）。
+- **S2 still running**（refverify web）。
 
 ## 待办
-- 全部 S1–S9。
+- S2 出错误清单 → 修/删 refs（先于 trim）。然后 S4 下沉证明 → S5-S7 → S9 R3。
+
+## protect-list 摘要（trim 红线，不许删/不许精炼掉）
+abstract 单行贡献+技术总结；intro §1.1 定理/tightness 单句/对比表+caption/support-lemma balance/scope;
+§1.2 技术 intuition；roadmap；overview 全部 map+barrier 例+leader 实验+E/Var 推导+两部分+reduction+
+WSPD map+balance/novelty；prelims model+CRT 证明+death-time view+两张表；§4 warmup+cover+leader alg+
+scale-graph 图+candidate universe+additive call；§5 small map+death-time intuition+3 张图(staircase/
+search/snapping)+regularization+snapping+decomposition；§6 thm+Alg+三件套+amp+k0 remark+W-search+
+worked example punchline；optimality 两段+qualifiers；open EMD+cost-of-K；app_wspd WSPD 图标注。

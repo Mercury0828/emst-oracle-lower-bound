@@ -22,10 +22,11 @@ range counts.}
 Counting components in sublinear time is classically done by sampling: pick a few vertices, explore their
 components, and extrapolate~\cite{CRT05,CzumajSohler09}. In the geometric setting this is exactly what
 costs $\Omega(\sqrt n)$. The reason is a mismatch between mass and weight. Consider a dense
-$\sqrt K\times\sqrt K$ block of points together with a handful of far-flung satellites. The satellites are
-a vanishing fraction of the points, so a sample of $\poly\log$ many points misses them with high
-probability; yet each satellite is its own cluster across a wide range of scales and so contributes a
-constant fraction of the MST weight. To see the satellites by sampling \emph{points} one must draw
+$\sqrt K\times\sqrt K$ block of points together with $s=\Theta(\sqrt K)$ far-flung satellites, each its
+own cluster carrying a constant share of the MST weight. The satellites are an $s/K=\Theta(1/\sqrt K)$
+fraction of the points, so a uniform point sample sees one only after $\Theta(K/s)=\Theta(\sqrt K)$ draws,
+and a sample of $\poly\log$ many points misses them with high probability while they hold a constant
+fraction of the weight. To resolve the cluster count by sampling \emph{points} one must therefore draw
 $\Omega(\sqrt K)$ of them, and paying this at every scale is the $\sqrt n$ barrier of~\cite{DMOSW25}.
 
 \subsection{The empty-cell spatial leader estimator}\label{sec:ov-leader}
