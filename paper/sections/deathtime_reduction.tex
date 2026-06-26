@@ -146,11 +146,11 @@ i.e.\ the spanner inflates the clipped weight by at most $\rho\,\wt(\MST(X))$.
     \foreach \x/\y in {0.5/0.5,1.5/2.5,2.5/0.5,2.5/2.5,0.5/1.5,2.5/1.5} {
       \fill[red!70] (\x,\y) circle (1.6pt);
     }
-    \node at (1.5,-0.4) {$Q$: cell centers, $K=\Theta(K_0)$};
+    \node at (1.5,-0.4) {$Q$: cell centers, $K=\Theta_xi(K_0)$};
   \end{scope}
 \end{tikzpicture}
 \caption{Support regularization and snapping. A grid scale $h=\Theta(\xi L)$ is chosen
-(\cref{lem:kwindow}) so the nonempty $h$-cells number $K=\Theta(K_0)$; each point of $P$ is snapped to its
+(\cref{lem:kwindow}) so the nonempty $h$-cells number $K=\Theta_xi(K_0)$; each point of $P$ is snapped to its
 cell center, yielding the support $Q$. Snapping moves a point by at most $\sqrt2\,h/2$, so MST weights
 distort by a controlled amount and the heavy tail of $P$ transfers to $Q$.}
 \label{fig:snap}
@@ -163,7 +163,7 @@ $K_0=\Theta(n^{2/3})$ and whose snapping error is controlled. Choosing the grid 
 search is needed, because the right scale depends on how the (unseen) points are spread.
 
 Fix a guess $G\ge W$, put $K_0=\ceil{n^{2/3}}$ and $L=G/K_0$. We choose a grid scale $h$ whose support
-$Q$ has $K=\Theta(K_0)$ cells. How $K_h$, the number of nonempty $h$-cells, varies with $h$ is governed by
+$Q$ has $K=\Theta_xi(K_0)$ cells. How $K_h$, the number of nonempty $h$-cells, varies with $h$ is governed by
 the same packing principle as the active cover: occupied cells of side $h$ are pairwise $\ge h$ apart in
 each of four color classes, so their count is tied to the MST weight, giving a bound analogous to
 \cref{lem:packing},
@@ -172,7 +172,7 @@ each of four color classes, so their count is tied to the MST weight, giving a b
 \end{equation}
 This bound is one-directional ($K_h$ may be much smaller than $8W/h$ if the points cluster), which is
 exactly why a search over $h$ is needed: the packing tells us $K_h$ cannot be too large at a given scale,
-but only by trying scales can we find one where it is large enough, namely $\Theta(K_0)$.
+but only by trying scales can we find one where it is large enough, namely $\Theta_xi(K_0)$.
 Starting from a dyadic quadtree scale $h_0=\Theta(\xi L)$ (the largest dyadic side below $\xi L$, so $h_0$
 is within a factor $2$ of $\xi L$) and halving until $K_h$ first reaches a constant multiple of $K_0$
 (which is certified by a fixed batch of rejection trials, since halving $h$ at most quadruples $K_h$, and

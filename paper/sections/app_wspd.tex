@@ -199,7 +199,8 @@ r(p(c'))/\rho=2r(c')/\rho\le 4s/\rho$, whence $d(c,c')\le d(c,p(c'))+\sqrt2\,r(p
 $\rho\le1$), and symmetrically if $(p(c),c')$ is not well separated; so $d(c,c')\le 8s/\rho$ in either
 case. The candidate set is therefore the explicit finite list of all cells of side in $\{s/2,s,2s\}$ whose
 center is within $8s/\rho$ of $c$'s center, an $O(\rho^{-2})$-size list of grid positions computed from
-$c$'s coordinates with no query. For each candidate $c'$ we test nonemptiness ($1$ count) and the (symmetric,
+$c$'s coordinates with no query. (For $X=Q$ the quadtree bottoms out at the $h$-cells, so when $s=h$ the
+scale $s/2$ is omitted and only $\{h,2h\}$ are scanned.) For each candidate $c'$ we test nonemptiness ($1$ count) and the (symmetric,
 unordered) $\widehat{\mathcal W}$-predicate ($O(1)$ counts), compute $\rep(c')$ ($O(\log\Delta)$ counts),
 and, when $\norm{u-\rep(c')}\le r$, emit $\{u,\rep(c')\}$ with that exact weight. Each ancestor thus costs
 $O(\rho^{-2})$ candidates at $O(\log\Delta)$ counts each, and there are $O(\log\Delta)$ ancestors, for
@@ -224,12 +225,15 @@ probability zero and are broken by $z$-order). As in \cref{sec:dt-sampler}, $\ta
 \caption{Clipped death time $X_L(v)$ on the WSPD spanner $S$}\label{alg:deathtime}
 \KwIn{seed $v$; clip level $L$; ranks (root $r_X$ has rank $-\infty$)}
 \KwOut{$\min\{\tau(v),L\}$}
-$\beta(v)\leftarrow 0$; push $v$ on a min-priority queue keyed by $\beta$\;
+$\beta(v)\leftarrow 0$; $\beta(\cdot)\leftarrow\infty$ elsewhere; \textsc{insert}$(v)$ into a min-priority queue keyed by $\beta$; mark no vertex finalized\;
 \While{the queue is nonempty}{
-  extract the minimum-$\beta$ vertex $u$ (ties broken by vertex identity, independent of ranks)\;
+  $u\leftarrow$ \textsc{extract-min} (ties broken by vertex identity, independent of ranks); mark $u$ finalized\;
   \lIf{$u=r_X$ or $\mathrm{rank}(u)<\mathrm{rank}(v)$}{\Return $\beta(u)$}
   enumerate all incident edges $\{u,u'\}$ of weight $\le L$ (\cref{lem:incident})\;
-  \lForEach{such edge of weight $\omega$}{$\beta(u')\leftarrow\min\{\beta(u'),\max\{\beta(u),\omega\}\}$}
+  \ForEach{such edge of weight $\omega$ with $u'$ not finalized}{
+    $b\leftarrow\max\{\beta(u),\omega\}$\;
+    \lIf{$b<\beta(u')$}{$\beta(u')\leftarrow b$; \textsc{insert}/\textsc{decrease-key}$(u')$}
+  }
 }
 \Return $L$\tcp*{queue emptied: $\tau(v)>L$}
 \end{algorithm}

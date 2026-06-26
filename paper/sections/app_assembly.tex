@@ -193,10 +193,13 @@ scales the sample mean $\bar X=\tfrac1{s_Q}\sum_i X_L(v_i)$ by the estimate $\wi
 and $A_L(H_Q)\le\wt(\MST(H_Q))\le(1+\rho)\Wq=O(G)$, so the first term is $O(\xi G)$. For the second, with
 $K=\Theta_\xi(K_0)$ ($K\le C_\xi K_0=O(K_0/\xi)$ by \cref{lem:kwindow}), $\Var(K\bar X)=K^2\Var(\bar X)\le
 K L\,\wt(\MST(H_Q))/s_Q=O(\tfrac{K}{K_0}G^2/s_Q)=O(\xi^{-1}G^2/s_Q)$ by \eqref{eq:dt-var}, so $s_Q=
-O(\xi^{-3})$ samples give $\widehat K\abs{\bar X-\mu}\le\tfrac{C_*}8\xi G$ with probability $\ge1-\tfrac1{100}$
-(using $\widehat K=O(K)$). Adding the two, $\abs{\widehat A_Q-A_L(Q)}\le\tfrac{C_*}4\xi G$. The extra
-$K/K_0=O(1/\xi)$ factor, from the window being $\Theta_\xi$ and not $\Theta$, is what raises $s_Q$ from
-$O(\xi^{-2})$ to $O(\xi^{-3})$.
+O(\xi^{-3})$ samples give $\widehat K\abs{\bar X-\mu}\le\tfrac{C_*}{12}\xi G$ with probability
+$\ge1-\tfrac1{100}$ (using $\widehat K=O(K)$). So far this bounds $\abs{\widehat A_Q-A_L(H_Q)}$, the error
+against the \emph{spanner}'s clipped weight; the spanner bias adds $\abs{A_L(H_Q)-A_L(Q)}\le\rho\,A_L(Q)\le
+\rho\Wq=O(\xi G)\le\tfrac{C_*}{12}\xi G$ by \eqref{eq:spanner-stretch}. Adding the support-size, sampling,
+and spanner-bias terms, $\abs{\widehat A_Q-A_L(Q)}\le\tfrac{C_*}4\xi G$. The extra $K/K_0=O(1/\xi)$ factor,
+from the window being $\Theta_\xi$ and not $\Theta$, is what raises $s_Q$ from $O(\xi^{-2})$ to
+$O(\xi^{-3})$.
 
 \emph{(iv) Tail transfer.} $\abs{B_L(Q)-B_L(P)}\le\tfrac{C_*}4\xi G$ is \eqref{eq:tail-transfer}, which
 gave $O(\xi W)$.
@@ -242,11 +245,15 @@ bound, for $O(\xi^{-4}(n/K_0)\poly\log n)$ queries; the support sampler uses $s_
 $\xi^{-3}$, not $\xi^{-2}$, accounts for $K=\Theta_\xi(K_0)$) at $\Otil(n/K)$ each. Both are
 $O(\eps^{-O(1)}n^{1/3}\poly\log n)$.
 
-\emph{Total.} With $K=\Theta_\xi(K_0)=\Theta(n^{2/3})$ each per-guess call is $O(\eps^{-O(1)}n^{1/3}
-\poly\log n)$, and the $O(\log n)$ guesses and the final median keep the overall bound at
+\emph{Total.} With $K=\Theta_\xi(K_0)=\Theta(n^{2/3})$ the four parts of a single call -- the
+regularization search and $K$-estimation, the support estimator, and the two death-time samplers --
+each cost $\Otil_\eps(n^{1/3})$ as bounded above and elsewhere in this appendix, so one global call has
 \[
-  O\!\bigl(\eps^{-O(1)}\,n^{1/3}\,\poly\log n\bigr)=\Otil_\eps(n^{1/3}).
+  \E[\text{queries per call}]=\E[\text{regularization}]+\E[\text{support estimator}]
+   +\E[\text{two death-time samplers}]=O\!\bigl(\eps^{-O(1)}\,n^{1/3}\,\poly\log n\bigr),
 \]
+and this is exactly the quantity the deterministic global budget $B$ of \cref{sec:wspd-cap} caps. The
+$O(\log n)$ guesses and the final median keep the overall bound at the same $\Otil_\eps(n^{1/3})$.
 The exponent of $1/\eps$ is a fixed constant; we have not optimized it, as the contribution of the paper is
 the $n^{1/3}$ rate. For fixed $\eps$ the bound is $\Otil(n^{1/3})$, and the lower bound of \cref{cor:tight}
 shows the $n^{1/3}$ cannot be reduced.
