@@ -1,8 +1,8 @@
 \section{The local WSPD death-time implementation}\label{sec:wspd}
 
-This appendix discharges the one implementation step deferred by \cref{sec:dt}: realizing a locally
-navigable Euclidean $(1+\rho)$-spanner of a point set $X\subseteq[\Delta]^2$ under the range-counting
-oracle, and running the clipped death-time sampler of \cref{sec:dt-sampler} on it. We build on the
+This appendix proves \cref{lem:realize}, the one implementation step deferred by \cref{sec:dt}: realizing a
+locally navigable Euclidean $(1+\rho)$-spanner of a point set $X\subseteq[\Delta]^2$ under the
+range-counting oracle, and running the clipped death-time sampler of \cref{sec:dt-sampler} on it. We build on the
 WSPD construction of Driemel et al.~\cite{DMOSW25} (whose spanner
 facts are from Har-Peled~\cite{HarPeled11} and whose sampling primitive is from
 Monemizadeh~\cite{Monemizadeh23}). We use \emph{cell} for a node of the quadtree $\mathcal T$ on

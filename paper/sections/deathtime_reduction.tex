@@ -92,9 +92,26 @@ average of $s$ independent samples has
 \begin{equation}\label{eq:dt-var}
   \Var\Bigl[\tfrac{\abs V}{s}\textstyle\sum_i X_L(v_i)\Bigr]\le\frac{\abs V\,L\,\wt(\MST(H))}{s}.
 \end{equation}
-We apply this to a locally navigable Euclidean $(1+\rho)$-spanner $H_X$ of a point set $X$, realized under
-the oracle by a WSPD (\cref{sec:wspd}). Since $H_X$ is a Euclidean subgraph and a $(1+\rho)$-spanner,
-$c_X(t)\le c_{H_X}(t)\le c_X(t/(1+\rho))$, so integrating,
+We apply this to a Euclidean $(1+\rho)$-spanner $H_X$ of a point set $X$, realized under the oracle. The
+realization is the one step inherited from~\cite{DMOSW25}, and because a counting oracle reveals neither
+the points nor the standard WSPD, we enumerate a \emph{locally testable} pair family $\widehat{\mathcal W}$
+instead of the WSPD itself: $\{c,c'\}\in\widehat{\mathcal W}$ iff $c,c'$ are nonempty, of comparable side
+($\tfrac12\le r(c)/r(c')\le2$), well separated, and at least one parent-pair $(p(c),c')$ or $(c,p(c'))$ is
+\emph{not} well separated. Joining the representatives of each pair of $\widehat{\mathcal W}$ at their exact
+Euclidean distance gives the spanner. The next lemma is what the death-time sampler needs; it is proved in
+\cref{sec:wspd}.
+
+\begin{lemma}[Spanner realization]\label{lem:realize}
+The family $\widehat{\mathcal W}$ is testable in $O(1)$ range counts per pair and contains the standard
+WSPD, so the resulting graph $H_X=(X,E)$ is a Euclidean $(1+\rho)$-spanner of $X$ with
+$\wt(\MST(H_X))\le(1+\rho)\wt(\MST(X))$, in which every vertex has $O(\rho^{-2}\log\Delta)$ incident edges.
+For a seed $v$ and a clip $L$, the clipped death time $\min\{\tau(v),L\}$ on $H_X$ is computed by a
+bottleneck search using $\Otil_\rho(1)$ range counts in expectation, and a uniform seed of $X$ is drawn in
+$O(\log\Delta)$ counts (for $X=P$) or $\Otil(n/K)$ counts (for a support $X=Q$).
+\end{lemma}
+
+Since $H_X$ is a Euclidean subgraph and a $(1+\rho)$-spanner, $c_X(t)\le c_{H_X}(t)\le c_X(t/(1+\rho))$, so
+integrating,
 \begin{equation}\label{eq:spanner-stretch}
   A_L(X)\le A_L(H_X)\le(1+\rho)\,A_L(X),
 \end{equation}
