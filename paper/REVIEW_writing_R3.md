@@ -44,7 +44,11 @@ red-line: adversarial review goes through Codex, never a Claude subagent). Raw v
 - **Codex recommendation: remove all 5.** → escalated to owner (the prompt reserved this decision);
   pending owner call before the JOINT exit gate is closed.
 
-## JOINT exit gate status
-- R3 BLOCKER fixed; build clean (0 undefined, 44pp); first-10pp merits PASS (R-W1); protect-list intact.
-- **Open**: owner decision on the 5 self-citations. After it, apply the §1.3/refs.bib edit (if any) and
-  re-run R-W3 once to confirm CLAIMS-CONSISTENT on the final text, then close the gate.
+## JOINT exit gate status — CLOSED (green)
+- Owner decision on self-citations: **keep only the closest one** (Shen26CBAM); removed the other 4.
+- Re-checks on final text (Codex, archived docs/reviews/R3_*_recheck.md):
+  - **R-W3 RE-CHECK: CLAIMS-CONSISTENT** — Δ=O(n) regime now in both corollaries; no new BLOCKER/SHOULD-FIX/NIT.
+  - **ANON RE-CHECK: ANON-CLEAN** — 4 removed refs gone+uncited; single Shen26CBAM = DE-ANON-RISK MEDIUM,
+    "probably acceptable" (the keep-1 trade-off the owner chose; could be dropped to 0 to remove the residual).
+- No BLOCKER across the panel; first-10pp merits PASS (R-W1); protect-list intact; build clean (0 undefined,
+  44pp). Gate closed.

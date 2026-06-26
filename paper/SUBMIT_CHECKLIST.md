@@ -9,11 +9,11 @@ Status keys: [x] done/self-verified · [~] in progress · [ ] TODO · [OWNER] ne
   Keys: Shen26Bilevel (IEEE Systems J. 2026), Zhong25UNIQ (arXiv:2512.00401), Zhong24DP (arXiv:2412.12387),
   Shen26CBAM (arXiv:2605.03304), Shen25JointBidding (PESGM 2025). Compiles clean, 0 undefined.
   ⚠️ none topically related to EMST; de-anon cluster risk → assessed in S5, owner to weigh.
-- [~] **S2/S3 R3 cold-reader panel** (Codex, 3 reviewers) + JOINT exit gate.
-  R-W1 SKIM-PASS, R-W2 FOLLOWABLE, R-W3 CLAIMS-INCONSISTENT (1 BLOCKER). BLOCKER fixed (Δ=O(n) regime in
-  both corollaries) + 7 SHOULD-FIX applied (incl. a real `\Theta_xi` rendering bug). Build clean, 44pp.
-  Verdicts: REVIEW_writing_R3.md + docs/reviews/R3_*. **Open**: owner decision on 5 self-cites → then
-  re-run R-W3 once on final text to close the gate.
+- [x] **S2/S3 R3 cold-reader panel** (Codex, 3 reviewers) + JOINT exit gate **CLOSED**.
+  R-W1 SKIM-PASS, R-W2 FOLLOWABLE, R-W3 CLAIMS-INCONSISTENT (1 BLOCKER) → fixed (Δ=O(n) regime in both
+  corollaries) + 7 SHOULD-FIX (incl. a real `\Theta_xi` rendering bug). Self-cites reduced 5→1 (owner).
+  Re-checks on final text: **R-W3 CLAIMS-CONSISTENT**, **ANON-CLEAN**. Build clean, 0 undefined, 44pp.
+  Verdicts frozen: REVIEW_writing_R3.md + docs/reviews/R3_* (incl. *_recheck).
 
 ## Format compliance (SODA 2027 CFP: 11pt+, single-column, single-space, 1-inch margins all around, letter; violation = summary rejection)
 - [x] documentclass `[11pt]{article}` (≥11pt ✓); `geometry[letterpaper,margin=1in]` (1-inch all around ✓);
@@ -27,10 +27,10 @@ Status keys: [x] done/self-verified · [~] in progress · [ ] TODO · [OWNER] ne
 - [x] empty `\author{}`; no `\thanks`; no acknowledgments/funding section; no "NSF/grant/funded" (the grep
   hits were the substring "nsf" inside "tra-nsf-er"). main.tex:37.
 - [x] self-citations in third person (no "our prior work"); grouped, no first-person tell.
-- [x] S5 independent Codex audit done (docs/reviews/R3_anon_audit.md): no Houston/email/ORCID/grant/URL,
-  no first-person self-citation, empty PDF metadata — all clean. **Only finding**: the 5 self-citations are
-  a HIGH de-anon-risk cluster (same-group, off-topic) + relevance risk; Codex recommends removing all 5.
-  → [OWNER] decision (see report).
+- [x] S5 independent Codex audit done + re-check (docs/reviews/R3_anon_audit.md, R3_anon_recheck.md):
+  no Houston/email/ORCID/grant/URL, no first-person self-citation, empty PDF metadata. The 5-self-cite
+  HIGH-risk cluster was the only finding → owner reduced 5→1 (Shen26CBAM). Re-check: **ANON-CLEAN**, single
+  cite = DE-ANON-RISK MEDIUM (acceptable; could drop to 0 to remove the residual).
 
 ## Submission mechanics (SODA 2027, confirmed via CFP + HotCRP)
 - [x] portal **soda27.hotcrp.com**; deadline **Fri 2026-07-09 23:59:59 UTC-12 (AoE)** = Jul 10 07:59 EDT.
